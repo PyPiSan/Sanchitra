@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "724438942455",
+    "project_id": "sanchitra-v1",
+    "storage_bucket": "sanchitra-v1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:724438942455:android:a86296377947e791d5c9f2",
+        "android_client_info": {
+          "package_name": "com.example.sanchitra"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "724438942455-jd0tdsskfdhin3059kbr4b1ui82pr590.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlA5u6AfKklX3B43swwFJS3DIM8RG4ovM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "724438942455-jd0tdsskfdhin3059kbr4b1ui82pr590.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
