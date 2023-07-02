@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.sanchitra.MainActivity;
 import com.example.sanchitra.Model.AnimeModel;
 import com.example.sanchitra.Model.AnimeRecentModel;
 import com.example.sanchitra.Presenter.RecentPresenter;
@@ -101,10 +102,6 @@ public class NewList extends RowsSupportFragment {
     private void setupEventListeners() {
         setOnItemViewSelectedListener(new AnimeView.ItemViewSelectedListener());
         setOnItemViewClickedListener(new ItemViewClickedListener());
-    }
-
-    public AnimeModel selectedListener(AnimeModel animeModel){
-        return  animeModel;
     }
 
 

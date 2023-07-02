@@ -5,34 +5,11 @@
     android:focusable="true"
     android:clickable="true">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/drama_card"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
         <ImageView
             android:id="@+id/main_image"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:scaleType="fitXY"/>
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="match_parent"
-            android:layout_height="38dp"
-            android:layout_marginTop="2dp"
-            android:background="@color/cardview_light_background"
-            android:maxLines="2"
-            android:padding="3dp"
-            android:textColor="@color/cardview_dark_background"
-            android:textSize="13sp" />
 
-    </androidx.cardview.widget.CardView>
-
-    <androidx.leanback.widget.ImageCardView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
-
-    </androidx.leanback.widget.ImageCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

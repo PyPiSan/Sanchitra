@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,7 +9,88 @@
         android:id="@+id/fragmentView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:nextFocusRight="@id/side_menu"
         />
 
+    <androidx.leanback.widget.BrowseFrameLayout
+        android:id="@+id/side_menu"
+        android:layout_height="match_parent"
+        android:layout_width="50dp"
+        android:background="#000000"
+        android:nextFocusLeft="@id/fragmentView"
+        >
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_marginTop="32dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+            <TextView
+                android:id="@+id/search_page"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:focusable="true"
+                android:text="Search"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"
+                android:layout_marginStart="16dp"
+                android:drawableLeft="@drawable/baseline_search"
+                android:textColor="#FFFFFF"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/home_page"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:focusable="true"
+                android:layout_marginStart="16dp"
+                android:drawableLeft="@drawable/baseline_home"
+                android:text="Home"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
+            <TextView
+                android:id="@+id/anime_page"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:focusable="true"
+                android:layout_marginStart="16dp"
+                android:drawableLeft="@drawable/baseline_movie"
+                android:text="Anime"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
+            <TextView
+                android:id="@+id/drama_page"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:focusable="true"
+                android:layout_marginStart="16dp"
+                android:drawableLeft="@drawable/baseline_movie"
+                android:text="Drama"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
+
+            <TextView
+                android:id="@+id/tv_page"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:focusable="true"
+                android:layout_marginStart="16dp"
+                android:drawableLeft="@drawable/baseline_live_tv"
+                android:text="Live TV"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
+
+            <TextView
+                android:id="@+id/movie_page"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:focusable="true"
+                android:layout_marginStart="16dp"
+                android:drawableLeft="@drawable/baseline_local_movies"
+                android:text="Movies"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
+
+
+        </LinearLayout>
+    </androidx.leanback.widget.BrowseFrameLayout>
+</merge>

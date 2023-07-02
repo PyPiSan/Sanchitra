@@ -39,14 +39,14 @@ public class RecentPresenter extends Presenter {
         View rootView = viewHolder.view;
 
         ImageView animeView = rootView.findViewById(R.id.main_image);
-        TextView animeTitle = rootView.findViewById(R.id.title);
-        CardView animeCard = rootView.findViewById(R.id.drama_card);
+//        TextView animeTitle = rootView.findViewById(R.id.title);
+//        CardView animeCard = rootView.findViewById(R.id.drama_card);
         String animeImage = animeModel.getImage();
         String  animeName = animeModel.getTitle();
         Glide.with(viewHolder.view.getContext())
                 .load(animeImage)
                 .into(animeView);
-        animeTitle.setText(animeName);
+//        animeTitle.setText(animeName);
 
 //        animeCard.setOnClickListener(view -> {
 //            Toast.makeText(view.getContext(), "Card is " + animeName, Toast.LENGTH_SHORT).show();
