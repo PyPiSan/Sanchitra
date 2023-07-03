@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".view.MainActivity">
 
     <FrameLayout
         android:id="@+id/fragmentView"
@@ -35,7 +35,8 @@
                 android:gravity="center_vertical"
                 android:layout_marginStart="16dp"
                 android:drawableLeft="@drawable/baseline_search"
-                android:textColor="#FFFFFF"/>
+                android:background="@drawable/menu_selector"
+                android:textColor="@color/text_selector"/>
 
             <TextView
                 android:id="@+id/home_page"
@@ -46,7 +47,10 @@
                 android:drawableLeft="@drawable/baseline_home"
                 android:text="Home"
                 android:drawablePadding="16dp"
-                android:gravity="center_vertical"/>
+                android:gravity="center_vertical"
+                android:background="@drawable/menu_selector"
+                android:textColor="@color/text_selector"/>
+
             <TextView
                 android:id="@+id/anime_page"
                 android:layout_width="match_parent"
@@ -56,7 +60,9 @@
                 android:drawableLeft="@drawable/baseline_movie"
                 android:text="Anime"
                 android:drawablePadding="16dp"
-                android:gravity="center_vertical"/>
+                android:gravity="center_vertical"
+                android:background="@drawable/menu_selector"
+                android:textColor="@color/text_selector"/>
             <TextView
                 android:id="@+id/drama_page"
                 android:layout_width="match_parent"
@@ -66,7 +72,9 @@
                 android:drawableLeft="@drawable/baseline_movie"
                 android:text="Drama"
                 android:drawablePadding="16dp"
-                android:gravity="center_vertical"/>
+                android:gravity="center_vertical"
+                android:background="@drawable/menu_selector"
+                android:textColor="@color/text_selector"/>
 
             <TextView
                 android:id="@+id/tv_page"
@@ -77,7 +85,9 @@
                 android:drawableLeft="@drawable/baseline_live_tv"
                 android:text="Live TV"
                 android:drawablePadding="16dp"
-                android:gravity="center_vertical"/>
+                android:gravity="center_vertical"
+                android:background="@drawable/menu_selector"
+                android:textColor="@color/text_selector"/>
 
             <TextView
                 android:id="@+id/movie_page"
@@ -88,8 +98,24 @@
                 android:drawableLeft="@drawable/baseline_local_movies"
                 android:text="Movies"
                 android:drawablePadding="16dp"
-                android:gravity="center_vertical"/>
+                android:gravity="center_vertical"
+                android:background="@drawable/menu_selector"
+                android:textColor="@color/text_selector"/>
 
+            <TextView
+                android:id="@+id/settings_page"
+                android:layout_width="match_parent"
+                android:layout_marginTop="32dp"
+                android:drawableLeft="@drawable/baseline_settings"
+                android:layout_marginLeft="16dp"
+                android:layout_height="45dp"
+                android:gravity="center_vertical"
+                android:drawablePadding="16dp"
+                android:text="Settings"
+                android:focusable="true"
+                android:background="@drawable/menu_selector"
+                android:textColor="@color/text_selector"
+                />
 
         </LinearLayout>
     </androidx.leanback.widget.BrowseFrameLayout>

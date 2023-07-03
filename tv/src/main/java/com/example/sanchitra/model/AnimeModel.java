@@ -1,4 +1,4 @@
-package com.example.sanchitra.Model;
+package com.example.sanchitra.model;
 
 public class AnimeModel {
 

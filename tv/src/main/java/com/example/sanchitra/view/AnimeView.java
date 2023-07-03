@@ -1,4 +1,4 @@
-package com.example.sanchitra.View;
+package com.example.sanchitra.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -8,22 +8,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.fragment.app.ListFragment;
 import androidx.leanback.widget.OnItemViewSelectedListener;
 import androidx.leanback.widget.Presenter;
 import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.example.sanchitra.Model.AnimeModel;
+import com.example.sanchitra.model.AnimeModel;
 import com.example.sanchitra.R;
 public class AnimeView extends Fragment {
 

@@ -1,6 +1,8 @@
-package com.example.sanchitra.Utils;
+package com.example.sanchitra.utils;
 
-import com.example.sanchitra.Model.AnimeRecentModel;
+import com.example.sanchitra.api.Title;
+import com.example.sanchitra.model.AnimeEpisodeListModel;
+import com.example.sanchitra.model.AnimeRecentModel;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -11,13 +13,17 @@ import retrofit2.http.Query;
 
 public interface RequestModule {
 
-    String apiKey = "e7y6acFyHGqwtkBLKHx6eA";
-
     @Headers({
             "x-api-key: e7y6acFyHGqwtkBLKHx6eA"
     })
     @GET("new/")
     Call<AnimeRecentModel> getAnime(@Query("page") String num);
+
+    @Headers({
+            "x-api-key: e7y6acFyHGqwtkBLKHx6eA"
+    })
+    @POST("episodes")
+    Call<AnimeEpisodeListModel> getEpisodeList(@Body Title body);
 
 }
 

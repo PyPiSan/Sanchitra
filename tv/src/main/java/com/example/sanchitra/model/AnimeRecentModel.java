@@ -1,4 +1,4 @@
-package com.example.sanchitra.Model;
+package com.example.sanchitra.model;
 
 import com.google.gson.annotations.SerializedName;
 

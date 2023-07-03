@@ -18,10 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sanchitra">
         <activity
-            android:name=".View.DetailViewActivity"
+            android:name=".view.DetailViewActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".view.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

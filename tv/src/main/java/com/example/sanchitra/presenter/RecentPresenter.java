@@ -1,24 +1,15 @@
-package com.example.sanchitra.Presenter;
+package com.example.sanchitra.presenter;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.cardview.widget.CardView;
-import androidx.leanback.widget.ArrayObjectAdapter;
-import androidx.leanback.widget.HeaderItem;
-import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.Presenter;
 
 import com.bumptech.glide.Glide;
-import com.example.sanchitra.Model.AnimeModel;
+import com.example.sanchitra.model.AnimeModel;
 import com.example.sanchitra.R;
 
 public class RecentPresenter extends Presenter {
@@ -47,10 +38,6 @@ public class RecentPresenter extends Presenter {
                 .load(animeImage)
                 .into(animeView);
 //        animeTitle.setText(animeName);
-
-//        animeCard.setOnClickListener(view -> {
-//            Toast.makeText(view.getContext(), "Card is " + animeName, Toast.LENGTH_SHORT).show();
-//        });
 
 
     }

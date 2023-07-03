@@ -1,12 +1,10 @@
-package com.example.sanchitra.View;
+package com.example.sanchitra.view;
 
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.leanback.app.RowsSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.FocusHighlight;
@@ -14,25 +12,19 @@ import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.ListRowPresenter;
 import androidx.leanback.widget.OnItemViewClickedListener;
-import androidx.leanback.widget.OnItemViewSelectedListener;
 import androidx.leanback.widget.Presenter;
 import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
 
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.sanchitra.MainActivity;
-import com.example.sanchitra.Model.AnimeModel;
-import com.example.sanchitra.Model.AnimeRecentModel;
-import com.example.sanchitra.Presenter.RecentPresenter;
-import com.example.sanchitra.R;
-import com.example.sanchitra.Utils.RequestModule;
+import com.example.sanchitra.model.AnimeModel;
+import com.example.sanchitra.model.AnimeRecentModel;
+import com.example.sanchitra.presenter.RecentPresenter;
+import com.example.sanchitra.utils.RequestModule;
 
-import java.lang.annotation.AnnotationTypeMismatchException;
 import java.util.List;
 
 import retrofit2.Call;
