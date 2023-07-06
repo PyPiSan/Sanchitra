@@ -36,7 +36,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class NewList extends RowsSupportFragment {
 
     private final ArrayObjectAdapter rootAdapter = new ArrayObjectAdapter(
-            new ListRowPresenter(FocusHighlight.ZOOM_FACTOR_MEDIUM));;
+            new ListRowPresenter(FocusHighlight.ZOOM_FACTOR_MEDIUM));
     private HeaderItem header;
 
     @Override
@@ -97,7 +97,7 @@ public class NewList extends RowsSupportFragment {
     }
 
 
-    private final class ItemViewClickedListener implements OnItemViewClickedListener {
+    final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {

@@ -3,10 +3,12 @@ package com.example.sanchitra.utils;
 import com.example.sanchitra.api.Title;
 import com.example.sanchitra.model.AnimeEpisodeListModel;
 import com.example.sanchitra.model.AnimeRecentModel;
+import com.example.sanchitra.model.ContentListModel;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
@@ -24,6 +26,10 @@ public interface RequestModule {
     })
     @POST("episodes")
     Call<AnimeEpisodeListModel> getEpisodeList(@Body Title body);
+
+    //    for dramas
+    @GET("sanchitra")
+    Call<ContentListModel> getDramaContentList(@Header("x-api-key") String apikey);
 
 }
 

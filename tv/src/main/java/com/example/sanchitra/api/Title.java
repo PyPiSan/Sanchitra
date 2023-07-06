@@ -1,9 +1,8 @@
 package com.example.sanchitra.api;
 
 public class Title {
-    final String jtitle;
-
-    public Title(String jtitle) {
-        this.jtitle = jtitle;
+    final String title;
+    public Title(String title) {
+        this.title = title;
     }
 }

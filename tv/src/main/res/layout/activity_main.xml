@@ -57,7 +57,7 @@
                 android:layout_height="45dp"
                 android:focusable="true"
                 android:layout_marginStart="16dp"
-                android:drawableLeft="@drawable/baseline_movie"
+                android:drawableLeft="@drawable/anime_movie"
                 android:text="Anime"
                 android:drawablePadding="16dp"
                 android:gravity="center_vertical"
