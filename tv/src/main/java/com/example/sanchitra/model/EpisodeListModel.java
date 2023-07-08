@@ -17,12 +17,12 @@ public class EpisodeListModel {
 
     public class datum {
 
-        @SerializedName("image_url")
-        private String imageUrl;
+        @SerializedName("image")
+        private String image;
 
-        @SerializedName("anime_detail_link")
+        @SerializedName("link")
         private String animeDetailLink;
-        @SerializedName("anime_title")
+        @SerializedName("title")
         private String title;
         @SerializedName("summary")
         private String summary;
@@ -38,7 +38,7 @@ public class EpisodeListModel {
         private String[] genres;
 
         public String getImageLink() {
-            return imageUrl;
+            return image;
         }
 
         public String getAnimeDetailLink() {
