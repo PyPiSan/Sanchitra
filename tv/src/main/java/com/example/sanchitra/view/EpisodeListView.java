@@ -88,7 +88,7 @@ public class EpisodeListView extends RowsSupportFragment {
                         int episodeNumbers = details.getEpisodes();
                         for(int i =1;i<=episodeNumbers; i++){
                             EpisodeBody episodeBody = new EpisodeBody(details.getTitle(),
-                                    String.valueOf(i));
+                                    String.valueOf(i), details.getImageLink());
                             episodes.add(episodeBody);
                         }
                         header = new HeaderItem("Episodes");

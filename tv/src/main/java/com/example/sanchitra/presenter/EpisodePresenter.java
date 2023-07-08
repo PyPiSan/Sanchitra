@@ -11,9 +11,9 @@ import android.view.ViewGroup;
 import androidx.leanback.widget.ImageCardView;
 import androidx.leanback.widget.Presenter;
 
+import com.bumptech.glide.Glide;
 import com.example.sanchitra.R;
 import com.example.sanchitra.api.EpisodeBody;
-import com.example.sanchitra.model.EpisodeListModel;
 
 public class EpisodePresenter extends Presenter {
 
@@ -37,12 +37,16 @@ public class EpisodePresenter extends Presenter {
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
         EpisodeBody episodes = (EpisodeBody) item;
         ImageCardView episodeCard = (ImageCardView) viewHolder.view;
-        episodeCard.setTitleText(episodes.getEpisode());
 
         Resources res = episodeCard.getResources();
-        int width = res.getDimensionPixelSize(R.dimen.card_width);
-        int height = res.getDimensionPixelSize(R.dimen.card_height);
+        int width = res.getDimensionPixelSize(R.dimen.episode_card_width);
+        int height = res.getDimensionPixelSize(R.dimen.episode_card_height);
         episodeCard.setMainImageDimensions(width, height);
+
+        episodeCard.setTitleText(String.format("Episode %s", episodes.getEpisode()));
+        Glide.with(episodeCard.getContext())
+                .load(episodes.getImage())
+                .into(episodeCard.getMainImageView());
     }
 
     @Override
