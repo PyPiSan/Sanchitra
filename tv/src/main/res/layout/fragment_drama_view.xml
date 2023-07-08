@@ -38,7 +38,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_default="percent"
-        app:layout_constraintWidth_percent="0.6"
+        app:layout_constraintWidth_percent="0.7"
         android:scaleType="fitXY"
         android:contentDescription="@string/main_image"
         />
@@ -59,27 +59,29 @@
         android:layout_height="wrap_content"
         android:text="@string/title"
         android:maxLines="2"
-        android:textStyle="bold"
         android:layout_marginStart="12dp"
         app:layout_constraintTop_toTopOf="@+id/top"
         app:layout_constraintStart_toStartOf="@+id/start"
         android:textColor="#fff"
-        android:textSize="16sp"/>
+        android:textSize="26sp"/>
 
     <TextView
         android:id="@+id/summary"
-        android:layout_width="420dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/summary"
         android:layout_marginTop="16dp"
         android:layout_marginStart="12dp"
-        android:maxLines="9"
+        android:lineSpacingMultiplier="1.2"
+        android:maxLines="7"
         android:ellipsize="end"
         android:scrollHorizontally="true"
         app:layout_constraintTop_toBottomOf="@+id/title"
         app:layout_constraintStart_toStartOf="@+id/start"
         android:textColor="#fff"
-        android:textSize="14sp"/>
+        android:textSize="13sp"
+        app:layout_constraintWidth_default="percent"
+        app:layout_constraintWidth_percent=".42"/>
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/content_list"

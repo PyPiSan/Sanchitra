@@ -111,6 +111,8 @@ public class CommonContentList extends RowsSupportFragment {
                 intent.putExtra("title", contents.getTitle());
                 intent.putExtra("summary", contents.getSummary());
                 intent.putExtra("image", contents.getImage());
+                intent.putExtra("release", contents.getRelease());
+                intent.putExtra("type", contents.getType());
                 getActivity().startActivity(intent);
             }
         }
