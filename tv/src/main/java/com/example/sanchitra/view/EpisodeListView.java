@@ -1,29 +1,29 @@
 package com.example.sanchitra.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.leanback.app.RowsSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.FocusHighlight;
 import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.ListRowPresenter;
+import androidx.leanback.widget.OnItemViewClickedListener;
+import androidx.leanback.widget.Presenter;
+import androidx.leanback.widget.Row;
+import androidx.leanback.widget.RowPresenter;
 
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-
-import com.example.sanchitra.R;
 import com.example.sanchitra.api.EpisodeBody;
 import com.example.sanchitra.api.Title;
-import com.example.sanchitra.model.ContentListModel;
 import com.example.sanchitra.model.ContentModel;
 import com.example.sanchitra.model.EpisodeListModel;
-import com.example.sanchitra.presenter.CommonContentPresenter;
+import com.example.sanchitra.player.PlaybackOverlay;
+import com.example.sanchitra.player.VideoPlayer;
 import com.example.sanchitra.presenter.EpisodePresenter;
 import com.example.sanchitra.utils.RequestModule;
 
@@ -61,6 +61,7 @@ public class EpisodeListView extends RowsSupportFragment {
         insertDataToCard(apikey, title, baseUrl);
 //        Set Adapter
         setAdapter(episodeAdapter);
+        setupEventListeners();
 
     }
 
@@ -103,6 +104,22 @@ public class EpisodeListView extends RowsSupportFragment {
             }
         });
     }
+    private void setupEventListeners() {
+        setOnItemViewClickedListener(new ItemViewClickedListener());
+    }
 
+    private final class ItemViewClickedListener implements OnItemViewClickedListener {
+        @Override
+        public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item, RowPresenter.ViewHolder rowViewHolder, Row row) {
+            // each time the item is clicked, code inside here will be executed.
 
+            if (item instanceof EpisodeBody) {
+                EpisodeBody episodes = (EpisodeBody) item;
+                Intent intent = new Intent(getActivity(), VideoPlayer.class);
+                intent.putExtra("title", episodes.getTitle());
+                intent.putExtra("episode", episodes.getEpisode());
+                getActivity().startActivity(intent);
+            }
+        }
+    }
 }

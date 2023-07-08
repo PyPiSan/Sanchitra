@@ -18,6 +18,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sanchitra">
         <activity
+            android:name=".player.VideoPlayer"
+            android:exported="false" />
+        <activity
             android:name=".view.DetailViewActivity"
             android:exported="false" />
         <activity
