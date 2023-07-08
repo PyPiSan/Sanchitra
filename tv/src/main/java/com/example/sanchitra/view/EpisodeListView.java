@@ -56,7 +56,7 @@ public class EpisodeListView extends RowsSupportFragment {
 
         final String apikey = "e7y6acFyHGqwtkBLKHx6eA";
         final String baseUrl = "https://drama.pypisan.com/v1/drama/" ;
-        String title = "All About Eve";
+        String title = getArguments().getString("title");
 //      Insert Data
         insertDataToCard(apikey, title, baseUrl);
 //        Set Adapter
