@@ -26,10 +26,13 @@ public class DetailViewActivity extends FragmentActivity {
         binding.headTitle.setText(getIntent().getStringExtra("title"));
         binding.subtitle.setText(getIntent().getStringExtra("release"));
         binding.description.setText(getIntent().getStringExtra("summary"));
-        changeFragment(new EpisodeListView());
+        changeFragment(new EpisodeListView(), getIntent().getStringExtra("title"));
     }
 
-    private void changeFragment(Fragment fragment){
+    private void changeFragment(Fragment fragment, String title){
+        Bundle bundle = new Bundle();
+        bundle.putString("title", title);
+        fragment.setArguments(bundle);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.episode_fragment, fragment);
         transaction.commit();
