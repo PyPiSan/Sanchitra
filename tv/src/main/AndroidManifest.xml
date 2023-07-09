@@ -19,7 +19,8 @@
         android:theme="@style/Theme.Sanchitra">
         <activity
             android:name=".player.VideoPlayer"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Leanback"/>
         <activity
             android:name=".view.DetailViewActivity"
             android:exported="false" />
@@ -28,7 +29,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>

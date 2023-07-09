@@ -8,18 +8,14 @@
     <VideoView
         android:id="@+id/videoView"
         android:layout_width="match_parent"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_centerInParent="true" />
+        />
 
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/playback_control_fragment"
-        android:name="com.example.sanchitra.player.PlaybackOverlay"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:background="@color/transparent"/>
 
 </FrameLayout>
