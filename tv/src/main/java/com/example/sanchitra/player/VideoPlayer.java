@@ -1,63 +1,40 @@
 package com.example.sanchitra.player;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.app.Activity;
-import android.media.session.PlaybackState;
+import android.media.session.MediaSession;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.VideoView;
 
 import com.example.sanchitra.R;
-import com.google.firebase.installations.Utils;
 
-public class VideoPlayer extends Activity {
+public class VideoPlayer extends FragmentActivity implements
+        PlaybackOverlay.OnPlayPauseClickedListener {
 
-    private static final String TAG = VideoPlayer.class.getSimpleName();
     private VideoView mVideoView;
-    private LeanbackPlaybackState mPlaybackState = LeanbackPlaybackState.IDLE;
-    private int mPosition = 0;
-    private long mStartTimeMillis;
-    private long mDuration = -1;
+//    private LeanbackPlaybackState mPlaybackState;
+    private MediaSession mSession;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_video_player);
-        loadViews();
+
+        mSession = new MediaSession(this, "Sanchitra");
+//        mSession.setCallback(new MediaSessionCallback());
+        mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS
+                | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS
+        );
+
+        mSession.setActive(true);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.playback_control_fragment, new PlaybackOverlay());
+        transaction.commit();
+
     }
 
-    /*
-     * List of various states that we can be in
-     */
-    public enum LeanbackPlaybackState {
-        PLAYING, PAUSED, IDLE
-    }
-
-    private void loadViews() {
-        mVideoView = (VideoView) findViewById(R.id.videoView);
-        mVideoView.setFocusable(false);
-        mVideoView.setFocusableInTouchMode(false);
-        setVideoPath("");
-    }
-
-    public void setVideoPath(String videoUrl) {
-        mVideoView.setVideoPath(videoUrl);
-        mStartTimeMillis = 0;;
-    }
-
-    private void stopPlayback() {
-        if (mVideoView != null) {
-            mVideoView.stopPlayback();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        stopPlayback();
-        mVideoView.suspend();
-        mVideoView.setVideoURI(null);
-    }
 }
