@@ -2,7 +2,7 @@ package com.example.sanchitra.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class ContentModel {
+public class DramaContentModel {
     @SerializedName("title")
     private String title;
 

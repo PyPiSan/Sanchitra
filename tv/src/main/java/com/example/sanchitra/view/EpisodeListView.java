@@ -20,14 +20,11 @@ import android.util.Log;
 import android.view.View;
 import com.example.sanchitra.api.EpisodeBody;
 import com.example.sanchitra.api.Title;
-import com.example.sanchitra.model.ContentModel;
-import com.example.sanchitra.model.EpisodeListModel;
-import com.example.sanchitra.player.PlaybackOverlay;
+import com.example.sanchitra.model.DramaEpisodeListModel;
 import com.example.sanchitra.player.VideoPlayer;
 import com.example.sanchitra.presenter.EpisodePresenter;
+import com.example.sanchitra.utils.Constant;
 import com.example.sanchitra.utils.RequestModule;
-
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -54,11 +51,10 @@ public class EpisodeListView extends RowsSupportFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final String apikey = "e7y6acFyHGqwtkBLKHx6eA";
-        final String baseUrl = "https://drama.pypisan.com/v1/drama/" ;
         String title = getArguments().getString("title");
+        String type = getArguments().getString("type");
 //      Insert Data
-        insertDataToCard(apikey, title, baseUrl);
+        insertDataToCardDrama(title);
 //        Set Adapter
         setAdapter(episodeAdapter);
         setupEventListeners();
@@ -66,26 +62,26 @@ public class EpisodeListView extends RowsSupportFragment {
     }
 
 
-    private void insertDataToCard(String apikey, String title, String baseURL) {
+    private void insertDataToCardDrama(String title) {
 //        Add the cards data and display them
 //        fetching data
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(baseURL)
+                .baseUrl(Constant.dramaUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         RequestModule episodeGetRequest = retrofit.create(RequestModule.class);
-        Call<EpisodeListModel> call = episodeGetRequest.getEpisodeList(apikey, new Title(title));
+        Call<DramaEpisodeListModel> call = episodeGetRequest.getDramaEpisodeList(Constant.key, new Title(title));
 
-        call.enqueue(new Callback<EpisodeListModel>() {
+        call.enqueue(new Callback<DramaEpisodeListModel>() {
             @Override
-            public void onResponse(Call<EpisodeListModel> call, Response<EpisodeListModel> response) {
+            public void onResponse(Call<DramaEpisodeListModel> call, Response<DramaEpisodeListModel> response) {
                 Log.d("Log1", "Response code is : " + response.code());
-                EpisodeListModel resources = response.body();
+                DramaEpisodeListModel resources = response.body();
                 ArrayObjectAdapter episodes = new ArrayObjectAdapter(new EpisodePresenter());
                 boolean status = resources.getSuccess();
                 if (status){
-                        EpisodeListModel.datum details = resources.getData();
+                        DramaEpisodeListModel.datum details = resources.getData();
                         int episodeNumbers = details.getEpisodes();
                         for(int i =1;i<=episodeNumbers; i++){
                             EpisodeBody episodeBody = new EpisodeBody(details.getTitle(),
@@ -99,7 +95,7 @@ public class EpisodeListView extends RowsSupportFragment {
 //                contentAdapter.notifyArrayItemRangeChanged(1, 20);
 
             @Override
-            public void onFailure(Call<EpisodeListModel> call, Throwable t) {
+            public void onFailure(Call<DramaEpisodeListModel> call, Throwable t) {
                 Log.d("Log4", "Response code is : 400" + t.getMessage());
             }
         });

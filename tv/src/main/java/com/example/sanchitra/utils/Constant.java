@@ -12,6 +12,10 @@ public class Constant {
     public static String MENU_MOVIE = "movie";
     public static String MENU_SETTINGS = "settings";
 
+    public final static String key ="e7y6acFyHGqwtkBLKHx6eA";
+    public final static String dramaUrl = "https://drama.pypisan.com/v1/drama/";
+    public final static String animeUrl = "https://anime.pypisan.com/v1/anime/";
+
     public static int getWidthInPercent(Context context, int percent){
         int width = context.getResources().getDisplayMetrics().widthPixels;
         return (width*percent)/100;

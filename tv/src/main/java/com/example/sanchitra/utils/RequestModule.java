@@ -1,33 +1,29 @@
 package com.example.sanchitra.utils;
 
 import com.example.sanchitra.api.Title;
-import com.example.sanchitra.model.AnimeRecentModel;
-import com.example.sanchitra.model.ContentListModel;
-import com.example.sanchitra.model.EpisodeListModel;
+import com.example.sanchitra.model.AnimeContentListModel;
+import com.example.sanchitra.model.DramaContentListModel;
+import com.example.sanchitra.model.DramaEpisodeListModel;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.Headers;
 import retrofit2.http.POST;
-import retrofit2.http.Query;
 
 public interface RequestModule {
 
-    @Headers({
-            "x-api-key: e7y6acFyHGqwtkBLKHx6eA"
-    })
-    @GET("new/")
-    Call<AnimeRecentModel> getAnime(@Query("page") String num);
-
+    //    for Dramas
+    @GET("sanchitra")
+    Call<DramaContentListModel> getDramaContentList(@Header("x-api-key") String apikey);
 
     @POST("episodes")
-    Call<EpisodeListModel> getEpisodeList(@Header("x-api-key") String apikey, @Body Title body);
+    Call<DramaEpisodeListModel> getDramaEpisodeList(@Header("x-api-key") String apikey,
+                                                    @Body Title body);
 
-    //    for dramas
+    //    For Anime
     @GET("sanchitra")
-    Call<ContentListModel> getDramaContentList(@Header("x-api-key") String apikey);
+    Call<AnimeContentListModel> getAnimeContentList(@Header("x-api-key") String apikey);
 
 }
 
