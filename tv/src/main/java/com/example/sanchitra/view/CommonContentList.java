@@ -3,8 +3,6 @@ package com.example.sanchitra.view;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.leanback.app.RowsSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.FocusHighlight;
@@ -18,9 +16,10 @@ import androidx.leanback.widget.RowPresenter;
 
 import android.util.Log;
 import android.view.View;
-import com.example.sanchitra.model.ContentListModel;
-import com.example.sanchitra.model.ContentModel;
+import com.example.sanchitra.model.DramaContentListModel;
+import com.example.sanchitra.model.DramaContentModel;
 import com.example.sanchitra.presenter.CommonContentPresenter;
+import com.example.sanchitra.utils.Constant;
 import com.example.sanchitra.utils.RequestModule;
 
 import java.util.List;
@@ -40,41 +39,39 @@ public class CommonContentList extends RowsSupportFragment {
 
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        final String apikey = "e7y6acFyHGqwtkBLKHx6eA";
-        final String baseUrl = "https://drama.pypisan.com/v1/drama/";
 //        Insert Data
-        insertDataToCard(apikey, baseUrl);
+        insertDataToCard();
 //        Set Adapter
         setAdapter(contentAdapter);
 //        Set Click Listener
         setupEventListeners();
     }
 
-    private void insertDataToCard(String apikey, String baseURL) {
+    private void insertDataToCard() {
 //        Add the cards data and display them
 //        fetching data
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(baseURL)
+                .baseUrl(Constant.dramaUrl)
                 .addConverterFactory(GsonConverterFactory
                 .create())
                 .build();
 
         RequestModule contentGetRequest = retrofit.create(RequestModule.class);
-        Call<ContentListModel> call = contentGetRequest.getDramaContentList(apikey);
+        Call<DramaContentListModel> call = contentGetRequest.getDramaContentList(Constant.key);
 
-        call.enqueue(new Callback<ContentListModel>() {
+        call.enqueue(new Callback<DramaContentListModel>() {
             @Override
-            public void onResponse(Call<ContentListModel> call, Response<ContentListModel> response) {
+            public void onResponse(Call<DramaContentListModel> call, Response<DramaContentListModel> response) {
                 Log.d("Log1", "Response code is : " + response.code());
-                ContentListModel resources = response.body();
+                DramaContentListModel resources = response.body();
                 boolean status = resources.getSuccess();
                 if (status) {
-                    List<ContentListModel.datum> data = resources.getData();
-                    for (ContentListModel.datum contentListHeader : data){
+                    List<DramaContentListModel.datum> data = resources.getData();
+                    for (DramaContentListModel.datum contentListHeader : data){
                         ArrayObjectAdapter contents = new ArrayObjectAdapter(new CommonContentPresenter());
-                        for (ContentModel contentDetail : contentListHeader.getContentList()){
+                        for (DramaContentModel contentDetail : contentListHeader.getContentList()){
                             contents.add(contentDetail);
                         }
                         header = new HeaderItem(contentListHeader.getContentHeader());
@@ -85,7 +82,7 @@ public class CommonContentList extends RowsSupportFragment {
             }
 
             @Override
-            public void onFailure(Call<ContentListModel> call, Throwable t) {
+            public void onFailure(Call<DramaContentListModel> call, Throwable t) {
                 Log.d("Log4", "Response code is : 400" + t.getMessage());
             }
         });
@@ -103,8 +100,8 @@ public class CommonContentList extends RowsSupportFragment {
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item, RowPresenter.ViewHolder rowViewHolder, Row row) {
             // each time the item is clicked, code inside here will be executed.
 
-            if (item instanceof ContentModel) {
-                ContentModel contents = (ContentModel) item;
+            if (item instanceof DramaContentModel) {
+                DramaContentModel contents = (DramaContentModel) item;
 //                Log.d(getTag(), "Item: " + item.toString());
 //                Toast.makeText(getContext(), "Card is " + animeModel.getTitle(), Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getActivity(), DetailViewActivity.class);

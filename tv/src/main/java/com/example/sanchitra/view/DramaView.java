@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.leanback.widget.OnItemViewSelectedListener;
@@ -21,8 +20,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.sanchitra.R;
-import com.example.sanchitra.model.AnimeModel;
-import com.example.sanchitra.model.ContentModel;
+import com.example.sanchitra.model.DramaContentModel;
 
 public class DramaView extends Fragment {
 
@@ -48,7 +46,7 @@ public class DramaView extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         titleImage = view.findViewById(R.id.main_image);
         name = view.findViewById(R.id.title);
@@ -66,8 +64,8 @@ public class DramaView extends Fragment {
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
                                    RowPresenter.ViewHolder rowViewHolder, Row row) {
             // each time the item is selected, code inside here will be executed.
-            if (item instanceof ContentModel) {
-                ContentModel contents = (ContentModel) item;
+            if (item instanceof DramaContentModel) {
+                DramaContentModel contents = (DramaContentModel) item;
 
                 Glide.with(context)
                         .load(contents.getImage())

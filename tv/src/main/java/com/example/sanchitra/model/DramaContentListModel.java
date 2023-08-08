@@ -4,10 +4,10 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class ContentListModel {
+public class DramaContentListModel {
 
     @SerializedName("results")
-    private List<ContentListModel.datum> results;
+    private List<DramaContentListModel.datum> results;
 
     @SerializedName("success")
     private Boolean success;
@@ -26,14 +26,14 @@ public class ContentListModel {
         private String contentHeader;
 
         @SerializedName("content_list")
-        private List<ContentModel> contentList;
+        private List<DramaContentModel> contentList;
 
 
         public String getContentHeader() {
             return contentHeader;
         }
 
-        public List<ContentModel> getContentList() {
+        public List<DramaContentModel> getContentList() {
             return contentList;
         }
     }
