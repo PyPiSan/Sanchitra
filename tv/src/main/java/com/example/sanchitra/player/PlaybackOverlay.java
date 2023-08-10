@@ -1,5 +1,6 @@
 package com.example.sanchitra.player;
 
+import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -10,9 +11,16 @@ import androidx.leanback.app.VideoSupportFragmentGlueHost;
 import androidx.leanback.media.MediaPlayerAdapter;
 import androidx.leanback.media.PlaybackGlue;
 import androidx.leanback.media.PlaybackTransportControlGlue;
+import androidx.leanback.widget.PlaybackControlsRow;
+
+import android.os.Handler;
 import android.view.View;
 
 public class PlaybackOverlay extends VideoSupportFragment {
+
+    private int mCurrentPlaybackState;
+    private Handler mHandler;
+    private Runnable mRunnable;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,27 +30,61 @@ public class PlaybackOverlay extends VideoSupportFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        final PlaybackTransportControlGlue<MediaPlayerAdapter> playerGlue =
-                new PlaybackTransportControlGlue<>(getActivity(),
-                        new MediaPlayerAdapter(getActivity()));
-
-        playerGlue.setHost(new VideoSupportFragmentGlueHost(this));
-        playerGlue.addPlayerCallback(new PlaybackGlue.PlayerCallback() {
-            @Override
-            public void onPreparedStateChanged(PlaybackGlue glue) {
-                if (glue.isPrepared()) {
-//                    playerGlue.setSeekProvider(new MySeekProvider());
-                    playerGlue.play();
-                }
-            }
-        });
-        playerGlue.setSubtitle("Episode 1");
-        playerGlue.setTitle("Naruto");
-        String uriPath = "https://www005.vipanicdn.net/streamhls/027e9529af2b06fe7b4f47e507a787eb/ep.1.1677593055.1080.m3u8";
-        playerGlue.getPlayerAdapter().setDataSource(Uri.parse(uriPath));
     }
 
-    public interface OnPlayPauseClickedListener {
+//    public void playbackStateChanged() {
+//
+//        if (mCurrentPlaybackState != PlaybackState.STATE_PLAYING) {
+//            mCurrentPlaybackState = PlaybackState.STATE_PLAYING;
+////            startProgressAutomation();
+//            setFadingEnabled(true);
+//            mPlayPauseAction.setIndex(PlaybackControlsRow.PlayPauseAction.PAUSE);
+//            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlaybackControlsRow.PlayPauseAction.PAUSE));
+//            notifyChanged(mPlayPauseAction);
+//        } else if (mCurrentPlaybackState != PlaybackState.STATE_PAUSED) {
+//            mCurrentPlaybackState = PlaybackState.STATE_PAUSED;
+//            stopProgressAutomation();
+//            //setFadingEnabled(false); // if set to false, PlaybackcontrolsRow will always be on the screen
+//            mPlayPauseAction.setIndex(PlaybackControlsRow.PlayPauseAction.PLAY);
+//            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlaybackControlsRow.PlayPauseAction.PLAY));
+//            notifyChanged(mPlayPauseAction);
+//        }
+//
+//        int currentTime = ((PlaybackOverlayActivity) getActivity()).getPosition();
+//        mPlaybackControlsRow.setCurrentTime(currentTime);
+//        mPlaybackControlsRow.setBufferedProgress(currentTime + SIMULATED_BUFFERED_TIME);
+//
+//    }
 
-    }
+//    private void togglePlayback(boolean playPause) {
+//        /* Video control part */
+////        ((VideoPlayer)).playPause(playPause);
+//        /* UI control part */
+////        playbackStateChanged();
+//    }
+
+//    private void startProgressAutomation() {
+//        if (mRunnable == null) {
+//            mRunnable = new Runnable() {
+//                @Override
+//                public void run() {
+//                    int updatePeriod = getUpdatePeriod();
+//                    int currentTime = mPlaybackControlsRow.getCurrentTime() + updatePeriod;
+//                    int totalTime = mPlaybackControlsRow.getTotalTime();
+//                    mPlaybackControlsRow.setCurrentTime(currentTime);
+//                    mPlaybackControlsRow.setBufferedProgress(currentTime + SIMULATED_BUFFERED_TIME);
+//
+//                    if (totalTime > 0 && totalTime <= currentTime) {
+//                        stopProgressAutomation();
+//                        next(true);
+//                    } else {
+//                        mHandler.postDelayed(this, updatePeriod);
+//                    }
+//                }
+//            };
+//            mHandler.postDelayed(mRunnable, getUpdatePeriod());
+//        }
+//    }
+
+
 }
