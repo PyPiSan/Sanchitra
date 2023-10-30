@@ -66,7 +66,7 @@ public class EpisodeListView extends RowsSupportFragment {
 //        Add the cards data and display them
 //        fetching data
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constant.dramaUrl)
+                .baseUrl(Constant.animeUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
