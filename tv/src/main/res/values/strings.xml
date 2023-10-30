@@ -5,4 +5,5 @@
     <string name="main_image">Main Image</string>
     <string name="title">No Title Found</string>
     <string name="summary">No Content to display. Please Try again.</string>
+    <string name="playback_tag">playback_frag</string>
 </resources>
