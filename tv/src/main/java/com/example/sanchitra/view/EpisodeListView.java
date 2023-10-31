@@ -38,6 +38,8 @@ public class EpisodeListView extends RowsSupportFragment {
             new ArrayObjectAdapter(new ListRowPresenter(FocusHighlight.ZOOM_FACTOR_MEDIUM));
 
     private HeaderItem header;
+
+    private String title;
     public EpisodeListView() {
         // Required empty public constructor
     }
@@ -51,7 +53,7 @@ public class EpisodeListView extends RowsSupportFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        String title = getArguments().getString("title");
+        title = getArguments().getString("title");
         String type = getArguments().getString("type");
 //      Insert Data
         insertDataToCardDrama(title);
@@ -112,7 +114,7 @@ public class EpisodeListView extends RowsSupportFragment {
             if (item instanceof EpisodeBody) {
                 EpisodeBody episodes = (EpisodeBody) item;
                 Intent intent = new Intent(getActivity(), VideoPlayer.class);
-                intent.putExtra("title", episodes.getTitle());
+                intent.putExtra("title", title);
                 intent.putExtra("episode", episodes.getEpisode());
                 getActivity().startActivity(intent);
             }

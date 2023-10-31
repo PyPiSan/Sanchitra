@@ -38,9 +38,7 @@ public class VideoMediaPlayerGlue <T extends PlayerAdapter> extends PlaybackTran
     protected void onCreateSecondaryActions(ArrayObjectAdapter adapter) {
         adapter.add(mThumbsUpAction);
         adapter.add(mThumbsDownAction);
-        if (android.os.Build.VERSION.SDK_INT > 23) {
-            adapter.add(mPipAction);
-        }
+        adapter.add(mPipAction);
     }
 
     @Override
