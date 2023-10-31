@@ -6,10 +6,13 @@ import android.os.Handler;
 import androidx.leanback.media.PlaybackGlueHost;
 import androidx.leanback.media.PlayerAdapter;
 import androidx.leanback.media.SurfaceHolderGlueHost;
+
+import android.util.Log;
 import android.view.SurfaceHolder;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.ts.DefaultTsPayloadReaderFactory;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -20,7 +23,7 @@ import com.google.android.exoplayer2.util.Util;
 
 import java.util.Objects;
 
-public class ExoPlayerAdapter extends PlayerAdapter{
+public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
 
     Context mContext;
     SimpleExoPlayer mPlayer;
@@ -53,19 +56,11 @@ public class ExoPlayerAdapter extends PlayerAdapter{
         dataSourceFactory.setConnectTimeoutMs(10000);
         HlsMediaSource.Factory hlsMediaSource =
                 new HlsMediaSource.Factory(dataSourceFactory);
-//                        .setExtractorFactory(extractorFactory);
-        mPlayer = new SimpleExoPlayer.Builder(context)
-                .setMediaSourceFactory(hlsMediaSource)
+
+        mPlayer = new SimpleExoPlayer.Builder(mContext)
+//                .setMediaSourceFactory(hlsMediaSource)
                 .build();
     }
-
-//    public ExoPlayerAdapter(Context context) {
-//        mContext = context;
-//        mPlayer = ExoPlayerFactory.newSimpleInstance(mContext,
-//                new DefaultTrackSelector(),
-//                new DefaultLoadControl());
-//        mPlayer.addListener(this);
-//    }
 
     @Override
     public void onAttachedToHost(PlaybackGlueHost host) {
@@ -100,6 +95,7 @@ public class ExoPlayerAdapter extends PlayerAdapter{
      * according to the state of buffering.
      */
     void notifyBufferingStartEnd() {
+        Log.d("videoAdapter", "buffering is in progress " +mInitialized);
         getCallback().onBufferingStateChanged(ExoPlayerAdapter.this,
                 mBufferingStart || !mInitialized);
     }
@@ -203,13 +199,12 @@ public class ExoPlayerAdapter extends PlayerAdapter{
         return mContext;
     }
 
-    public boolean setDataSource(Uri uri) {
+    public void setDataSource(Uri uri) {
         if (Objects.equals(mMediaSourceUri, uri)) {
-            return false;
+            return;
         }
         mMediaSourceUri = uri;
         prepareMediaForPlaying();
-        return true;
     }
 
     public int getAudioStreamType() {
@@ -241,17 +236,16 @@ public class ExoPlayerAdapter extends PlayerAdapter{
     private void prepareMediaForPlaying() {
         reset();
         if (mMediaSourceUri != null) {
-//            MediaSource mediaSource = onCreateMediaSource(mMediaSourceUri);
-//            mPlayer.prepare(mediaSource);
-
             // Set the media source to be played.
+            MediaSource mediaSource = onCreateMediaSource(mMediaSourceUri);
             // Prepare the player.
-            mPlayer.setMediaItem(MediaItem.fromUri(mMediaSourceUri));
-            mPlayer.prepare();
+//            mPlayer.setMediaItem(MediaItem.fromUri(mMediaSourceUri));
+            mPlayer.prepare(mediaSource);
 
         } else {
             return;
         }
+        mInitialized = true;
         notifyBufferingStartEnd();
         getCallback().onPlayStateChanged(ExoPlayerAdapter.this);
     }
@@ -283,22 +277,23 @@ public class ExoPlayerAdapter extends PlayerAdapter{
 
     // ExoPlayer Event Listeners
 
-//    @Override
-//    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-//        mBufferingStart = false;
-//        if (playbackState == ExoPlayer.STATE_READY && !mInitialized) {
-//            mInitialized = true;
-//            if (mSurfaceHolderGlueHost == null || mHasDisplay) {
-//                getCallback().onPreparedStateChanged(ExoPlayerAdapter.this);
-//            }
-//        } else if (playbackState == ExoPlayer.STATE_BUFFERING) {
-//            mBufferingStart = true;
-//        } else if (playbackState == ExoPlayer.STATE_ENDED) {
-//            getCallback().onPlayStateChanged(ExoPlayerAdapter.this);
-//            getCallback().onPlayCompleted(ExoPlayerAdapter.this);
-//        }
-//        notifyBufferingStartEnd();
-//    }
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        Log.d("videoAdapter", "event listener " +mInitialized);
+        mBufferingStart = false;
+        if (playbackState == ExoPlayer.STATE_READY && !mInitialized) {
+            mInitialized = true;
+            if (mSurfaceHolderGlueHost == null || mHasDisplay) {
+                getCallback().onPreparedStateChanged(ExoPlayerAdapter.this);
+            }
+        } else if (playbackState == ExoPlayer.STATE_BUFFERING) {
+            mBufferingStart = true;
+        } else if (playbackState == ExoPlayer.STATE_ENDED) {
+            getCallback().onPlayStateChanged(ExoPlayerAdapter.this);
+            getCallback().onPlayCompleted(ExoPlayerAdapter.this);
+        }
+        notifyBufferingStartEnd();
+    }
 
 
 }
