@@ -8,6 +8,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
@@ -27,13 +28,13 @@ import java.util.Objects;
 
 public class MainActivity extends FragmentActivity implements View.OnKeyListener {
 
-    private TextView searchPage, homePage, animePage, dramaPage, tvPage, moviePage,
+    private AppCompatButton searchPage, homePage, animePage, dramaPage, tvPage, moviePage,
             settingsPage;
-    private BrowseFrameLayout sideMenu;
+//    private FrameLayout topMenu;
     private FrameLayout fragmentContainer;
-    private  boolean SIDE_MENU = false;
 
     private String selectedMenu = Constant.MENU_HOME;
+
     private View lastSelectedMenu;
 
     public MainActivity() {
@@ -43,9 +44,9 @@ public class MainActivity extends FragmentActivity implements View.OnKeyListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        MobileAds.initialize(this);
+//        MobileAds.initialize(this);
         // Get reference to singleton RewardedVideoAd object
-        sideMenu = findViewById(R.id.side_menu);
+//        topMenu = findViewById(R.id.top_menu);
         fragmentContainer = findViewById(R.id.fragmentView);
 
         searchPage = findViewById(R.id.search_page);
@@ -72,22 +73,7 @@ public class MainActivity extends FragmentActivity implements View.OnKeyListener
 
     @Override
     public boolean onKey(View view, int i, KeyEvent keyEvent) {
-        if (i == KeyEvent.KEYCODE_DPAD_LEFT) {
-            if (!SIDE_MENU) {
-                openSideMenu();
-                switchToLastSelectedMenu();
-                SIDE_MENU = true;
-            }
-        } else if (i == KeyEvent.KEYCODE_DPAD_RIGHT){
-            if (SIDE_MENU) {
-                SIDE_MENU = false;
-                closeSideMenu();
-            }
-        }
-        if (i == KeyEvent.KEYCODE_DPAD_CENTER){
-                lastSelectedMenu.setActivated(false);
-                lastSelectedMenu = view;
-                view.setActivated(true);
+
             if (view.getId() == R.id.search_page){
                 selectedMenu = Constant.MENU_SEARCH;
                 changeFragment(new SearchView());
@@ -116,47 +102,14 @@ public class MainActivity extends FragmentActivity implements View.OnKeyListener
                 selectedMenu = Constant.MENU_HOME;
                 changeFragment(new HomeView());
             }
-        }
         return false;
     }
 
-//    @Override
-//    public boolean onKeyDown(int keyCode, KeyEvent event) {
-//        if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && SIDE_MENU){
-//
-//        }
-//        return super.onKeyDown(keyCode, event);
-//    }
-
-
-    @Override
-    public void onBackPressed() {
-        if(SIDE_MENU){
-            SIDE_MENU = false;
-            closeSideMenu();
-        }
-        super.onBackPressed();
-    }
-
-    private void openSideMenu(){
-        Animation animeSlide = AnimationUtils.loadAnimation(this, R.anim.left_side);
-        sideMenu.startAnimation(animeSlide);
-        sideMenu.requestLayout();
-        sideMenu.getLayoutParams().width = Constant.getWidthInPercent(this, 16);
-    }
-
-    private void closeSideMenu(){
-        sideMenu.requestLayout();
-        sideMenu.getLayoutParams().width = Constant.getWidthInPercent(this, 5);
-        fragmentContainer.requestFocus();
-        SIDE_MENU = false;
-    }
 
     private void changeFragment(Fragment fragment){
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragmentView, fragment);
         transaction.commit();
-        closeSideMenu();
     }
 
     private void switchToLastSelectedMenu(){

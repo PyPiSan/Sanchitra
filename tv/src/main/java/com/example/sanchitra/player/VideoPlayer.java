@@ -17,11 +17,10 @@ public class VideoPlayer extends Activity {
         setContentView(R.layout.activity_video_player);
 //      for getting video summary params
         Intent videoIntent = getIntent();
-        String name = videoIntent.getStringExtra("title");
-        String episode_num = videoIntent.getStringExtra("episode");
         Bundle bundle = new Bundle();
-        bundle.putString("title", name);
-        bundle.putString("subTitle", episode_num);
+        bundle.putString("title", videoIntent.getStringExtra("title"));
+        bundle.putString("subTitle", videoIntent.getStringExtra("episode"));
+        bundle.putString("type", videoIntent.getStringExtra("type"));
         VideoPlaybackFragment fragment = new VideoPlaybackFragment();
         fragment.setArguments(bundle);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();

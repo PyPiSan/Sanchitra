@@ -4,4 +4,6 @@
     <color name="color_grey">#F8F8F8</color>
     <color name="color_white">#FFFFFF</color>
     <color name="primary">#000000</color>
+    <color name="black">#000000</color>
+    <color name="old_background">#282828</color>
 </resources>
