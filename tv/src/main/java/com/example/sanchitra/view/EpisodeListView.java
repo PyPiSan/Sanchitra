@@ -20,7 +20,7 @@ import android.util.Log;
 import android.view.View;
 import com.example.sanchitra.api.EpisodeBody;
 import com.example.sanchitra.api.Title;
-import com.example.sanchitra.model.DramaEpisodeListModel;
+import com.example.sanchitra.model.EpisodeListModel;
 import com.example.sanchitra.player.VideoPlayer;
 import com.example.sanchitra.presenter.EpisodePresenter;
 import com.example.sanchitra.utils.Constant;
@@ -39,7 +39,7 @@ public class EpisodeListView extends RowsSupportFragment {
 
     private HeaderItem header;
 
-    private String title;
+    private String title, type;
     public EpisodeListView() {
         // Required empty public constructor
     }
@@ -54,9 +54,9 @@ public class EpisodeListView extends RowsSupportFragment {
         super.onViewCreated(view, savedInstanceState);
 
         title = getArguments().getString("title");
-        String type = getArguments().getString("type");
+        type = getArguments().getString("type");
 //      Insert Data
-        insertDataToCardDrama(title);
+        insertDataToCardDrama(title, type);
 //        Set Adapter
         setAdapter(episodeAdapter);
         setupEventListeners();
@@ -64,27 +64,35 @@ public class EpisodeListView extends RowsSupportFragment {
     }
 
 
-    private void insertDataToCardDrama(String title) {
+    private void insertDataToCardDrama(String title, String type) {
 //        Add the cards data and display them
+        String url;
+        if (type=="anime"){
+            url = Constant.animeUrl;
+        }else{
+            url = Constant.dramaUrl;
+        }
+//        Log.d("episodeList", "url is "+ url);
 //        fetching data
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constant.animeUrl)
+                .baseUrl(url)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         RequestModule episodeGetRequest = retrofit.create(RequestModule.class);
-        Call<DramaEpisodeListModel> call = episodeGetRequest.getDramaEpisodeList(Constant.key, new Title(title));
+        Call<EpisodeListModel> call = episodeGetRequest.getEpisodeList(Constant.key, new Title(title));
 
-        call.enqueue(new Callback<DramaEpisodeListModel>() {
+        call.enqueue(new Callback<EpisodeListModel>() {
             @Override
-            public void onResponse(Call<DramaEpisodeListModel> call, Response<DramaEpisodeListModel> response) {
-                Log.d("Log1", "Response code is : " + response.code());
-                DramaEpisodeListModel resources = response.body();
+            public void onResponse(Call<EpisodeListModel> call, Response<EpisodeListModel> response) {
+                Log.d("episodeList", "Response code is : " + response.code());
+                EpisodeListModel resources = response.body();
                 ArrayObjectAdapter episodes = new ArrayObjectAdapter(new EpisodePresenter());
                 boolean status = resources.getSuccess();
                 if (status){
-                        DramaEpisodeListModel.datum details = resources.getData();
+                        EpisodeListModel.datum details = resources.getData();
                         int episodeNumbers = details.getEpisodes();
+                    Log.d("episodeList", "Episode number is : " + String.valueOf(details.getEpisodes()));
                         for(int i =1;i<=episodeNumbers; i++){
                             EpisodeBody episodeBody = new EpisodeBody(details.getTitle(),
                                     String.valueOf(i), details.getImageLink());
@@ -97,8 +105,8 @@ public class EpisodeListView extends RowsSupportFragment {
 //                contentAdapter.notifyArrayItemRangeChanged(1, 20);
 
             @Override
-            public void onFailure(Call<DramaEpisodeListModel> call, Throwable t) {
-                Log.d("Log4", "Response code is : 400" + t.getMessage());
+            public void onFailure(Call<EpisodeListModel> call, Throwable t) {
+                Log.d("episodeList", "Response code is : 400" + t.getMessage());
             }
         });
     }
@@ -116,6 +124,7 @@ public class EpisodeListView extends RowsSupportFragment {
                 Intent intent = new Intent(getActivity(), VideoPlayer.class);
                 intent.putExtra("title", title);
                 intent.putExtra("episode", episodes.getEpisode());
+                intent.putExtra("type", type);
                 getActivity().startActivity(intent);
             }
         }

@@ -1,9 +1,9 @@
 package com.example.sanchitra.model;
 
 import com.google.gson.annotations.SerializedName;
-public class DramaEpisodeListModel {
+public class EpisodeListModel {
     @SerializedName("data")
-    private final DramaEpisodeListModel.datum data = null;
+    private final EpisodeListModel.datum data = null;
     @SerializedName("success")
     private Boolean success;
 
@@ -11,7 +11,7 @@ public class DramaEpisodeListModel {
         return success;
     }
 
-    public DramaEpisodeListModel.datum getData() {
+    public EpisodeListModel.datum getData() {
         return data;
     }
 

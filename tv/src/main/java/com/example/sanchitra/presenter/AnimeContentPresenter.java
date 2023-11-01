@@ -63,13 +63,13 @@ public class AnimeContentPresenter extends Presenter {
 
     }
 
-    public int getWidthInPercent(Context context, int percent){
-       int widthPixels = context.getResources().getDisplayMetrics().widthPixels;
-        return (widthPixels*percent)/100;
-    }
-
-    public int getHeightInPercent(Context context, int percent){
-        int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
-        return (heightPixels*percent)/100;
-    }
+//    public int getWidthInPercent(Context context, int percent){
+//       int widthPixels = context.getResources().getDisplayMetrics().widthPixels;
+//        return (widthPixels*percent)/100;
+//    }
+//
+//    public int getHeightInPercent(Context context, int percent){
+//        int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
+//        return (heightPixels*percent)/100;
+//    }
 }

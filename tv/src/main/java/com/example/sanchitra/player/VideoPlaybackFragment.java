@@ -72,7 +72,8 @@ public class VideoPlaybackFragment extends VideoFragment {
 
         mMediaPlayerGlue.setMode(PlaybackControlsRow.RepeatAction.NONE);
         mMediaPlayerGlue.setTitle(String.format("%s ( Episode %s )", getArguments().getString("title"), getArguments().getString("subTitle")));
-        getEpisodeLink(getArguments().getString("title"), getArguments().getString("subTitle"));
+        getEpisodeLink(getArguments().getString("title"), getArguments().getString("subTitle"),
+                getArguments().getString("type"));
 
     }
 
@@ -89,15 +90,23 @@ public class VideoPlaybackFragment extends VideoFragment {
         super.onPause();
     }
 
-    private void getEpisodeLink(String title, String episode_num) {
+    private void getEpisodeLink(String title, String episode_num, String type) {
+        String url, server;
+        if (type=="anime"){
+            url = Constant.animeUrl;
+            server ="";
+        }else{
+            url = Constant.dramaUrl;
+            server = "streamsb";
+        }
         //      fetching data
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://anime.pypisan.com/v1/anime/")
+                .baseUrl(url)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         RequestModule episodeLink = retrofit.create(RequestModule.class);
         Call<EpisodeVideoModel> call = episodeLink.getEpisodeVideo(Constant.key,
-                new WatchRequest(title, episode_num, ""));
+                new WatchRequest(title, episode_num, server));
         call.enqueue(new Callback<EpisodeVideoModel>() {
             @Override
             public void onResponse(Call<EpisodeVideoModel> call, Response<EpisodeVideoModel> response) {
@@ -114,13 +123,19 @@ public class VideoPlaybackFragment extends VideoFragment {
                     videoLink[2] = resource.getValue().getQuality3();
                     videoLink[3] = resource.getValue().getQuality4();
                 }
-                if (videoLink[3] == null || videoLink[3].equals("")) {
+                if (videoLink[3] == null || videoLink[3].equals("") && videoLink[2].equals("")) {
                     Toast.makeText(getContext(), "Not found, Click Retry", Toast.LENGTH_LONG).show();
-                }else{
+                } else if (!videoLink[2].equals("") && videoLink[3].equals("")) {
+                    mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(videoLink[2]));
+                    playWhenReady(mMediaPlayerGlue);
+                    setBackgroundType(BG_LIGHT);
+                }
+                else{
                     mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(videoLink[3]));
                     playWhenReady(mMediaPlayerGlue);
                     setBackgroundType(BG_LIGHT);
                 }
+
             }
 
             @Override

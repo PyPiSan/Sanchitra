@@ -4,7 +4,7 @@ import com.example.sanchitra.api.Title;
 import com.example.sanchitra.api.WatchRequest;
 import com.example.sanchitra.model.AnimeContentListModel;
 import com.example.sanchitra.model.DramaContentListModel;
-import com.example.sanchitra.model.DramaEpisodeListModel;
+import com.example.sanchitra.model.EpisodeListModel;
 import com.example.sanchitra.model.EpisodeVideoModel;
 
 import retrofit2.Call;
@@ -20,8 +20,8 @@ public interface RequestModule {
     Call<DramaContentListModel> getDramaContentList(@Header("x-api-key") String apikey);
 
     @POST("episodes")
-    Call<DramaEpisodeListModel> getDramaEpisodeList(@Header("x-api-key") String apikey,
-                                                    @Body Title body);
+    Call<EpisodeListModel> getEpisodeList(@Header("x-api-key") String apikey,
+                                               @Body Title body);
 
 //    For Anime
     @GET("sanchitra")
