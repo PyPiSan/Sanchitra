@@ -94,10 +94,8 @@ public class VideoPlaybackFragment extends VideoFragment {
         String url, server;
         if (type=="anime"){
             url = Constant.animeUrl;
-            server ="";
         }else{
             url = Constant.dramaUrl;
-            server = "streamsb";
         }
         //      fetching data
         Retrofit retrofit = new Retrofit.Builder()
@@ -106,7 +104,7 @@ public class VideoPlaybackFragment extends VideoFragment {
                 .build();
         RequestModule episodeLink = retrofit.create(RequestModule.class);
         Call<EpisodeVideoModel> call = episodeLink.getEpisodeVideo(Constant.key,
-                new WatchRequest(title, episode_num, server));
+                new WatchRequest(title, episode_num, ""));
         call.enqueue(new Callback<EpisodeVideoModel>() {
             @Override
             public void onResponse(Call<EpisodeVideoModel> call, Response<EpisodeVideoModel> response) {
@@ -124,7 +122,7 @@ public class VideoPlaybackFragment extends VideoFragment {
                     videoLink[3] = resource.getValue().getQuality4();
                 }
                 if (videoLink[3] == null || videoLink[3].equals("") && videoLink[2].equals("")) {
-                    Toast.makeText(getContext(), "Not found, Click Retry", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Not found format is Blank, Click Retry", Toast.LENGTH_LONG).show();
                 } else if (!videoLink[2].equals("") && videoLink[3].equals("")) {
                     mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(videoLink[2]));
                     playWhenReady(mMediaPlayerGlue);
@@ -140,7 +138,7 @@ public class VideoPlaybackFragment extends VideoFragment {
 
             @Override
             public void onFailure(Call<EpisodeVideoModel> call, Throwable t) {
-                Toast.makeText(getContext(), "Not found, Click Retry", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Not found Source Failure, Click Retry", Toast.LENGTH_LONG).show();
             }
         });
 

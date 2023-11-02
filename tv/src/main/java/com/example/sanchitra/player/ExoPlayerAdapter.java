@@ -237,6 +237,7 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
         reset();
         if (mMediaSourceUri != null) {
             // Set the media source to be played.
+            Log.d("Video Adapter", "url is "+mMediaSourceUri);
             MediaSource mediaSource = onCreateMediaSource(mMediaSourceUri);
             // Prepare the player.
 //            mPlayer.setMediaItem(MediaItem.fromUri(mMediaSourceUri));
