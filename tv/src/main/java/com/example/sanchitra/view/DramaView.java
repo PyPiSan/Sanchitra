@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.sanchitra.R;
-import com.example.sanchitra.model.DramaContentModel;
+import com.example.sanchitra.model.ContentModel;
 
 public class DramaView extends Fragment {
 
@@ -64,8 +64,8 @@ public class DramaView extends Fragment {
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
                                    RowPresenter.ViewHolder rowViewHolder, Row row) {
             // each time the item is selected, code inside here will be executed.
-            if (item instanceof DramaContentModel) {
-                DramaContentModel contents = (DramaContentModel) item;
+            if (item instanceof ContentModel) {
+                ContentModel contents = (ContentModel) item;
 
                 Glide.with(context)
                         .load(contents.getImage())

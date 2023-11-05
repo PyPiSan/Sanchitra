@@ -26,14 +26,14 @@ public class DramaContentListModel {
         private String contentHeader;
 
         @SerializedName("content_list")
-        private List<DramaContentModel> contentList;
+        private List<ContentModel> contentList;
 
 
         public String getContentHeader() {
             return contentHeader;
         }
 
-        public List<DramaContentModel> getContentList() {
+        public List<ContentModel> getContentList() {
             return contentList;
         }
     }

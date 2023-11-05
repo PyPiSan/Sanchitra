@@ -12,7 +12,7 @@ import androidx.leanback.widget.Presenter;
 
 import com.bumptech.glide.Glide;
 import com.example.sanchitra.R;
-import com.example.sanchitra.model.DramaContentModel;
+import com.example.sanchitra.model.ContentModel;
 
 public class CommonContentPresenter extends Presenter {
 
@@ -35,7 +35,7 @@ public class CommonContentPresenter extends Presenter {
 
     @Override
     public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object item) {
-        DramaContentModel contents = (DramaContentModel) item;
+        ContentModel contents = (ContentModel) item;
         ImageCardView contentCard = (ImageCardView) viewHolder.view;
         contentCard.setTitleText(contents.getTitle());
 

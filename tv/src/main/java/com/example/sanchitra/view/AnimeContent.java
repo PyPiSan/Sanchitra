@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.leanback.app.RowsSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.FocusHighlight;
@@ -18,10 +17,9 @@ import androidx.leanback.widget.RowPresenter;
 
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.example.sanchitra.model.AnimeContentListModel;
-import com.example.sanchitra.model.AnimeContentModel;
+import com.example.sanchitra.model.ContentModel;
 import com.example.sanchitra.presenter.AnimeContentPresenter;
 import com.example.sanchitra.utils.Constant;
 import com.example.sanchitra.utils.RequestModule;
@@ -68,7 +66,7 @@ public class AnimeContent extends RowsSupportFragment {
                     List<AnimeContentListModel.datum> data = resources.getData();
                     for (AnimeContentListModel.datum contentListHeader : data){
                         ArrayObjectAdapter animeList = new ArrayObjectAdapter(new AnimeContentPresenter());
-                        for (AnimeContentModel contentDetail : contentListHeader.getContentList()){
+                        for (ContentModel contentDetail : contentListHeader.getContentList()){
                             animeList.add(contentDetail);
                         }
                         header = new HeaderItem(contentListHeader.getContentHeader());
@@ -97,8 +95,8 @@ public class AnimeContent extends RowsSupportFragment {
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
             // each time the item is clicked, code inside here will be executed.
 
-            if (item instanceof AnimeContentModel) {
-                AnimeContentModel animeContentModel = (AnimeContentModel) item;
+            if (item instanceof ContentModel) {
+                ContentModel animeContentModel = (ContentModel) item;
 //                Log.d(getTag(), "Item: " + item.toString());
 //                Toast.makeText(getContext(), "Card is " + animeContentModel.getTitle(),
 //                        Toast.LENGTH_SHORT).show();
@@ -107,7 +105,7 @@ public class AnimeContent extends RowsSupportFragment {
                 intent.putExtra("summary", animeContentModel.getSummary());
                 intent.putExtra("image", animeContentModel.getImage());
                 intent.putExtra("release", animeContentModel.getReleased());
-                intent.putExtra("type", animeContentModel.getType());
+                intent.putExtra("type", "anime");
                 getActivity().startActivity(intent);
             }
         }

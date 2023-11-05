@@ -26,14 +26,14 @@ public class AnimeContentListModel {
         private String contentHeader;
 
         @SerializedName("content_list")
-        private List<AnimeContentModel> contentList;
+        private List<ContentModel> contentList;
 
 
         public String getContentHeader() {
             return contentHeader;
         }
 
-        public List<AnimeContentModel> getContentList() {
+        public List<ContentModel> getContentList() {
             return contentList;
         }
     }

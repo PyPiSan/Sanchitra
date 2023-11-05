@@ -5,18 +5,14 @@ import static androidx.leanback.widget.BaseCardView.CARD_TYPE_MAIN_ONLY;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import androidx.leanback.widget.ImageCardView;
 import androidx.leanback.widget.Presenter;
 
 import com.bumptech.glide.Glide;
-import com.example.sanchitra.model.AnimeContentModel;
-import com.example.sanchitra.model.AnimeModel;
 import com.example.sanchitra.R;
+import com.example.sanchitra.model.ContentModel;
 
 public class AnimeContentPresenter extends Presenter {
 
@@ -40,7 +36,7 @@ public class AnimeContentPresenter extends Presenter {
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
-        AnimeContentModel animeContentModel = (AnimeContentModel) item;
+        ContentModel animeContentModel = (ContentModel) item;
         ImageCardView contentCard = (ImageCardView) viewHolder.view;
         contentCard.setTitleText(animeContentModel.getTitle());
 

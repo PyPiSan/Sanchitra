@@ -26,6 +26,8 @@ import com.example.sanchitra.presenter.EpisodePresenter;
 import com.example.sanchitra.utils.Constant;
 import com.example.sanchitra.utils.RequestModule;
 
+import java.util.Objects;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -67,12 +69,12 @@ public class EpisodeListView extends RowsSupportFragment {
     private void insertDataToCardDrama(String title, String type) {
 //        Add the cards data and display them
         String url;
-        if (type=="anime"){
+        if (Objects.equals(type, "anime")){
             url = Constant.animeUrl;
         }else{
             url = Constant.dramaUrl;
         }
-//        Log.d("episodeList", "url is "+ url);
+        Log.d("episodeList", "url is "+ type);
 //        fetching data
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(url)
