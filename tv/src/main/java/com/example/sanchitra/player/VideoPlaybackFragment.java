@@ -21,6 +21,8 @@ import com.example.sanchitra.model.EpisodeVideoModel;
 import com.example.sanchitra.utils.Constant;
 import com.example.sanchitra.utils.RequestModule;
 
+import java.util.Objects;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -92,11 +94,12 @@ public class VideoPlaybackFragment extends VideoFragment {
 
     private void getEpisodeLink(String title, String episode_num, String type) {
         String url, server;
-        if (type=="anime"){
+        if (Objects.equals(type, "anime")){
             url = Constant.animeUrl;
         }else{
             url = Constant.dramaUrl;
         }
+        Log.d("episodeList", "type is "+ type +"url is "+url);
         //      fetching data
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(url)

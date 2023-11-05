@@ -17,7 +17,7 @@ import androidx.leanback.widget.RowPresenter;
 import android.util.Log;
 import android.view.View;
 import com.example.sanchitra.model.DramaContentListModel;
-import com.example.sanchitra.model.DramaContentModel;
+import com.example.sanchitra.model.ContentModel;
 import com.example.sanchitra.presenter.CommonContentPresenter;
 import com.example.sanchitra.utils.Constant;
 import com.example.sanchitra.utils.RequestModule;
@@ -71,7 +71,7 @@ public class CommonContentList extends RowsSupportFragment {
                     List<DramaContentListModel.datum> data = resources.getData();
                     for (DramaContentListModel.datum contentListHeader : data){
                         ArrayObjectAdapter contents = new ArrayObjectAdapter(new CommonContentPresenter());
-                        for (DramaContentModel contentDetail : contentListHeader.getContentList()){
+                        for (ContentModel contentDetail : contentListHeader.getContentList()){
                             contents.add(contentDetail);
                         }
                         header = new HeaderItem(contentListHeader.getContentHeader());
@@ -100,15 +100,15 @@ public class CommonContentList extends RowsSupportFragment {
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item, RowPresenter.ViewHolder rowViewHolder, Row row) {
             // each time the item is clicked, code inside here will be executed.
 
-            if (item instanceof DramaContentModel) {
-                DramaContentModel contents = (DramaContentModel) item;
+            if (item instanceof ContentModel) {
+                ContentModel contents = (ContentModel) item;
 //                Log.d(getTag(), "Item: " + item.toString());
 //                Toast.makeText(getContext(), "Card is " + animeModel.getTitle(), Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getActivity(), DetailViewActivity.class);
                 intent.putExtra("title", contents.getTitle());
                 intent.putExtra("summary", contents.getSummary());
                 intent.putExtra("image", contents.getImage());
-                intent.putExtra("release", contents.getRelease());
+                intent.putExtra("release", contents.getReleased());
                 intent.putExtra("type", contents.getType());
                 getActivity().startActivity(intent);
             }

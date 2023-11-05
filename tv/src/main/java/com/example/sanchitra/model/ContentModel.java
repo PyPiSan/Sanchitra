@@ -2,7 +2,7 @@ package com.example.sanchitra.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class DramaContentModel {
+public class ContentModel {
     @SerializedName("title")
     private String title;
 
@@ -12,8 +12,8 @@ public class DramaContentModel {
     @SerializedName("link")
     private String link;
 
-    @SerializedName("release")
-    private String release;
+    @SerializedName("released")
+    private String released;
 
     @SerializedName("summary")
     private String summary;
@@ -36,8 +36,8 @@ public class DramaContentModel {
         return link;
     }
 
-    public String getRelease() {
-        return release;
+    public String getReleased() {
+        return released;
     }
 
     public String getSummary() {
@@ -51,4 +51,5 @@ public class DramaContentModel {
     public int getEpisodes() {
         return episodes;
     }
+
 }

@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.sanchitra.R;
-import com.example.sanchitra.model.AnimeContentModel;
+import com.example.sanchitra.model.ContentModel;
 
 public class AnimeView extends Fragment {
 
@@ -68,8 +68,8 @@ public class AnimeView extends Fragment {
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
                                    RowPresenter.ViewHolder rowViewHolder, Row row) {
             // each time the item is selected, code inside here will be executed.
-            if (item instanceof AnimeContentModel) {
-                AnimeContentModel animeContent = (AnimeContentModel) item;
+            if (item instanceof ContentModel) {
+                ContentModel animeContent = (ContentModel) item;
                 String animeImage = animeContent.getImage();
                 String  animeName = animeContent.getTitle();
                 Glide.with(context)
