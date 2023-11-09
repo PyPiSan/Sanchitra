@@ -32,7 +32,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class VideoPlaybackFragment extends VideoFragment {
 
     private VideoMediaPlayerGlue<ExoPlayerAdapter> mMediaPlayerGlue;
-    private String[] videoLink = new String[4];
+    private final String[] videoLink = new String[4];
 
     final VideoFragmentGlueHost mHost = new VideoFragmentGlueHost(this);
 
@@ -114,8 +114,7 @@ public class VideoPlaybackFragment extends VideoFragment {
                 boolean flag = false;
                 EpisodeVideoModel resource = response.body();
                 if (response.code() == 200) {
-                    boolean status = resource.getSuccess();
-                    flag = status;
+                    flag = resource.getSuccess();
                 }
 //                Log.d("video", "link is"+resource.getSuccess());
                 if (flag) {
