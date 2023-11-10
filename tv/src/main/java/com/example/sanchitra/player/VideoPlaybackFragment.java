@@ -9,8 +9,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.leanback.app.VideoFragment;
 import androidx.leanback.app.VideoFragmentGlueHost;
+import androidx.leanback.app.VideoSupportFragment;
+import androidx.leanback.app.VideoSupportFragmentGlueHost;
 import androidx.leanback.media.PlaybackGlue;
 import androidx.leanback.widget.PlaybackControlsRow;
+import androidx.leanback.widget.PlaybackSeekDataProvider;
 
 import android.util.Log;
 import android.view.View;
@@ -72,7 +75,7 @@ public class VideoPlaybackFragment extends VideoFragment {
             Log.d("video", "video player cannot obtain audio focus!");
         }
 
-        mMediaPlayerGlue.setMode(PlaybackControlsRow.RepeatAction.NONE);
+//        mMediaPlayerGlue.setMode(PlaybackControlsRow.RepeatAction.NONE);
         mMediaPlayerGlue.setTitle(String.format("%s ( Episode %s )", getArguments().getString("title"), getArguments().getString("subTitle")));
         getEpisodeLink(getArguments().getString("title"), getArguments().getString("subTitle"),
                 getArguments().getString("type"));

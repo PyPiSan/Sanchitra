@@ -38,28 +38,16 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
     };
     final Handler mHandler = new Handler();
     boolean mInitialized = false;
-    Uri mMediaSourceUri = null;
+    Uri mMediaSourceUri;
     boolean mHasDisplay;
     boolean mBufferingStart;
     @C.StreamType int mAudioStreamType;
 
     public ExoPlayerAdapter(Context context) {
         mContext = context;
-        int flags = DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES
-                | DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS;
-        DefaultHlsExtractorFactory extractorFactory = new DefaultHlsExtractorFactory(flags, true);
-
-//        New Implementation
-        DefaultHttpDataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory();
-        dataSourceFactory.setAllowCrossProtocolRedirects(true);
-        dataSourceFactory.setUserAgent("curl/7.85.0");
-        dataSourceFactory.setConnectTimeoutMs(10000);
-        HlsMediaSource.Factory hlsMediaSource =
-                new HlsMediaSource.Factory(dataSourceFactory);
-
         mPlayer = new SimpleExoPlayer.Builder(mContext)
-//                .setMediaSourceFactory(hlsMediaSource)
                 .build();
+        mPlayer.addListener(this);
     }
 
     @Override
@@ -95,7 +83,7 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
      * according to the state of buffering.
      */
     void notifyBufferingStartEnd() {
-        Log.d("videoAdapter", "buffering is in progress " +mInitialized);
+//        Log.d("videoAdapter", "buffering is in progress " +mInitialized);
         getCallback().onBufferingStateChanged(ExoPlayerAdapter.this,
                 mBufferingStart || !mInitialized);
     }
@@ -168,7 +156,6 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
         if (!mInitialized || isPlaying()) {
             return;
         }
-
         mPlayer.setPlayWhenReady(true);
         getCallback().onPlayStateChanged(ExoPlayerAdapter.this);
         getCallback().onCurrentPositionChanged(ExoPlayerAdapter.this);
@@ -182,6 +169,15 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
         }
     }
 
+    @Override
+    public void fastForward(){
+        seekTo(getCurrentPosition()+10_000);
+    }
+
+    @Override
+    public void rewind(){
+        seekTo(getCurrentPosition()-10_000);
+    }
     @Override
     public void seekTo(long newPosition) {
         if (!mInitialized) {
@@ -239,14 +235,11 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
             // Set the media source to be played.
             Log.d("Video Adapter", "url is "+mMediaSourceUri);
             MediaSource mediaSource = onCreateMediaSource(mMediaSourceUri);
-            // Prepare the player.
-//            mPlayer.setMediaItem(MediaItem.fromUri(mMediaSourceUri));
             mPlayer.prepare(mediaSource);
 
         } else {
             return;
         }
-        mInitialized = true;
         notifyBufferingStartEnd();
         getCallback().onPlayStateChanged(ExoPlayerAdapter.this);
     }
@@ -280,7 +273,6 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        Log.d("videoAdapter", "event listener " +mInitialized);
         mBufferingStart = false;
         if (playbackState == ExoPlayer.STATE_READY && !mInitialized) {
             mInitialized = true;
