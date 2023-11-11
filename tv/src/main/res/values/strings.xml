@@ -6,4 +6,11 @@
     <string name="title">No Title Found</string>
     <string name="summary">No Content to display. Please Try again.</string>
     <string name="playback_tag">playback_frag</string>
+    <string name="settings">Settings</string>
+    <string name="movies">Movies</string>
+    <string name="live_tv">Live TV</string>
+    <string name="drama">Drama</string>
+    <string name="anime">Anime</string>
+    <string name="home">Home</string>
+    <string name="search">Search</string>
 </resources>
