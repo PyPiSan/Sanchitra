@@ -1,6 +1,8 @@
 package com.example.sanchitra.view;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -103,12 +105,14 @@ public class MainActivity extends FragmentActivity implements View.OnKeyListener
             }
         }
         if (i == KeyEvent.KEYCODE_DPAD_CENTER){
+//            Log.d("main", "item selected "+lastSelectedMenu);
             lastSelectedMenu.setActivated(false);
             lastSelectedMenu = view;
             view.setActivated(true);
-            if (view.getId() == R.id.search_page){
+            if (view.getId() == R.id.search_page && !Objects.equals(selectedMenu, Constant.MENU_SEARCH)){
                 selectedMenu = Constant.MENU_SEARCH;
-                changeFragment(new SearchView());
+                Intent intent = new Intent(this, SearchActivity.class);
+                startActivity(intent);
             } else if (view.getId() == R.id.anime_page){
                 selectedMenu = Constant.MENU_ANIME;
                 changeFragment(new AnimeView());
