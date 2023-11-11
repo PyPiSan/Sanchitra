@@ -154,12 +154,18 @@ public class MainActivity extends FragmentActivity implements View.OnKeyListener
         Animation animeSlide = AnimationUtils.loadAnimation(this, R.anim.left_side);
         sideMenu.startAnimation(animeSlide);
         sideMenu.requestLayout();
-        sideMenu.getLayoutParams().width = Constant.getWidthInPercent(this, 16);
+//        animePage.setText("Anime");
+//        homePage.setText("Home");
+//        dramaPage.setText("Drama");
+        sideMenu.getLayoutParams().width = Constant.getWidthInPercent(this, 19);
     }
 
     private void closeSideMenu(){
         sideMenu.requestLayout();
-        sideMenu.getLayoutParams().width = Constant.getWidthInPercent(this, 5);
+        sideMenu.getLayoutParams().width = Constant.getWidthInPercent(this, 6);
+//        animePage.setText("");
+//        homePage.setText("");
+//        dramaPage.setText("");
         fragmentContainer.requestFocus();
         SIDE_MENU = false;
     }

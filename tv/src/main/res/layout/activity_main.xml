@@ -4,33 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".view.MainActivity">
-
-
-<!--    <androidx.leanback.tab.LeanbackTabLayout-->
-<!--        android:id="@+id/tab_layout"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="50dp"-->
-<!--        android:background="@android:color/transparent"-->
-<!--        android:elevation="6dp"-->
-<!--        android:focusable="true"-->
-<!--        android:nextFocusDown="@id/pager"-->
-<!--        app:layout_constraintBottom_toTopOf="@id/pager"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:tabIndicatorColor="@android:color/black"-->
-<!--        app:tabMode="scrollable"-->
-<!--        app:tabTextColor="@android:color/white" />-->
-
-<!--    <androidx.leanback.tab.LeanbackViewPager-->
-<!--        android:id="@+id/pager"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="490dp"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toBottomOf="@+id/tab_layout" />-->
-
-
 
     <FrameLayout
         android:id="@+id/fragmentView"
@@ -43,12 +17,11 @@
         android:id="@+id/side_menu"
         android:layout_height="match_parent"
         android:layout_width="80dp"
-        android:background="#000000"
+        android:background="@drawable/browse_gradient"
         android:nextFocusLeft="@id/fragmentView"
         >
         <LinearLayout
             android:orientation="vertical"
-            android:layout_marginTop="32dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             >
@@ -65,12 +38,15 @@
             <TextView
                 android:id="@+id/search_page"
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
+                android:layout_marginTop="100dp"
+                android:layout_height="40dp"
                 android:focusable="true"
                 android:text="@string/search"
-                android:drawablePadding="16dp"
                 android:gravity="center_vertical"
-                android:layout_marginStart="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:drawablePadding="12dp"
+                android:layout_marginStart="12dp"
                 android:drawableLeft="@drawable/baseline_search"
                 android:background="@drawable/menu_selector"
                 android:textColor="@color/text_selector"/>
@@ -78,12 +54,15 @@
             <TextView
                 android:id="@+id/home_page"
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="12dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:focusable="true"
                 android:text="@string/home"
-                android:drawableLeft="@drawable/baseline_home"
-                android:drawablePadding="16dp"
-                android:layout_marginStart="16dp"
+                android:drawableStart="@drawable/baseline_home"
+                android:drawablePadding="12dp"
                 android:gravity="center_vertical"
                 android:background="@drawable/menu_selector"
                 android:textColor="@color/text_selector"/>
@@ -91,25 +70,31 @@
             <TextView
                 android:id="@+id/anime_page"
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
+                android:layout_height="40dp"
                 android:focusable="true"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="12dp"
                 android:text="@string/anime"
-                android:drawablePadding="16dp"
-                android:layout_marginStart="16dp"
+                android:drawablePadding="12dp"
                 android:gravity="center_vertical"
-                android:drawableLeft="@drawable/anime_movie"
+                android:drawableStart="@drawable/anime_movie"
                 android:background="@drawable/menu_selector"
                 android:textColor="@color/text_selector"
                 />
             <TextView
                 android:id="@+id/drama_page"
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
+                android:layout_height="40dp"
                 android:focusable="true"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="12dp"
                 android:text="@string/drama"
-                android:drawableLeft="@drawable/baseline_movie"
-                android:drawablePadding="16dp"
-                android:layout_marginStart="16dp"
+                android:drawableStart="@drawable/baseline_movie"
+                android:drawablePadding="12dp"
                 android:gravity="center_vertical"
                 android:background="@drawable/menu_selector"
                 android:textColor="@color/text_selector"/>
@@ -117,11 +102,14 @@
             <TextView
                 android:id="@+id/tv_page"
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
+                android:layout_height="40dp"
                 android:focusable="true"
-                android:drawableLeft="@drawable/baseline_live_tv"
-                android:drawablePadding="16dp"
-                android:layout_marginStart="16dp"
+                android:drawableStart="@drawable/baseline_live_tv"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:drawablePadding="12dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="12dp"
                 android:gravity="center_vertical"
                 android:background="@drawable/menu_selector"
                 android:textColor="@color/text_selector"
@@ -130,11 +118,14 @@
             <TextView
                 android:id="@+id/movie_page"
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:drawableLeft="@drawable/baseline_local_movies"
+                android:layout_height="40dp"
+                android:drawableStart="@drawable/baseline_local_movies"
                 android:text="@string/movies"
-                android:drawablePadding="16dp"
-                android:layout_marginStart="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:drawablePadding="12dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="12dp"
                 android:gravity="center_vertical"
                 android:background="@drawable/menu_selector"
                 android:textColor="@color/text_selector"/>
@@ -142,13 +133,15 @@
             <TextView
                 android:id="@+id/settings_page"
                 android:layout_width="match_parent"
-                android:layout_marginTop="32dp"
-                android:drawableLeft="@drawable/baseline_settings"
-                android:layout_height="45dp"
+                android:layout_marginTop="50dp"
+                android:drawableStart="@drawable/baseline_settings"
+                android:layout_height="40dp"
                 android:gravity="center_vertical"
-                android:drawablePadding="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:drawablePadding="12dp"
+                android:layout_marginStart="12dp"
                 android:focusable="true"
-                android:layout_marginStart="16dp"
                 android:text="@string/settings"
                 android:background="@drawable/menu_selector"
                 android:textColor="@color/text_selector"
