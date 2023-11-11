@@ -4,5 +4,5 @@
         android:endColor="@android:color/transparent"
         android:centerColor="#282828"
         android:startColor="#282828"
-        android:centerY=".54"/>
+        android:centerY=".52"/>
 </shape>
