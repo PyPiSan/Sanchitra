@@ -21,6 +21,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sanchitra">
         <activity
+            android:name=".view.OnboardingView"
+            android:exported="false" />
+        <activity
             android:name=".view.SearchActivity"
             android:exported="false" />
         <activity

@@ -40,8 +40,8 @@ public class VideoMediaPlayerGlue <T extends PlayerAdapter> extends PlaybackTran
     @Override
     protected void onCreatePrimaryActions(ArrayObjectAdapter adapter) {
         super.onCreatePrimaryActions(adapter);
-        adapter.add(mFastforwardAction);
         adapter.add(mRewindAction);
+        adapter.add(mFastforwardAction);
 //        adapter.add(mRepeatAction);
 //        adapter.add(mClosedCaptioningAction);
     }

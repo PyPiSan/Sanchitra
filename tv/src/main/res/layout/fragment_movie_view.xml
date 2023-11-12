@@ -1,34 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".view.MovieView">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent=".05"
-        />
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent=".06"
-        />
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/vertical_grid_fragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="@id/start"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="45dp"
+        android:layout_marginTop="60dp"
         />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>
