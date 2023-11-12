@@ -10,6 +10,14 @@
         android:layout_height="match_parent"
         android:layout_gravity="center" />
 
+    <ProgressBar
+        android:id="@+id/spinner"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:visibility="visible"
+        />
+
     <RelativeLayout
         android:id="@+id/playback_controls_fragment"
         android:tag="@string/playback_tag"

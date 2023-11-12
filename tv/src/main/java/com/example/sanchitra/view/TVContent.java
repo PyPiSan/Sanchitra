@@ -7,6 +7,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.leanback.app.RowsSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.FocusHighlight;
@@ -17,6 +18,8 @@ import androidx.leanback.widget.OnItemViewClickedListener;
 import androidx.leanback.widget.Presenter;
 import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
+
+import com.example.sanchitra.R;
 import com.example.sanchitra.model.TVChannelListModel;
 import com.example.sanchitra.model.TVContentModel;
 import com.example.sanchitra.player.VideoPlayer;
@@ -38,9 +41,12 @@ public class TVContent extends RowsSupportFragment {
             new ListRowPresenter());
     private HeaderItem header;
 
+    private Fragment mSpinnerFragment;
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        onPreExecute();
         insertDataToCard();
         setAdapter(tvChannelAdapter);
         setupEventListeners();
@@ -72,6 +78,7 @@ public class TVContent extends RowsSupportFragment {
                         tvChannelAdapter.add(new ListRow(header, channelList));
                     }
                 }
+                onPostExecute();
 //                rootAdapter.notifyArrayItemRangeChanged(1, 20);
             }
 
@@ -104,6 +111,15 @@ public class TVContent extends RowsSupportFragment {
                 getActivity().startActivity(intent);
             }
         }
+    }
+
+    protected void onPreExecute(){
+        mSpinnerFragment = new SpinnerView();
+        getFragmentManager().beginTransaction().add(R.id.tv_content_fragment, mSpinnerFragment).commit();
+    }
+
+    protected void onPostExecute(){
+        getFragmentManager().beginTransaction().remove(mSpinnerFragment).commit();
     }
 
 }

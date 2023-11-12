@@ -10,27 +10,13 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.leanback.widget.BrowseFrameLayout;
 
 import com.example.sanchitra.R;
-import com.example.sanchitra.presenter.TopMenuAdapter;
 import com.example.sanchitra.utils.Constant;
-import com.example.sanchitra.view.AnimeView;
-import com.example.sanchitra.view.DramaView;
-import com.example.sanchitra.view.HomeView;
-import com.example.sanchitra.view.MovieView;
-import com.example.sanchitra.view.SearchView;
-import com.example.sanchitra.view.TvView;
-import com.google.android.gms.ads.MobileAds;
-import androidx.leanback.tab.LeanbackTabLayout;
-import androidx.leanback.tab.LeanbackViewPager;
-import androidx.viewpager.widget.PagerAdapter;
 
 import java.util.Objects;
 
@@ -54,6 +40,8 @@ public class MainActivity extends FragmentActivity implements View.OnKeyListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+//        Intent intent = new Intent(this, OnboardingView.class);
+//        startActivity(intent);
 //        MobileAds.initialize(this);
         // Get reference to singleton RewardedVideoAd object
         sideMenu = findViewById(R.id.side_menu);
