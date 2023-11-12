@@ -59,15 +59,6 @@ public class MainActivity extends FragmentActivity implements View.OnKeyListener
         sideMenu = findViewById(R.id.side_menu);
         fragmentContainer = findViewById(R.id.fragmentView);
 
-//        final LeanbackTabLayout leanbackTabLayout = (LeanbackTabLayout) ActivityCompat.
-//                requireViewById(this, R.id.tab_layout);
-//        leanbackTabLayout.setFocusable(true);
-//        final LeanbackViewPager leanbackViewPager = (LeanbackViewPager) ActivityCompat.
-//                requireViewById(this, R.id.pager);
-//        leanbackViewPager.setAdapter(TopMenuAdapter);
-//        leanbackTabLayout.setupWithViewPager(leanbackViewPager);
-//        fragmentContainer = findViewById(R.id.fragmentView);
-
         searchPage = findViewById(R.id.search_page);
         homePage = findViewById(R.id.home_page);
         animePage = findViewById(R.id.anime_page);
@@ -86,6 +77,7 @@ public class MainActivity extends FragmentActivity implements View.OnKeyListener
 
         lastSelectedMenu = homePage;
         lastSelectedMenu.setActivated(true);
+        homePage.requestFocus();
         changeFragment(new HomeView());
     }
 
@@ -162,7 +154,7 @@ public class MainActivity extends FragmentActivity implements View.OnKeyListener
 
     private void closeSideMenu(){
         sideMenu.requestLayout();
-        sideMenu.getLayoutParams().width = Constant.getWidthInPercent(this, 6);
+        sideMenu.getLayoutParams().width = Constant.getWidthInPercent(this, 8);
 //        animePage.setText("");
 //        homePage.setText("");
 //        dramaPage.setText("");
