@@ -3,6 +3,8 @@
     <dimen name="card_elevation">8dp</dimen>
     <dimen name="card_width">110dp</dimen>
     <dimen name="card_height">140dp</dimen>
+    <dimen name="tv_card_width">180dp</dimen>
+    <dimen name="tv_card_height">120dp</dimen>
     <dimen name="episode_card_width">130dp</dimen>
     <dimen name="episode_card_height">85dp</dimen>
 </resources>

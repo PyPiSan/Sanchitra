@@ -97,9 +97,6 @@ public class AnimeContent extends RowsSupportFragment {
 
             if (item instanceof ContentModel) {
                 ContentModel animeContentModel = (ContentModel) item;
-//                Log.d(getTag(), "Item: " + item.toString());
-//                Toast.makeText(getContext(), "Card is " + animeContentModel.getTitle(),
-//                        Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getActivity(), DetailViewActivity.class);
                 intent.putExtra("title", animeContentModel.getTitle());
                 intent.putExtra("summary", animeContentModel.getSummary());
