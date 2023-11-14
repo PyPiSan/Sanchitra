@@ -21,6 +21,7 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 
+import java.util.HashMap;
 import java.util.Objects;
 
 public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
@@ -195,12 +196,12 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
         return mContext;
     }
 
-    public void setDataSource(Uri uri) {
+    public void setDataSource(Uri uri, String type) {
         if (Objects.equals(mMediaSourceUri, uri)) {
             return;
         }
         mMediaSourceUri = uri;
-        prepareMediaForPlaying();
+        prepareMediaForPlaying(type);
     }
 
     public int getAudioStreamType() {
@@ -211,30 +212,44 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
         mAudioStreamType = audioStreamType;
     }
 
-    public MediaSource onCreateMediaSource(Uri uri) {
-        String userAgent = Util.getUserAgent(mContext, "ExoPlayerAdapter");
-        int flags = DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES
-                | DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS;
-        DefaultHlsExtractorFactory extractorFactory = new DefaultHlsExtractorFactory(flags, true);
+    public MediaSource onCreateMediaSource(Uri uri, String type) {
+        if (type.equals("tv")){
+//        New Implementation
+            DefaultHttpDataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory();
+            dataSourceFactory.setAllowCrossProtocolRedirects(true);
+            dataSourceFactory.setUserAgent("plaYtv/7.0.8 (Linux;Android 9) ExoPlayerLib/2.11.7");
+            HashMap<String, String> map = new HashMap<>();
+            map.put("Cookie", "__hdnea__=st=1699831417~exp=1699917817~acl=/*~hmac=f8cd6a63bd093885727b50987b2a240d0e12f116660288f6661cd05f3cad4c87");
+            dataSourceFactory.setDefaultRequestProperties(map);
+            dataSourceFactory.setConnectTimeoutMs(10000);
+            // Create a player instance.
+            return new HlsMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(uri));
+
+        }else {
+//            String userAgent = Util.getUserAgent(mContext, "ExoPlayerAdapter");
+            int flags = DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES
+                    | DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS;
+            DefaultHlsExtractorFactory extractorFactory = new DefaultHlsExtractorFactory(flags, true);
 
 //        New Implementation
-        DefaultHttpDataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory();
-        dataSourceFactory.setAllowCrossProtocolRedirects(true);
-        dataSourceFactory.setUserAgent("curl/7.85.0");
-        dataSourceFactory.setConnectTimeoutMs(10000);
+            DefaultHttpDataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory();
+            dataSourceFactory.setAllowCrossProtocolRedirects(true);
+            dataSourceFactory.setUserAgent("curl/7.85.0");
+            dataSourceFactory.setConnectTimeoutMs(10000);
+            // Create a player instance.
+            return new HlsMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(uri));
+        }
 
-
-        // Create a player instance.
-        return new HlsMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(uri));
     }
 
-    private void prepareMediaForPlaying() {
+    private void prepareMediaForPlaying(String type) {
         reset();
         if (mMediaSourceUri != null) {
             // Set the media source to be played.
             Log.d("Video Adapter", "url is "+mMediaSourceUri);
-            MediaSource mediaSource = onCreateMediaSource(mMediaSourceUri);
+            MediaSource mediaSource = onCreateMediaSource(mMediaSourceUri, type);
             mPlayer.prepare(mediaSource);
 
         } else {

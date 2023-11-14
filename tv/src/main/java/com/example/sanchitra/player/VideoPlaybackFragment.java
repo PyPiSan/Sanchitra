@@ -64,7 +64,8 @@ public class VideoPlaybackFragment extends VideoFragment {
 //
         if (Objects.equals(getArguments().getString("type"), "tv")){
             mMediaPlayerGlue.setTitle(getArguments().getString("title"));
-            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("1080")));
+            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse("https://jiotvmblive.cdn.jio.com/bpk-tv/Colors_HD_MOB/Fallback/Colors_HD_MOB-audio_98835_eng=98800-video=1173600.m3u8")
+            ,"tv");
             playWhenReady(mMediaPlayerGlue);
             setBackgroundType(BG_LIGHT);
 
@@ -75,12 +76,12 @@ public class VideoPlaybackFragment extends VideoFragment {
             Toast.makeText(getContext(), "Not found format is Blank, Click Retry", Toast.LENGTH_LONG).show();
         } else if (!Objects.equals(getArguments().getString("720"), "") &&
                 Objects.equals(getArguments().getString("1080"), "")) {
-            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("720")));
+            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("720")),"drama");
             playWhenReady(mMediaPlayerGlue);
             setBackgroundType(BG_LIGHT);
         }
         else{
-            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("1080")));
+            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("1080")),"drama");
             playWhenReady(mMediaPlayerGlue);
             setBackgroundType(BG_LIGHT);
             }
