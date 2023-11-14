@@ -44,6 +44,7 @@ public class VideoPlayer extends FragmentActivity {
         type = videoIntent.getStringExtra("type");
         loader = findViewById(R.id.spinner);
         if (type.equals("tv")){
+            title = videoIntent.getStringExtra("channel");
             getTvLink();
         }else{
             title = videoIntent.getStringExtra("title");
@@ -105,12 +106,14 @@ public class VideoPlayer extends FragmentActivity {
     protected void changeFragment(String[] args) {
         Bundle bundle = new Bundle();
         bundle.putString("title", title);
-        bundle.putString("subTitle", episode);
         bundle.putString("type", type);
-        bundle.putString("360", args[0]);
-        bundle.putString("480", args[1]);
-        bundle.putString("720", args[2]);
-        bundle.putString("1080", args[3]);
+        if (!type.equals("tv")) {
+            bundle.putString("subTitle", episode);
+            bundle.putString("360", args[0]);
+            bundle.putString("480", args[1]);
+            bundle.putString("720", args[2]);
+            bundle.putString("1080", args[3]);
+        }
         VideoPlaybackFragment fragment = new VideoPlaybackFragment();
         fragment.setArguments(bundle);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -120,7 +123,8 @@ public class VideoPlayer extends FragmentActivity {
     }
 
     private void getTvLink(){
-
+        loader.setVisibility(View.GONE);
+        changeFragment(new String[4]);
     }
 
 }
