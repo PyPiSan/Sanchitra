@@ -65,13 +65,14 @@ public class VideoPlaybackFragment extends VideoFragment {
 //
         if (Objects.equals(getArguments().getString("type"), "tv")){
             mMediaPlayerGlue.setTitle(getArguments().getString("title"));
-            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse("http://127.0.0.1:3500/getm3u8?id=1368&m3u8=/jiotvmblive.cdn.jio.com/bpk-tv/Colors_SD_MOB/Fallback/Colors_SD_MOB-audio_98836_eng=98800-video=1272000.m3u8")
-            ,"tv");
+            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("720")),"tv");
             playWhenReady(mMediaPlayerGlue);
             setBackgroundType(BG_LIGHT);
-
         }else{
-            mMediaPlayerGlue.setTitle(String.format("%s ( Episode %s )", getArguments().getString("title"), getArguments().getString("subTitle")));
+            mMediaPlayerGlue.setTitle(String.format("%s ( Episode %s )",
+                    getArguments().getString("title"),
+                    getArguments().getString("subTitle")));
+        }
         if (getArguments().getString("1080") == null || Objects.equals(getArguments().getString("1080"), "") &&
                 Objects.equals(getArguments().getString("720"), "")) {
             Toast.makeText(getContext(), "Not found format is Blank, Click Retry", Toast.LENGTH_LONG).show();
@@ -86,7 +87,6 @@ public class VideoPlaybackFragment extends VideoFragment {
             playWhenReady(mMediaPlayerGlue);
             setBackgroundType(BG_LIGHT);
             }
-        }
 
     }
 

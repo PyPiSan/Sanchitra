@@ -8,6 +8,7 @@ import com.example.sanchitra.model.DramaContentListModel;
 import com.example.sanchitra.model.EpisodeListModel;
 import com.example.sanchitra.model.EpisodeVideoModel;
 import com.example.sanchitra.model.TVChannelListModel;
+import com.example.sanchitra.model.TVVideoModel;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -31,6 +32,9 @@ public interface RequestModule {
 //    for TV
     @GET("sanchitra")
     Call<TVChannelListModel> getTvChannelList(@Header("x-api-key") String apikey);
+
+    @GET("watch_link/")
+    Call<TVVideoModel> getTvVideo(@Header("x-api-key") String apikey, @Query("id") String channelId);
 
 //    Common
 

@@ -18,6 +18,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.example.sanchitra.R;
 import com.example.sanchitra.api.WatchRequest;
 import com.example.sanchitra.model.EpisodeVideoModel;
+import com.example.sanchitra.model.TVVideoModel;
 import com.example.sanchitra.utils.Constant;
 import com.example.sanchitra.utils.RequestModule;
 import com.example.sanchitra.view.SpinnerView;
@@ -45,7 +46,8 @@ public class VideoPlayer extends FragmentActivity {
         loader = findViewById(R.id.spinner);
         if (type.equals("tv")){
             title = videoIntent.getStringExtra("channel");
-            getTvLink();
+            String id = videoIntent.getStringExtra("id");
+            getTvLink(id, type);
         }else{
             title = videoIntent.getStringExtra("title");
             episode = videoIntent.getStringExtra("episode");
@@ -103,28 +105,60 @@ public class VideoPlayer extends FragmentActivity {
 
     }
 
+    private void getTvLink(String id, String type) {
+        final String[] tvLink = new String[4];
+        //      fetching data
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:3500/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        RequestModule videoLink = retrofit.create(RequestModule.class);
+        Call<TVVideoModel> call = videoLink.getTvVideo(Constant.key, id);
+        call.enqueue(new Callback<TVVideoModel>() {
+            @Override
+            public void onResponse(Call<TVVideoModel> call, Response<TVVideoModel> response) {
+                boolean flag = false;
+                TVVideoModel resource = response.body();
+                if (response.code() == 200) {
+                    flag = resource.getSuccess();
+                }
+                Constant.cookies =resource.getCookies();
+//                Log.d("video", "link is"+resource.getSuccess());
+                if (flag) {
+                    tvLink[0] = resource.getValue().getLow();
+                    tvLink[1] = resource.getValue().getMedium();
+                    tvLink[2] = resource.getValue().getHigh();
+                    tvLink[3] = resource.getValue().getUltraHigh();
+                }
+                loader.setVisibility(View.GONE);
+                changeFragment(tvLink);
+            }
+
+            @Override
+            public void onFailure(Call<TVVideoModel> call, Throwable t) {
+                Log.d("Video", "TV Error 404 not found");
+            }
+        });
+
+    }
+
     protected void changeFragment(String[] args) {
         Bundle bundle = new Bundle();
         bundle.putString("title", title);
         bundle.putString("type", type);
         if (!type.equals("tv")) {
             bundle.putString("subTitle", episode);
-            bundle.putString("360", args[0]);
-            bundle.putString("480", args[1]);
-            bundle.putString("720", args[2]);
-            bundle.putString("1080", args[3]);
         }
+        bundle.putString("360", args[0]);
+        bundle.putString("480", args[1]);
+        bundle.putString("720", args[2]);
+        bundle.putString("1080", args[3]);
         VideoPlaybackFragment fragment = new VideoPlaybackFragment();
         fragment.setArguments(bundle);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.add(R.id.playback_controls_fragment, fragment);
         transaction.commit();
 
-    }
-
-    private void getTvLink(){
-        loader.setVisibility(View.GONE);
-        changeFragment(new String[4]);
     }
 
 }
