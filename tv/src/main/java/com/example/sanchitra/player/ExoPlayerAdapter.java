@@ -217,9 +217,10 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
 //        New Implementation
             DefaultHttpDataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory();
             dataSourceFactory.setAllowCrossProtocolRedirects(true);
-            dataSourceFactory.setUserAgent("plaYtv/7.0.8 (Linux;Android 9) ExoPlayerLib/2.11.7");
+//            dataSourceFactory.setUserAgent("plaYtv/7.0.8 (Linux;Android 9) ExoPlayerLib/2.11.7");
             HashMap<String, String> map = new HashMap<>();
-            map.put("Cookie", "__hdnea__=st=1699831417~exp=1699917817~acl=/*~hmac=f8cd6a63bd093885727b50987b2a240d0e12f116660288f6661cd05f3cad4c87");
+            map.put("cookie", "__hdnea__=st=1700203964~exp=1700290364~acl=/*~hmac=02f560b16ca6d07d1f600bace11b90041b6611e321925ef92707f007d5c467cd; Domain=jiotvmblive.cdn.jio.com; path=/; Expires=Sat, 18 Nov 2023 06:52:44 GMT; SameSite=None; Secure");
+            map.put("x-api-key","e7y6acFyHGqwtkBLKHx6eA");
             dataSourceFactory.setDefaultRequestProperties(map);
             dataSourceFactory.setConnectTimeoutMs(10000);
             // Create a player instance.

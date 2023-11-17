@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:paddingBottom="@dimen/lb_playback_transport_control_row_padding_bottom"
+    tools:ignore="MissingDefaultResource">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:id="@+id/controls_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:clipToPadding="false"
+            android:paddingStart="?attr/browsePaddingStart"
+            android:paddingEnd="?attr/browsePaddingEnd"
+            android:layout_marginBottom="@dimen/lb_playback_transport_control_info_margin_bottom"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/lb_playback_transport_image_height"
+                android:layout_gravity="top"
+                android:adjustViewBounds="true"
+                android:layout_marginEnd="@dimen/lb_playback_transport_image_margin_end"
+                android:scaleType="fitStart" />
+
+            <FrameLayout
+                android:id="@+id/description_dock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:clipToPadding="false"
+                android:gravity="bottom" />
+        </LinearLayout>
+<!--        <androidx.leanback.widget.ThumbsBar-->
+<!--            android:id="@+id/thumbs_row"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:visibility="visible"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="bottom"-->
+<!--            android:layout_marginBottom="@dimen/lb_playback_transport_thumbs_bottom_margin" />-->
+    </FrameLayout>
+
+    <androidx.leanback.widget.PlaybackTransportRowView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/transport_row"
+        android:orientation="vertical"
+        android:paddingStart="?attr/browsePaddingStart"
+        android:paddingEnd="?attr/browsePaddingEnd"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+        <FrameLayout
+            android:id="@+id/controls_dock"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layoutDirection="ltr"
+            android:layout_marginLeft="@dimen/lb_playback_transport_controlbar_margin_start"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <TextView
+                android:id="@+id/current_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                style="?attr/playbackControlsTimeStyle" />
+
+            <androidx.leanback.widget.SeekBar
+                android:id="@+id/playback_progress"
+                android:layout_width="770dp"
+                android:layout_height="@dimen/lb_playback_transport_progressbar_height"
+                android:focusable="true"
+                android:layout_marginLeft="12dp"
+                />
+
+            <TextView
+                android:id="@+id/total_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="12dp"
+                style="?attr/playbackControlsTimeStyle" />
+
+        </LinearLayout>
+
+        <RelativeLayout android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layoutDirection="ltr"
+            android:layout_marginLeft="@dimen/lb_playback_transport_controlbar_margin_start">
+            <FrameLayout
+                android:id="@+id/secondary_controls_dock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true" >
+            </FrameLayout>
+
+<!--            <TextView-->
+<!--                android:id="@+id/separate_time"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="@string/lb_playback_time_separator"-->
+<!--                android:layout_gravity="top"-->
+<!--                android:layout_toStartOf="@+id/total_time"-->
+<!--                android:layout_marginStart="@dimen/lb_playback_transport_time_margin"-->
+<!--                android:layout_marginTop="@dimen/lb_playback_transport_time_margin_top"-->
+<!--                style="?attr/playbackControlsTimeStyle" />-->
+
+        </RelativeLayout>
+    </androidx.leanback.widget.PlaybackTransportRowView>
+</LinearLayout>

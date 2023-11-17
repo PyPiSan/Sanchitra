@@ -52,6 +52,7 @@ public class VideoPlaybackFragment extends VideoFragment {
         ExoPlayerAdapter playerAdapter = new ExoPlayerAdapter(getActivity());
         mMediaPlayerGlue = new VideoMediaPlayerGlue<>(getActivity(), playerAdapter);
         mMediaPlayerGlue.setHost(mHost);
+        mMediaPlayerGlue.setSeekEnabled(true);
         AudioManager audioManager = (AudioManager) getActivity()
                 .getSystemService(Context.AUDIO_SERVICE);
         if (audioManager.requestAudioFocus(mOnAudioFocusChangeListener, AudioManager.STREAM_MUSIC,
@@ -64,7 +65,7 @@ public class VideoPlaybackFragment extends VideoFragment {
 //
         if (Objects.equals(getArguments().getString("type"), "tv")){
             mMediaPlayerGlue.setTitle(getArguments().getString("title"));
-            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse("https://jiotvmblive.cdn.jio.com/bpk-tv/Colors_HD_MOB/Fallback/Colors_HD_MOB-audio_98835_eng=98800-video=1173600.m3u8")
+            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse("http://127.0.0.1:3500/getm3u8?id=1368&m3u8=/jiotvmblive.cdn.jio.com/bpk-tv/Colors_SD_MOB/Fallback/Colors_SD_MOB-audio_98836_eng=98800-video=1272000.m3u8")
             ,"tv");
             playWhenReady(mMediaPlayerGlue);
             setBackgroundType(BG_LIGHT);
