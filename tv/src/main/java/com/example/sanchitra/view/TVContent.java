@@ -104,7 +104,7 @@ public class TVContent extends RowsSupportFragment {
                 TVContentModel tvContentModel = (TVContentModel) item;
                 Intent intent = new Intent(getActivity(), VideoPlayer.class);
                 intent.putExtra("channel", tvContentModel.getChannelName());
-                intent.putExtra("id", tvContentModel.getChannelId());
+                intent.putExtra("id", tvContentModel.getChannelId().toString());
                 intent.putExtra("logo", tvContentModel.getLogoUrl());
                 intent.putExtra("language", tvContentModel.getChannelLanguageId());
                 intent.putExtra("type", "tv");

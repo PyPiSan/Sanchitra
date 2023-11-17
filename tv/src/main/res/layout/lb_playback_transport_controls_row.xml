@@ -42,14 +42,14 @@
                 android:clipToPadding="false"
                 android:gravity="bottom" />
         </LinearLayout>
-<!--        <androidx.leanback.widget.ThumbsBar-->
-<!--            android:id="@+id/thumbs_row"-->
-<!--            android:orientation="horizontal"-->
-<!--            android:visibility="visible"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_gravity="bottom"-->
-<!--            android:layout_marginBottom="@dimen/lb_playback_transport_thumbs_bottom_margin" />-->
+        <androidx.leanback.widget.ThumbsBar
+            android:id="@+id/thumbs_row"
+            android:orientation="horizontal"
+            android:visibility="invisible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="@dimen/lb_playback_transport_thumbs_bottom_margin" />
     </FrameLayout>
 
     <androidx.leanback.widget.PlaybackTransportRowView
@@ -82,7 +82,7 @@
 
             <androidx.leanback.widget.SeekBar
                 android:id="@+id/playback_progress"
-                android:layout_width="770dp"
+                android:layout_width="750dp"
                 android:layout_height="@dimen/lb_playback_transport_progressbar_height"
                 android:focusable="true"
                 android:layout_marginLeft="12dp"

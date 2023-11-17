@@ -9,6 +9,8 @@ import androidx.leanback.media.SurfaceHolderGlueHost;
 
 import android.util.Log;
 import android.view.SurfaceHolder;
+
+import com.example.sanchitra.utils.Constant;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
@@ -219,8 +221,8 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
             dataSourceFactory.setAllowCrossProtocolRedirects(true);
 //            dataSourceFactory.setUserAgent("plaYtv/7.0.8 (Linux;Android 9) ExoPlayerLib/2.11.7");
             HashMap<String, String> map = new HashMap<>();
-            map.put("cookie", "__hdnea__=st=1700203964~exp=1700290364~acl=/*~hmac=02f560b16ca6d07d1f600bace11b90041b6611e321925ef92707f007d5c467cd; Domain=jiotvmblive.cdn.jio.com; path=/; Expires=Sat, 18 Nov 2023 06:52:44 GMT; SameSite=None; Secure");
-            map.put("x-api-key","e7y6acFyHGqwtkBLKHx6eA");
+            map.put("cookie", Constant.cookies);
+            map.put("x-api-key", Constant.key);
             dataSourceFactory.setDefaultRequestProperties(map);
             dataSourceFactory.setConnectTimeoutMs(10000);
             // Create a player instance.
