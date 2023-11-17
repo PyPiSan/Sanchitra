@@ -107,9 +107,9 @@ public class VideoPlayer extends FragmentActivity {
 
     private void getTvLink(String id, String type) {
         final String[] tvLink = new String[4];
-        //      fetching data
+        //      fetching data http://10.0.2.2:3500/
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:3500/")
+                .baseUrl(Constant.local)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         RequestModule videoLink = retrofit.create(RequestModule.class);
