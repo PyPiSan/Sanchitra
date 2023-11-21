@@ -27,9 +27,7 @@ public class DramaView extends Fragment {
     @SuppressLint("StaticFieldLeak")
     private static ImageView titleImage;
     @SuppressLint("StaticFieldLeak")
-    private static TextView name;
-    @SuppressLint("StaticFieldLeak")
-    private static TextView summary;
+    private static TextView name, summary, releaseView, genresView;
     @SuppressLint("StaticFieldLeak")
     private static Context context;
     public DramaView() {
@@ -50,6 +48,8 @@ public class DramaView extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         titleImage = view.findViewById(R.id.main_image);
         name = view.findViewById(R.id.title);
+        releaseView= view.findViewById(R.id.released);
+        genresView = view.findViewById(R.id.genres);
         summary = view.findViewById(R.id.summary);
         context = getContext();
 
@@ -71,6 +71,7 @@ public class DramaView extends Fragment {
                         .load(contents.getImage())
                         .into(titleImage);
                 name.setText(contents.getTitle());
+                releaseView.setText(contents.getReleased());
                 summary.setText(contents.getSummary());
             }
         }
