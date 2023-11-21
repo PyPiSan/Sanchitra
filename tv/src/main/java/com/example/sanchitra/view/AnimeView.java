@@ -27,10 +27,7 @@ public class AnimeView extends Fragment {
     @SuppressLint("StaticFieldLeak")
     private static ImageView mainImage;
     @SuppressLint("StaticFieldLeak")
-    private static TextView title;
-
-    @SuppressLint("StaticFieldLeak")
-    private static TextView summary;
+    private static TextView title, summary, releaseView, genresView;
     @SuppressLint("StaticFieldLeak")
     private static Context context;
     public AnimeView() {
@@ -54,6 +51,8 @@ public class AnimeView extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mainImage = view.findViewById(R.id.main_image);
         title = view.findViewById(R.id.title);
+        releaseView= view.findViewById(R.id.released);
+        genresView = view.findViewById(R.id.genres);
         summary = view.findViewById(R.id.summary);
         context = getContext();
 
@@ -76,6 +75,7 @@ public class AnimeView extends Fragment {
                         .load(animeImage)
                         .into(mainImage);
                 title.setText(animeName);
+                releaseView.setText(animeContent.getReleased());
                 summary.setText(animeContent.getSummary());
             }
         }
