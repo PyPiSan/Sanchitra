@@ -13,6 +13,7 @@ import androidx.leanback.widget.Presenter;
 import com.bumptech.glide.Glide;
 import com.example.sanchitra.R;
 import com.example.sanchitra.model.ContentModel;
+import com.example.sanchitra.utils.CardView;
 
 public class AnimeContentPresenter extends Presenter {
 
@@ -21,35 +22,36 @@ public class AnimeContentPresenter extends Presenter {
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
         context = parent.getContext();
-        ImageCardView contentCard = new ImageCardView(context) {
-            @Override
-            public void setSelected(boolean selected) {
-                super.setSelected(selected);
-            }
-        };
-        contentCard.setFocusable(true);
-        contentCard.setFocusableInTouchMode(true);
-        contentCard.setInfoVisibility(CARD_REGION_VISIBLE_SELECTED);
-        contentCard.setCardType(CARD_TYPE_MAIN_ONLY);
-        return new ViewHolder(contentCard);
+//        ImageCardView contentCard = new ImageCardView(context) {
+//            @Override
+//            public void setSelected(boolean selected) {
+//                super.setSelected(selected);
+//            }
+//        };
+//        contentCard.setFocusable(true);
+//        contentCard.setFocusableInTouchMode(true);
+//        contentCard.setInfoVisibility(CARD_REGION_VISIBLE_SELECTED);
+//        contentCard.setCardType(CARD_TYPE_MAIN_ONLY);
+        return new ViewHolder(new CardView(context));
     }
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
-        ContentModel animeContentModel = (ContentModel) item;
-        ImageCardView contentCard = (ImageCardView) viewHolder.view;
-        contentCard.setTitleText(animeContentModel.getTitle());
-
-        if (animeContentModel.getImage() != null){
-            Resources res = contentCard.getResources();
-            int width = res.getDimensionPixelSize(R.dimen.card_width);
-            int height = res.getDimensionPixelSize(R.dimen.card_height);
-            contentCard.setMainImageDimensions(width, height);
-
-            Glide.with(contentCard.getContext())
-                    .load(animeContentModel.getImage())
-                    .into(contentCard.getMainImageView());
-        }
+        ((CardView) viewHolder.view).bind((ContentModel) item);
+//        ContentModel animeContentModel = (ContentModel) item;
+//        ImageCardView contentCard = (ImageCardView) viewHolder.view;
+//        contentCard.setTitleText(animeContentModel.getTitle());
+//
+//        if (animeContentModel.getImage() != null){
+//            Resources res = contentCard.getResources();
+//            int width = res.getDimensionPixelSize(R.dimen.card_width);
+//            int height = res.getDimensionPixelSize(R.dimen.card_height);
+//            contentCard.setMainImageDimensions(width, height);
+//
+//            Glide.with(contentCard.getContext())
+//                    .load(animeContentModel.getImage())
+//                    .into(contentCard.getMainImageView());
+//        }
 
 
     }

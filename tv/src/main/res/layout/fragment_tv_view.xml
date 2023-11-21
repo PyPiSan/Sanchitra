@@ -11,6 +11,7 @@
         android:layout_height="match_parent"
         android:layout_marginStart="45dp"
         android:layout_marginTop="60dp"
-        android:id="@+id/tv_content_fragment"/>
+        android:id="@+id/tv_content_fragment"
+        />
 
 </RelativeLayout>
