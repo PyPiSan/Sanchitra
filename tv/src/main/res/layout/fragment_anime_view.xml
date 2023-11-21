@@ -77,7 +77,7 @@
             <TextView
                 android:id="@+id/title"
                 android:layout_width="600dp"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="30dp"
                 android:layout_height="wrap_content"
                 android:text="@string/title"
                 android:maxLines="2"
@@ -98,6 +98,11 @@
                     android:layout_marginStart="12dp"
                     android:textColor="@color/color_white"
                     android:textSize="14sp" />
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/color_white"
+                    android:layout_marginStart="12dp"/>
                 <TextView
                     android:id="@+id/genres"
                     android:layout_width="wrap_content"
@@ -129,7 +134,7 @@
         android:id="@+id/new_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="17dp"
+        android:layout_marginStart="30dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/center"
