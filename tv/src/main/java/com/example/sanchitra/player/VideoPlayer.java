@@ -7,9 +7,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
@@ -34,6 +38,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class VideoPlayer extends FragmentActivity {
     private String title, episode,type;
     private ProgressBar loader;
+    private FrameLayout errorFragment;
+
+    private TextView reloadButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +51,8 @@ public class VideoPlayer extends FragmentActivity {
         Intent videoIntent = getIntent();
         type = videoIntent.getStringExtra("type");
         loader = findViewById(R.id.spinner);
+        errorFragment = findViewById(R.id.errorFrag);
+        reloadButton = findViewById(R.id.reload);
         if (type.equals("tv")){
             title = videoIntent.getStringExtra("channel");
             String id = videoIntent.getStringExtra("id");
@@ -53,6 +62,26 @@ public class VideoPlayer extends FragmentActivity {
             episode = videoIntent.getStringExtra("episode");
             getEpisodeLink(title,episode,type);
         }
+        reloadButton.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                if (i == KeyEvent.KEYCODE_DPAD_CENTER){
+                    loader.setVisibility(View.VISIBLE);
+                    errorFragment.setVisibility(View.GONE);
+                    if (type.equals("tv")){
+                        title = videoIntent.getStringExtra("channel");
+                        String id = videoIntent.getStringExtra("id");
+                        getTvLink(id, type);
+                    }else{
+                        title = videoIntent.getStringExtra("title");
+                        episode = videoIntent.getStringExtra("episode");
+                        getEpisodeLink(title,episode,type);
+                    }
+
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -92,14 +121,19 @@ public class VideoPlayer extends FragmentActivity {
                     videoLink[1] = resource.getValue().getQuality2();
                     videoLink[2] = resource.getValue().getQuality3();
                     videoLink[3] = resource.getValue().getQuality4();
+                    loader.setVisibility(View.GONE);
+                    changeFragment(videoLink);
+                }else {
+                    loader.setVisibility(View.GONE);
+                    errorFragment.setVisibility(View.VISIBLE);
                 }
-                loader.setVisibility(View.GONE);
-                changeFragment(videoLink);
             }
 
             @Override
             public void onFailure(Call<EpisodeVideoModel> call, Throwable t) {
-                Log.d("Video", "Error 404 not found");
+//                Log.d("Video", "Error 404 not found");
+                loader.setVisibility(View.GONE);
+                errorFragment.setVisibility(View.VISIBLE);
             }
         });
 
@@ -107,11 +141,12 @@ public class VideoPlayer extends FragmentActivity {
 
     private void getTvLink(String id, String type) {
         final String[] tvLink = new String[4];
-        //      fetching data http://10.0.2.2:3500/
+        //      fetching data
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constant.local)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+//        Toast.makeText(this, Constant.local, Toast.LENGTH_SHORT).show();
         RequestModule videoLink = retrofit.create(RequestModule.class);
         Call<TVVideoModel> call = videoLink.getTvVideo(Constant.key, id);
         call.enqueue(new Callback<TVVideoModel>() {
@@ -122,21 +157,27 @@ public class VideoPlayer extends FragmentActivity {
                 if (response.code() == 200) {
                     flag = resource.getSuccess();
                 }
-                Constant.cookies =resource.getCookies();
 //                Log.d("video", "link is"+resource.getSuccess());
                 if (flag) {
+                    Constant.cookies =resource.getCookies();
                     tvLink[0] = resource.getValue().getLow();
                     tvLink[1] = resource.getValue().getMedium();
                     tvLink[2] = resource.getValue().getHigh();
                     tvLink[3] = resource.getValue().getUltraHigh();
+
+                    loader.setVisibility(View.GONE);
+                    changeFragment(tvLink);
+                } else {
+                    loader.setVisibility(View.GONE);
+                    errorFragment.setVisibility(View.VISIBLE);
                 }
-                loader.setVisibility(View.GONE);
-                changeFragment(tvLink);
             }
 
             @Override
             public void onFailure(Call<TVVideoModel> call, Throwable t) {
-                Log.d("Video", "TV Error 404 not found");
+//                Log.d("Video", "TV Error 404 not found");
+                loader.setVisibility(View.GONE);
+                errorFragment.setVisibility(View.VISIBLE);
             }
         });
 

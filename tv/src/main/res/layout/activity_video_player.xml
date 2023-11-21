@@ -17,6 +17,27 @@
         android:layout_gravity="center"
         android:visibility="visible"
         />
+    <FrameLayout
+        android:id="@+id/errorFrag"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible">
+
+        <TextView
+            android:id="@+id/reload"
+            android:layout_width="150dp"
+            android:layout_height="45dp"
+            android:layout_gravity="center"
+            android:focusable="true"
+            android:drawableLeft="@drawable/replay"
+            android:text="@string/retry"
+            android:textSize="28sp"
+            android:drawablePadding="5dp"
+            android:background="@drawable/menu_selector"
+            android:textColor="@color/text_selector"
+            />
+
+    </FrameLayout>
 
     <RelativeLayout
         android:id="@+id/playback_controls_fragment"

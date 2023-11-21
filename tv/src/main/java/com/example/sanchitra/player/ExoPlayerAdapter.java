@@ -187,6 +187,7 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
             return;
         }
         mPlayer.seekTo(newPosition);
+        mPlayer.play();
     }
 
     @Override
@@ -251,7 +252,7 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
         reset();
         if (mMediaSourceUri != null) {
             // Set the media source to be played.
-            Log.d("Video Adapter", "url is "+mMediaSourceUri);
+//            Log.d("Video Adapter", "url is "+mMediaSourceUri);
             MediaSource mediaSource = onCreateMediaSource(mMediaSourceUri, type);
             mPlayer.prepare(mediaSource);
 
