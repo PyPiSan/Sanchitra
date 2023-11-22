@@ -18,7 +18,7 @@ public class Constant {
     public final static String animeUrl = "https://anime.pypisan.com/v1/anime/";
     public final static String tvUrl = "https://drama.pypisan.com/v1/tv/";
 
-    public final static  String local = "https://tv.pypisan.com/";
+    public final static  String local = "https://tv.pypisan.com/v1/tv/";
 
     public static int getWidthInPercent(Context context, int percent){
         int width = context.getResources().getDisplayMetrics().widthPixels;

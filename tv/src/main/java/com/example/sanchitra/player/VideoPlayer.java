@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import com.example.sanchitra.R;
+import com.example.sanchitra.api.TVRequest;
 import com.example.sanchitra.api.WatchRequest;
 import com.example.sanchitra.model.EpisodeVideoModel;
 import com.example.sanchitra.model.TVVideoModel;
@@ -56,7 +57,7 @@ public class VideoPlayer extends FragmentActivity {
         if (type.equals("tv")){
             title = videoIntent.getStringExtra("channel");
             String id = videoIntent.getStringExtra("id");
-            getTvLink(id, type);
+            getTvLink(id,videoIntent.getStringExtra("language"), type);
         }else{
             title = videoIntent.getStringExtra("title");
             episode = videoIntent.getStringExtra("episode");
@@ -71,7 +72,7 @@ public class VideoPlayer extends FragmentActivity {
                     if (type.equals("tv")){
                         title = videoIntent.getStringExtra("channel");
                         String id = videoIntent.getStringExtra("id");
-                        getTvLink(id, type);
+                        getTvLink(id,videoIntent.getStringExtra("language"), type);
                     }else{
                         title = videoIntent.getStringExtra("title");
                         episode = videoIntent.getStringExtra("episode");
@@ -139,7 +140,7 @@ public class VideoPlayer extends FragmentActivity {
 
     }
 
-    private void getTvLink(String id, String type) {
+    private void getTvLink(String id, String lang, String type) {
         final String[] tvLink = new String[4];
         //      fetching data
         Retrofit retrofit = new Retrofit.Builder()
@@ -148,7 +149,7 @@ public class VideoPlayer extends FragmentActivity {
                 .build();
 //        Toast.makeText(this, Constant.local, Toast.LENGTH_SHORT).show();
         RequestModule videoLink = retrofit.create(RequestModule.class);
-        Call<TVVideoModel> call = videoLink.getTvVideo(Constant.key, id);
+        Call<TVVideoModel> call = videoLink.getTvVideoV2(Constant.key, new TVRequest(id,lang));
         call.enqueue(new Callback<TVVideoModel>() {
             @Override
             public void onResponse(Call<TVVideoModel> call, Response<TVVideoModel> response) {

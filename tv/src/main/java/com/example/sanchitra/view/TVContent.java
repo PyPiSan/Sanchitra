@@ -44,8 +44,6 @@ public class TVContent extends RowsSupportFragment {
 
     private Fragment mSpinnerFragment;
 
-    private ProgressBar loader;
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -80,8 +78,8 @@ public class TVContent extends RowsSupportFragment {
                         header = new HeaderItem(contentListHeader.getContentHeader());
                         tvChannelAdapter.add(new ListRow(header, channelList));
                     }
+                    onPostExecute();
                 }
-                onPostExecute();
 //                rootAdapter.notifyArrayItemRangeChanged(1, 20);
             }
 
@@ -109,7 +107,7 @@ public class TVContent extends RowsSupportFragment {
                 intent.putExtra("channel", tvContentModel.getChannelName());
                 intent.putExtra("id", tvContentModel.getChannelId().toString());
                 intent.putExtra("logo", tvContentModel.getLogoUrl());
-                intent.putExtra("language", tvContentModel.getChannelLanguageId());
+                intent.putExtra("language", tvContentModel.getChannelLanguageId().toString());
                 intent.putExtra("type", "tv");
                 getActivity().startActivity(intent);
             }
