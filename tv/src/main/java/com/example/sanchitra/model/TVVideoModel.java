@@ -29,7 +29,7 @@ public class TVVideoModel {
         public String medium;
         @SerializedName("high")
         public String high;
-        @SerializedName("ultra high")
+        @SerializedName("ultra_high")
         public String ultraHigh;
 
         public String getLow() {

@@ -1,5 +1,6 @@
 package com.example.sanchitra.utils;
 
+import com.example.sanchitra.api.TVRequest;
 import com.example.sanchitra.api.Title;
 import com.example.sanchitra.api.WatchRequest;
 import com.example.sanchitra.model.AnimeContentListModel;
@@ -35,6 +36,9 @@ public interface RequestModule {
 
     @GET("watch_link/")
     Call<TVVideoModel> getTvVideo(@Header("x-api-key") String apikey, @Query("id") String channelId);
+
+    @POST("sanchitra")
+    Call<TVVideoModel> getTvVideoV2(@Header("x-api-key") String apikey, @Body TVRequest body);
 
 //    Common
 
