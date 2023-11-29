@@ -187,9 +187,11 @@ public class VideoPlayer extends FragmentActivity {
     protected void changeFragment(String[] args) {
         Bundle bundle = new Bundle();
         bundle.putString("title", title);
-        bundle.putString("type", type);
         if (!type.equals("tv")) {
             bundle.putString("subTitle", episode);
+            bundle.putString("type", "drama");
+        }else{
+            bundle.putString("type", type);
         }
         bundle.putString("360", args[0]);
         bundle.putString("480", args[1]);

@@ -65,27 +65,27 @@ public class VideoPlaybackFragment extends VideoFragment {
 //
         if (Objects.equals(getArguments().getString("type"), "tv")){
             mMediaPlayerGlue.setTitle(getArguments().getString("title"));
-            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("720")),"tv");
-            playWhenReady(mMediaPlayerGlue);
-            setBackgroundType(BG_LIGHT);
+//            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("720")),"tv");
+//            playWhenReady(mMediaPlayerGlue);
+//            setBackgroundType(BG_LIGHT);
         }else {
             mMediaPlayerGlue.setTitle(String.format("%s ( Episode %s )",
                     getArguments().getString("title"),
                     getArguments().getString("subTitle")));
+        }
             if (getArguments().getString("1080") == null || Objects.equals(getArguments().getString("1080"), "") &&
                     Objects.equals(getArguments().getString("720"), "")) {
                 Toast.makeText(getContext(), "Not found format is Blank, Click Retry", Toast.LENGTH_LONG).show();
             } else if (!Objects.equals(getArguments().getString("720"), "") &&
                     Objects.equals(getArguments().getString("1080"), "")) {
-                mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("720")), "drama");
+                mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("720")), getArguments().getString("type"));
                 playWhenReady(mMediaPlayerGlue);
                 setBackgroundType(BG_LIGHT);
             } else {
-                mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("1080")), "drama");
+                mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("1080")), getArguments().getString("type"));
                 playWhenReady(mMediaPlayerGlue);
                 setBackgroundType(BG_LIGHT);
             }
-        }
 
     }
 
