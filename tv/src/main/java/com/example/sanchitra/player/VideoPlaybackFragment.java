@@ -65,9 +65,6 @@ public class VideoPlaybackFragment extends VideoFragment {
 //
         if (Objects.equals(getArguments().getString("type"), "tv")){
             mMediaPlayerGlue.setTitle(getArguments().getString("title"));
-//            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(getArguments().getString("720")),"tv");
-//            playWhenReady(mMediaPlayerGlue);
-//            setBackgroundType(BG_LIGHT);
         }else {
             mMediaPlayerGlue.setTitle(String.format("%s ( Episode %s )",
                     getArguments().getString("title"),

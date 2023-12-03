@@ -153,6 +153,7 @@ public class VideoPlayer extends FragmentActivity {
         call.enqueue(new Callback<TVVideoModel>() {
             @Override
             public void onResponse(Call<TVVideoModel> call, Response<TVVideoModel> response) {
+//                Log.d("video", "link is"+id+"  "+lang);
                 boolean flag = false;
                 TVVideoModel resource = response.body();
                 if (response.code() == 200) {
