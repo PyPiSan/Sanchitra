@@ -232,9 +232,9 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
 
         }else {
 //            String userAgent = Util.getUserAgent(mContext, "ExoPlayerAdapter");
-            int flags = DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES
-                    | DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS;
-            DefaultHlsExtractorFactory extractorFactory = new DefaultHlsExtractorFactory(flags, true);
+//            int flags = DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES
+//                    | DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS;
+//            DefaultHlsExtractorFactory extractorFactory = new DefaultHlsExtractorFactory(flags, true);
 
 //        New Implementation
             DefaultHttpDataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory();
@@ -252,7 +252,7 @@ public class ExoPlayerAdapter extends PlayerAdapter implements Player.Listener{
         reset();
         if (mMediaSourceUri != null) {
             // Set the media source to be played.
-//            mMediaSourceUri = Uri.parse("https://content-aapm1.uplynk.com/channel/3324f2467c414329b3b0cc5cd987b6be/e.m3u8?pbs=cfe4af7fef8d46e1b0d66175091679e9");
+//            mMediaSourceUri = Uri.parse("http://vs-hls-uk-live.akamaized.net/pool_902/live/uk/bbc_one_hd/bbc_one_hd.isml/bbc_one_hd-pa4%3d128000-video%3d5070016.m3u8");
 //            Log.d("Video Adapter", "url is "+mMediaSourceUri);
             MediaSource mediaSource = onCreateMediaSource(mMediaSourceUri, type);
             mPlayer.prepare(mediaSource);
