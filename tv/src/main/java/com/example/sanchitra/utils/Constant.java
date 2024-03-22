@@ -12,7 +12,7 @@ public class Constant {
     public static String MENU_MOVIE = "movie";
     public static String MENU_SETTINGS = "settings";
 
-    public final static String key ="e7y6acFyHGqwtkBLKHx6eA";
+    public final static String key =null;
     public static String cookies = null;
     public final static String dramaUrl = "https://drama.pypisan.com/v1/drama/";
     public final static String animeUrl = "https://anime.pypisan.com/v1/anime/";
