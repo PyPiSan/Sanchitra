@@ -4,6 +4,11 @@ plugins {
     id 'com.google.gms.google-services'
 }
 
+def versionMajor = 1
+def versionMinor = 1
+def versionPatch = 1
+def buildType="beta"
+
 android {
     namespace 'com.example.sanchitra'
     compileSdk 34
@@ -13,7 +18,12 @@ android {
         minSdk 24
         targetSdk 34
         versionCode 1
-        versionName "1.0"
+        versionCode versionMajor * 10000
+        + versionMinor * 100
+        + versionPatch
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
+        multiDexEnabled true // add this to enable multi-dex
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -21,6 +31,8 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            resValue "string", "app_version", "${defaultConfig.versionName}"
+            signingConfig signingConfigs.debug
         }
     }
     compileOptions {
@@ -42,7 +54,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.12.0'
     // Glide v4 uses this new annotation processor -- see https://bumptech.github.io/glide/doc/generatedapi.html
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
-    implementation 'com.google.android.material:material:1.10.0'
+    implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
@@ -51,11 +63,11 @@ dependencies {
 //    For Ads
     implementation platform('com.google.firebase:firebase-bom:32.1.1')
     implementation 'com.google.firebase:firebase-analytics'
-    implementation("com.google.android.gms:play-services-ads:22.2.0")
+    implementation("com.google.android.gms:play-services-ads:23.0.0")
 
 //    Exoplayer
-    implementation 'com.google.android.exoplayer:exoplayer:2.19.0'
-    implementation 'com.google.android.exoplayer:extension-leanback:2.19.0'
+    implementation 'com.google.android.exoplayer:exoplayer:2.19.1'
+    implementation 'com.google.android.exoplayer:extension-leanback:2.19.1'
 
 //    for Pallet
     implementation("androidx.palette:palette:1.0.0")
