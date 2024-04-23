@@ -7,10 +7,13 @@ public class UserInit {
     final String os;
     final String version;
 
-    public UserInit(String uid, String origin, String os, String version) {
+    final String deviceType;
+
+    public UserInit(String uid, String origin, String os, String version, String deviceType) {
         this.uid = uid;
         this.origin = origin;
         this.os = os;
         this.version = version;
+        this.deviceType = deviceType;
     }
 }
