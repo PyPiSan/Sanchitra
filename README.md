@@ -9,6 +9,10 @@ App download Link will be available soon.
 You can also download the latest release version.\
 Minimum Supported SDK is 24, tested on MI Android tv 9.
 
+Check the mobile version if you want to watch on mobile <a href='https://github.com/PyPiSan/KinAni' target="_blank">KinAni</a>.\
+Mobile App download Link
+<a href="https://github.com/PyPiSan/KinAni/releases/download/v4.11.2-stable/KinAni.apk" target="_blank"><b>Download</b></a>
+
 **Star the repository for the future updates.**
 
 ## Installation
