@@ -6,6 +6,7 @@
     android:name="com.example.sanchitra.view.OnboardingFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.OnboardingView">
+    tools:context=".view.OnboardingView"
+    >
 
 </androidx.fragment.app.FragmentContainerView>
