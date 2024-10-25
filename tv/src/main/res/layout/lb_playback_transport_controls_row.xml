@@ -98,7 +98,9 @@
 
         </LinearLayout>
 
-        <RelativeLayout android:layout_width="match_parent"
+        <RelativeLayout
+
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layoutDirection="ltr"
             android:layout_marginLeft="@dimen/lb_playback_transport_controlbar_margin_start">
