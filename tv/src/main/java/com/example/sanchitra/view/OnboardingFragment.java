@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -97,7 +98,7 @@ public class OnboardingFragment extends OnboardingSupportFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setLogoResourceId(R.raw.sanchitra_raw);
+        setLogoResourceId(R.raw.ic_banner_foreground);
         @SuppressLint("HardwareIds") String deviceUser = Settings.Secure.getString(getContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID);
         String myVersion = "Android "+ Build.VERSION.RELEASE;
@@ -120,6 +121,7 @@ public class OnboardingFragment extends OnboardingSupportFragment {
             public void onResponse(Call<UserModel> call, Response<UserModel> response) {
                 boolean flag = false;
                 UserModel resource = response.body();
+                Log.d("test", String.valueOf(response.code()));
                 if (response.code() == 200) {
                     flag = resource.getUserStatus();
                     Constant.key=resource.getApikey();
@@ -146,7 +148,7 @@ public class OnboardingFragment extends OnboardingSupportFragment {
 
             @Override
             public void onFailure(Call<UserModel> call, Throwable t) {
-                Toast.makeText(getContext(), "Failed, Try Again", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Failed, Try Again "+t, Toast.LENGTH_LONG).show();
                 new Handler().postDelayed(() -> onFinishFragment(), 5000);
                 }
 

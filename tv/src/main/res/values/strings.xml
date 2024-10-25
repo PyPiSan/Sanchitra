@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Sanchitra</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="main_image">Main Image</string>
     <string name="title">No Title Found</string>
@@ -15,4 +14,6 @@
     <string name="search">Search</string>
     <string name="content_name">name</string>
     <string name="retry">Retry</string>
+    <string name="add_to_watch_list">Add to Watch List</string>
+    <string name="play">Play</string>
 </resources>

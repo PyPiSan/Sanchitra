@@ -74,7 +74,7 @@ public class EpisodeListView extends RowsSupportFragment {
         }else{
             url = Constant.dramaUrl;
         }
-        Log.d("episodeList", "url is "+ type);
+//        Log.d("episodeList", "url is "+ type);
 //        fetching data
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(url)
@@ -87,14 +87,14 @@ public class EpisodeListView extends RowsSupportFragment {
         call.enqueue(new Callback<EpisodeListModel>() {
             @Override
             public void onResponse(Call<EpisodeListModel> call, Response<EpisodeListModel> response) {
-                Log.d("episodeList", "Response code is : " + response.code());
+//                Log.d("episodeList", "Response code is : " + response.code());
                 EpisodeListModel resources = response.body();
                 ArrayObjectAdapter episodes = new ArrayObjectAdapter(new EpisodePresenter());
                 boolean status = resources.getSuccess();
                 if (status){
                         EpisodeListModel.datum details = resources.getData();
                         int episodeNumbers = details.getEpisodes();
-                    Log.d("episodeList", "Episode number is : " + String.valueOf(details.getEpisodes()));
+//                    Log.d("episodeList", "Episode number is : " + String.valueOf(details.getEpisodes()));
                         for(int i =1;i<=episodeNumbers; i++){
                             EpisodeBody episodeBody = new EpisodeBody(details.getTitle(),
                                     String.valueOf(i), details.getImageLink());
