@@ -36,23 +36,45 @@ public class MoviePresenter extends Presenter {
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
-        Log.d("movie presenter", "presenter Created");
         ContentModel movieContentModel = (ContentModel) item;
-        String image = "https://imagecdn.me/cover/eye-of-the-storm-2023-1699063261.png";
-        Log.d("movie presenter", "onBindViewHolder for " + item.toString());
         ImageCardView contentCard = (ImageCardView) viewHolder.view;
-        if (image != null){
-            Resources res = contentCard.getResources();
-            int width = res.getDimensionPixelSize(R.dimen.card_width);
-            int height = res.getDimensionPixelSize(R.dimen.card_height);
-            contentCard.setMainImageDimensions(width, height);
 
-            Glide.with(contentCard.getContext())
-                    .load(image)
-//                    .placeholder("No Name")
-                    .into(contentCard.getMainImageView());
+        // Assuming ContentModel has getTitle() and getImageUrl() methods
+        String title = "Default Title"; // Default value
+        if (movieContentModel != null && movieContentModel.getTitle() != null) {
+            title = movieContentModel.getTitle();
+        }
+        String imageUrl = null; // Default value
+        if (movieContentModel != null && movieContentModel.getImageUrl() != null) {
+            imageUrl = movieContentModel.getImageUrl();
         }
 
+        Log.d("MoviePresenter", "onBindViewHolder for: " + title);
+
+        // Set Title and Content Text
+        contentCard.setTitleText(title);
+        // Using title also for content text as placeholder, assuming no specific genre/year field for now
+        contentCard.setContentText(title);
+
+        // Set Card Dimensions
+        Resources res = contentCard.getResources();
+        int width = res.getDimensionPixelSize(R.dimen.card_width);
+        int height = res.getDimensionPixelSize(R.dimen.card_height);
+        contentCard.setMainImageDimensions(width, height);
+
+        // Load Image using Glide
+        if (imageUrl != null) {
+            Glide.with(contentCard.getContext())
+                    .load(imageUrl)
+                    .placeholder(R.drawable.default_background) // Optional: Add a placeholder drawable
+                    .error(R.drawable.default_background) // Optional: Add an error drawable
+                    .into(contentCard.getMainImageView());
+        } else {
+            // Optional: Set a default image if imageUrl is null
+             Glide.with(contentCard.getContext())
+                    .load(R.drawable.default_background)
+                    .into(contentCard.getMainImageView());
+        }
     }
 
     @Override

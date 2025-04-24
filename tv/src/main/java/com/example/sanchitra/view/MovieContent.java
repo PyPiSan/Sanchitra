@@ -1,7 +1,9 @@
 package com.example.sanchitra.view;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 
@@ -19,19 +21,29 @@ import androidx.leanback.widget.RowPresenter;
 import androidx.leanback.widget.VerticalGridPresenter;
 
 import com.example.sanchitra.R;
+// Assuming ContentModel exists in this package or is imported correctly
+import com.example.sanchitra.model.ContentModel;
 import com.example.sanchitra.presenter.MoviePresenter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MovieContent extends VerticalGridSupportFragment {
 
-    private static final int NUM_COLUMNS = 3;
     private static final int NUM_ITEMS = 50;
     private static final int HEIGHT = 200;
     private static final boolean TEST_ENTRANCE_TRANSITION = false;
+    // Threshold for screen width in pixels to change column count
+    private static final int WIDTH_THRESHOLD_PX = 1920;
+    private static final int COLUMNS_HIGH_RES = 5;
+    private static final int COLUMNS_LOW_RES = 4;
 
+    // Adapter now specifically holds ContentModel objects
     private static class Adapter extends ArrayObjectAdapter {
         public Adapter(MoviePresenter presenter) {
             super(presenter);
         }
+        // This method might not be necessary anymore, depending on usage
         public void callNotifyChanged() {
             super.notifyChanged();
         }
@@ -61,16 +73,39 @@ public class MovieContent extends VerticalGridSupportFragment {
     }
 
     private void loadData() {
-        for (int i = 0; i < NUM_ITEMS; i++) {
-            Log.d("movie", "Adding data to presenter "+i);
-            movieAdapter.add(Integer.toString(i));
+        // TODO: Replace this with actual data fetching logic (e.g., from ViewModel/Repository)
+        // Example: viewModel.getMovies().observe(getViewLifecycleOwner(), movies -> { ... });
 
+        // Create dummy data for demonstration
+        List<ContentModel> dummyMovies = new ArrayList<>();
+        for (int i = 0; i < NUM_ITEMS; i++) {
+            // Assuming ContentModel has a constructor or setters for title/poster
+            // We don't have the definition, so creating a basic object.
+            // The presenter seems to use a fixed image URL currently.
+            ContentModel movie = new ContentModel();
+            // movie.setTitle("Movie " + i); // Example if setTitle exists
+            // movie.setPosterUrl("some_url_" + i); // Example if setPosterUrl exists
+            dummyMovies.add(movie);
         }
+
+        // Add the dummy movie data to the adapter
+        for (ContentModel movie : dummyMovies) {
+            movieAdapter.add(movie);
+        }
+        // Notify the adapter that the data has changed (if needed, ArrayObjectAdapter might handle this)
+        // movieAdapter.notifyChanged(); // Or callNotifyChanged() if that specific method is required
     }
 
     private void setupFragment() {
+        // Get screen width
+        DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
+        int screenWidthPx = displayMetrics.widthPixels;
+
+        // Determine number of columns based on screen width
+        int numColumns = (screenWidthPx > WIDTH_THRESHOLD_PX) ? COLUMNS_HIGH_RES : COLUMNS_LOW_RES;
+
         VerticalGridPresenter gridPresenter = new VerticalGridPresenter();
-        gridPresenter.setNumberOfColumns(NUM_COLUMNS);
+        gridPresenter.setNumberOfColumns(numColumns);
         setGridPresenter(gridPresenter);
         movieAdapter = new Adapter(new MoviePresenter());
         setAdapter(movieAdapter);
