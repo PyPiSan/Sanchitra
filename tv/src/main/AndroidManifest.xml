@@ -38,7 +38,7 @@
             android:exported="false"
             android:theme="@style/Theme.Leanback"/>
         <activity
-            android:name=".view.OnboardingView"
+            android:name=".view.OnboardingActivity"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:enabled="true"

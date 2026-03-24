@@ -24,6 +24,7 @@ import com.example.sanchitra.presenter.AnimeContentPresenter;
 import com.example.sanchitra.utils.Constant;
 import com.example.sanchitra.utils.RequestModule;
 
+import com.example.sanchitra.R;
 import java.util.List;
 
 import retrofit2.Call;
@@ -84,8 +85,34 @@ public class AnimeContent extends RowsSupportFragment {
     }
 
     private void setupEventListeners() {
-        setOnItemViewSelectedListener(new AnimeView.ItemViewSelectedListener());
+        setOnItemViewSelectedListener(new ItemViewSelectedListener());
         setOnItemViewClickedListener(new ItemViewClickedListener());
+    }
+
+    public static final class ItemViewSelectedListener implements androidx.leanback.widget.OnItemViewSelectedListener {
+        @Override
+        public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
+                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
+            if (item instanceof ContentModel) {
+                ContentModel animeContent = (ContentModel) item;
+                String animeImage = animeContent.getImage();
+                String animeName = animeContent.getTitle();
+
+                android.widget.ImageView mainImage = itemViewHolder.view.getRootView().findViewById(R.id.main_image);
+                android.widget.TextView title = itemViewHolder.view.getRootView().findViewById(R.id.title);
+                android.widget.TextView releaseView = itemViewHolder.view.getRootView().findViewById(R.id.released);
+                android.widget.TextView summary = itemViewHolder.view.getRootView().findViewById(R.id.summary);
+
+                if (mainImage != null) {
+                    com.bumptech.glide.Glide.with(itemViewHolder.view.getContext())
+                            .load(animeImage)
+                            .into(mainImage);
+                }
+                if (title != null) title.setText(animeName);
+                if (releaseView != null) releaseView.setText(animeContent.getReleased());
+                if (summary != null) summary.setText(animeContent.getSummary());
+            }
+        }
     }
 
 
