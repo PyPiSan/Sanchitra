@@ -11,13 +11,14 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import com.example.sanchitra.R;
 import com.example.sanchitra.api.TVRequest;
@@ -38,7 +39,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class VideoPlayer extends FragmentActivity {
     private String title, episode,type;
-    private ProgressBar loader;
+    private CircularProgressIndicator loader;
     private FrameLayout errorFragment;
 
     private TextView reloadButton;
@@ -107,7 +108,7 @@ public class VideoPlayer extends FragmentActivity {
                 .build();
         RequestModule episodeLink = retrofit.create(RequestModule.class);
         Call<EpisodeVideoModel> call = episodeLink.getEpisodeVideo(Constant.key,
-                new WatchRequest(title, episode_num, ""));
+                new WatchRequest(title, episode_num, null));
         call.enqueue(new Callback<EpisodeVideoModel>() {
             @Override
             public void onResponse(Call<EpisodeVideoModel> call, Response<EpisodeVideoModel> response) {
