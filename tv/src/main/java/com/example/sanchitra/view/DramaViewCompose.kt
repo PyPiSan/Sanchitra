@@ -33,8 +33,10 @@ fun DramaViewCompose(activity: FragmentActivity) {
         onDispose {
             val fragment = activity.supportFragmentManager.findFragmentByTag(fragmentTag)
             if (fragment != null) {
-                activity.supportFragmentManager.commit {
-                    remove(fragment)
+                if (!activity.supportFragmentManager.isStateSaved) {
+                    activity.supportFragmentManager.commit {
+                        remove(fragment)
+                    }
                 }
             }
         }
