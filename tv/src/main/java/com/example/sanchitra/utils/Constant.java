@@ -12,7 +12,7 @@ public class Constant {
     public static String MENU_MOVIE = "movie";
     public static String MENU_SETTINGS = "settings";
 
-    public static String key;
+    public static String key = "e7y6acFyHGqwtkBLKHx6eA";
     public static String uid;
     public static String versionName;
     public static String cookies = null;

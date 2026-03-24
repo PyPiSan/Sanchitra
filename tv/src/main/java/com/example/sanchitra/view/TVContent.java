@@ -65,8 +65,13 @@ public class TVContent extends RowsSupportFragment {
         call.enqueue(new Callback<TVChannelListModel>() {
             @Override
             public void onResponse(Call<TVChannelListModel> call, Response<TVChannelListModel> response) {
-                Log.d("TV", "API request: " + call.request().url().toString());
-                Log.d("TV", "Response code is : " + response.code());
+//                Log.d("TV", "API request: " + call.request().url().toString());
+//                Log.d("TV", "Response code is : " + response.code());
+//                Log.d("TV", "Response code is : " + Constant.key);
+                if (response.code() == 401 ){
+                    Log.d("TV", "Response code is : 401");
+                    onPostExecute();
+                }
                 TVChannelListModel resources = response.body();
                 boolean status = resources.getSuccess();
                 if (status) {
