@@ -39,9 +39,12 @@ public class CommonContentList extends RowsSupportFragment {
     private HeaderItem header;
 
 
+    private androidx.fragment.app.Fragment mSpinnerFragment;
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        onPreExecute();
 //        Insert Data
         insertDataToCard();
 //        Set Adapter
@@ -65,6 +68,7 @@ public class CommonContentList extends RowsSupportFragment {
         call.enqueue(new Callback<DramaContentListModel>() {
             @Override
             public void onResponse(Call<DramaContentListModel> call, Response<DramaContentListModel> response) {
+                Log.d("Log1", "API request: " + call.request().url().toString());
                 Log.d("Log1", "Response code is : " + response.code());
                 DramaContentListModel resources = response.body();
                 boolean status = resources.getSuccess();
@@ -78,15 +82,23 @@ public class CommonContentList extends RowsSupportFragment {
                         header = new HeaderItem(contentListHeader.getContentHeader());
                         contentAdapter.add(new ListRow(header, contents));
                     }
+                    onPostExecute();
                 }
 //                contentAdapter.notifyArrayItemRangeChanged(1, 20);
             }
 
             @Override
             public void onFailure(Call<DramaContentListModel> call, Throwable t) {
+                onPostExecute();
                 Log.d("Log4", "Response code is : 400" + t.getMessage());
             }
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        onPostExecute();
     }
 
 
@@ -137,6 +149,20 @@ public class CommonContentList extends RowsSupportFragment {
                 intent.putExtra("type", contents.getType());
                 getActivity().startActivity(intent);
             }
+        }
+    }
+
+    protected void onPreExecute(){
+        mSpinnerFragment = new SpinnerView();
+        if (getFragmentManager() != null) {
+            getFragmentManager().beginTransaction().add(android.R.id.content, mSpinnerFragment).commit();
+        }
+    }
+
+    protected void onPostExecute(){
+        if (mSpinnerFragment != null && getFragmentManager() != null && !getFragmentManager().isStateSaved()) {
+            getFragmentManager().beginTransaction().remove(mSpinnerFragment).commit();
+            mSpinnerFragment = null;
         }
     }
 }
