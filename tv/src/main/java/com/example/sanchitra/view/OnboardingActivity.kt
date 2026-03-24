@@ -51,6 +51,7 @@ import com.example.sanchitra.api.UserInit
 import com.example.sanchitra.model.UserModel
 import com.example.sanchitra.utils.Constant
 import com.example.sanchitra.utils.RequestModule
+import com.example.sanchitra.BuildConfig
 import kotlinx.coroutines.delay
 import retrofit2.Call
 import retrofit2.Callback
@@ -209,8 +210,15 @@ class OnboardingActivity : ComponentActivity() {
         } catch (ignored: PackageManager.NameNotFoundException) {
         }
 
+        val client = if (BuildConfig.DEBUG) {
+            com.example.sanchitra.utils.UnsafeOkHttpClient.getUnsafeOkHttpClient()
+        } else {
+            okhttp3.OkHttpClient()
+        }
+
         val retrofit = Retrofit.Builder()
             .baseUrl(Constant.userUrl)
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
