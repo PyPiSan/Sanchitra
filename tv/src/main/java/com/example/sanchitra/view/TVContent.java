@@ -116,7 +116,7 @@ public class TVContent extends RowsSupportFragment {
 
     protected void onPreExecute(){
         mSpinnerFragment = new SpinnerView();
-        getFragmentManager().beginTransaction().add(R.id.tv_content_fragment, mSpinnerFragment).commit();
+        getFragmentManager().beginTransaction().add(android.R.id.content, mSpinnerFragment).commit();
     }
 
     protected void onPostExecute(){
