@@ -85,7 +85,8 @@ class MainActivity : FragmentActivity() {
                                 Icon(
                                     painter = painterResource(id = iconRes),
                                     contentDescription = stringResource(id = textRes),
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(20.dp),
+                                    tint = Color.White
                                 )
                             },
                             modifier = Modifier.padding(vertical = 4.dp).onFocusChanged { state ->
