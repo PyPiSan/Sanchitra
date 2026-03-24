@@ -20,7 +20,7 @@ import androidx.tv.material3.*
 import com.example.sanchitra.api.EpisodeBody
 import com.example.sanchitra.api.Title
 import com.example.sanchitra.model.EpisodeListModel
-import com.example.sanchitra.player.VideoPlayer
+import com.example.sanchitra.player.VideoPlayerActivity
 import com.example.sanchitra.utils.Constant
 import com.example.sanchitra.utils.RequestModule
 import retrofit2.Call
@@ -49,7 +49,7 @@ class DetailViewActivity : ComponentActivity() {
                     release = release,
                     type = type,
                     onPlayClicked = { episode ->
-                        val playIntent = Intent(this, VideoPlayer::class.java).apply {
+                        val playIntent = Intent(this, VideoPlayerActivity::class.java).apply {
                             putExtra("title", title)
                             putExtra("episode", episode)
                             putExtra("type", type)

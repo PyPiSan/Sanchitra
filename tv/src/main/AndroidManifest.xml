@@ -30,7 +30,7 @@
             android:name=".view.SearchActivity"
             android:exported="false" />
         <activity
-            android:name=".player.VideoPlayer"
+            android:name=".player.VideoPlayerActivity"
             android:exported="false"
             android:theme="@style/Theme.Leanback" />
         <activity
