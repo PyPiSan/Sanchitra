@@ -53,16 +53,6 @@ class MainActivity : FragmentActivity() {
                 // Navigate to SearchActivity and keep Home as selected
                 startActivity(Intent(this@MainActivity, SearchActivity::class.java))
                 selectedMenu = Constant.MENU_HOME
-            } else if (selectedMenu != Constant.MENU_ANIME && selectedMenu != Constant.MENU_DRAMA) {
-                val fragment = when (selectedMenu) {
-                    Constant.MENU_TV -> TvView()
-                    Constant.MENU_MOVIE -> MovieView()
-                    Constant.MENU_HOME -> HomeView()
-                    else -> HomeView()
-                }
-                supportFragmentManager.commit {
-                    replace(R.id.fragmentContainerId, fragment)
-                }
             }
         }
 
@@ -152,7 +142,10 @@ class MainActivity : FragmentActivity() {
                     when (selectedMenu) {
                         Constant.MENU_ANIME -> AnimeViewCompose(this@MainActivity)
                         Constant.MENU_DRAMA -> DramaViewCompose(this@MainActivity)
-                        else -> FragmentContainer()
+                        Constant.MENU_TV -> TvViewCompose(this@MainActivity)
+                        Constant.MENU_MOVIE -> MovieViewCompose(this@MainActivity)
+                        Constant.MENU_HOME -> HomeScreen()
+                        else -> HomeScreen()
                     }
                 }
             }
@@ -180,16 +173,4 @@ class MainActivity : FragmentActivity() {
             Text(stringResource(id = textRes))
         }
     }
-}
-
-@Composable
-fun FragmentContainer() {
-    androidx.compose.ui.viewinterop.AndroidView(
-        factory = { context ->
-            FragmentContainerView(context).apply {
-                id = R.id.fragmentContainerId
-            }
-        },
-        modifier = Modifier.fillMaxSize()
-    )
 }

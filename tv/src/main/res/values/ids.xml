@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="fragmentContainerId" type="id" />
+    <item name="tvContentContainer" type="id" />
+    <item name="movieContentContainer" type="id" />
 </resources>

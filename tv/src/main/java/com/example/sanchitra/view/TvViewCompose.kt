@@ -1,33 +1,34 @@
 package com.example.sanchitra.view
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.commit
 import com.example.sanchitra.R
 
 @Composable
-fun AnimeViewCompose(activity: FragmentActivity) {
-    val fragmentTag = "AnimeContentFragment"
+fun TvViewCompose(activity: FragmentActivity) {
+    val fragmentTag = "TvContentFragment"
 
     androidx.compose.ui.viewinterop.AndroidView(
         factory = { context ->
-            val view = android.view.LayoutInflater.from(context).inflate(R.layout.fragment_anime_view, null)
-            val fragmentContainer = view.findViewById<FragmentContainerView>(R.id.new_list)
+            val fragmentContainer = FragmentContainerView(context).apply {
+                id = R.id.tvContentContainer
+            }
 
-            // Replicate original onViewCreated logic
             if (activity.supportFragmentManager.findFragmentByTag(fragmentTag) == null) {
                 activity.supportFragmentManager.commit {
-                    replace(fragmentContainer.id, AnimeContent(), fragmentTag)
+                    replace(fragmentContainer.id, TVContent(), fragmentTag)
                 }
             }
-            view
+            fragmentContainer
         },
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().padding(start = 45.dp, top = 60.dp)
     )
 
     DisposableEffect(Unit) {
