@@ -56,121 +56,60 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        NavigationDrawer(
-            drawerContent = { drawerState ->
-                Column(
-                    modifier = Modifier
-                        .background(Color(0xFF1C1C1E)) // Dark background for the side menu
-                        .fillMaxHeight()
-                        .padding(12.dp)
-                ) {
-                    val isOpen = drawerState == DrawerValue.Open
+        val tabs = listOf(
+            Triple(Constant.MENU_SEARCH, R.string.search, R.drawable.baseline_search),
+            Triple(Constant.MENU_HOME, R.string.home, R.drawable.baseline_home),
+            Triple(Constant.MENU_ANIME, R.string.anime, R.drawable.anime_movie),
+            Triple(Constant.MENU_DRAMA, R.string.drama, R.drawable.baseline_movie),
+            Triple(Constant.MENU_TV, R.string.live_tv, R.drawable.baseline_live_tv),
+            Triple(Constant.MENU_MOVIE, R.string.movies, R.drawable.baseline_local_movies),
+            Triple(Constant.MENU_SETTINGS, R.string.settings, R.drawable.baseline_settings)
+        )
 
-                    // User icon
-                    NavigationDrawerItem(
-                        selected = false,
-                        onClick = {},
-                        leadingContent = {
-                            Icon(painterResource(id = R.drawable.baseline_account), contentDescription = "Account")
-                        }
+        val selectedTabIndex = tabs.indexOfFirst { it.first == selectedMenu }.takeIf { it >= 0 } ?: 1
+
+        Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
+            TabRow(
+                selectedTabIndex = selectedTabIndex,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp, bottom = 12.dp)
+            ) {
+                tabs.forEachIndexed { index, (menuId, textRes, iconRes) ->
+                    Tab(
+                        selected = index == selectedTabIndex,
+                        onFocus = { selectedMenu = menuId },
+                        onClick = { selectedMenu = menuId }
                     ) {
-                        Text(stringResource(id = R.string.app_name))
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    NavigationMenuItem(
-                        isOpen = isOpen,
-                        iconRes = R.drawable.baseline_search,
-                        textRes = R.string.search,
-                        isSelected = selectedMenu == Constant.MENU_SEARCH,
-                        onClick = { selectedMenu = Constant.MENU_SEARCH }
-                    )
-
-                    NavigationMenuItem(
-                        isOpen = isOpen,
-                        iconRes = R.drawable.baseline_home,
-                        textRes = R.string.home,
-                        isSelected = selectedMenu == Constant.MENU_HOME,
-                        onClick = { selectedMenu = Constant.MENU_HOME }
-                    )
-
-                    NavigationMenuItem(
-                        isOpen = isOpen,
-                        iconRes = R.drawable.anime_movie,
-                        textRes = R.string.anime,
-                        isSelected = selectedMenu == Constant.MENU_ANIME,
-                        onClick = { selectedMenu = Constant.MENU_ANIME }
-                    )
-
-                    NavigationMenuItem(
-                        isOpen = isOpen,
-                        iconRes = R.drawable.baseline_movie,
-                        textRes = R.string.drama,
-                        isSelected = selectedMenu == Constant.MENU_DRAMA,
-                        onClick = { selectedMenu = Constant.MENU_DRAMA }
-                    )
-
-                    NavigationMenuItem(
-                        isOpen = isOpen,
-                        iconRes = R.drawable.baseline_live_tv,
-                        textRes = R.string.live_tv,
-                        isSelected = selectedMenu == Constant.MENU_TV,
-                        onClick = { selectedMenu = Constant.MENU_TV }
-                    )
-
-                    NavigationMenuItem(
-                        isOpen = isOpen,
-                        iconRes = R.drawable.baseline_local_movies,
-                        textRes = R.string.movies,
-                        isSelected = selectedMenu == Constant.MENU_MOVIE,
-                        onClick = { selectedMenu = Constant.MENU_MOVIE }
-                    )
-
-                    NavigationMenuItem(
-                        isOpen = isOpen,
-                        iconRes = R.drawable.baseline_settings,
-                        textRes = R.string.settings,
-                        isSelected = selectedMenu == Constant.MENU_SETTINGS,
-                        onClick = { selectedMenu = Constant.MENU_SETTINGS }
-                    )
-                }
-            }
-        ) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                Box(modifier = Modifier.weight(1f)) {
-                    when (selectedMenu) {
-                        Constant.MENU_ANIME -> AnimeViewCompose(this@MainActivity)
-                        Constant.MENU_DRAMA -> DramaViewCompose(this@MainActivity)
-                        Constant.MENU_TV -> TvViewCompose(this@MainActivity)
-                        Constant.MENU_MOVIE -> MovieViewCompose(this@MainActivity)
-                        Constant.MENU_HOME -> HomeScreen()
-                        else -> HomeScreen()
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = iconRes),
+                                contentDescription = stringResource(id = textRes),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(id = textRes),
+                                fontSize = 14.sp
+                            )
+                        }
                     }
                 }
             }
-        }
-    }
 
-    @Composable
-    fun NavigationDrawerScope.NavigationMenuItem(
-        isOpen: Boolean,
-        iconRes: Int,
-        textRes: Int,
-        isSelected: Boolean,
-        onClick: () -> Unit
-    ) {
-        NavigationDrawerItem(
-            selected = isSelected,
-            onClick = onClick,
-            leadingContent = {
-                Icon(
-                    painter = painterResource(id = iconRes),
-                    contentDescription = stringResource(id = textRes)
-                )
+            Box(modifier = Modifier.fillMaxSize()) {
+                when (selectedMenu) {
+                    Constant.MENU_ANIME -> AnimeViewCompose(this@MainActivity)
+                    Constant.MENU_DRAMA -> DramaViewCompose(this@MainActivity)
+                    Constant.MENU_TV -> TvViewCompose(this@MainActivity)
+                    Constant.MENU_MOVIE -> MovieViewCompose(this@MainActivity)
+                    Constant.MENU_HOME -> HomeScreen()
+                    else -> HomeScreen()
+                }
             }
-        ) {
-            Text(stringResource(id = textRes))
         }
     }
 }
