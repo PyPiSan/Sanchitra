@@ -57,8 +57,8 @@ class MainActivity : FragmentActivity() {
         }
 
         val tabs = listOf(
-            Triple(Constant.MENU_SEARCH, R.string.search, R.drawable.baseline_search),
             Triple(Constant.MENU_HOME, R.string.home, R.drawable.baseline_home),
+            Triple(Constant.MENU_SEARCH, R.string.search, R.drawable.baseline_search),
             Triple(Constant.MENU_ANIME, R.string.anime, R.drawable.anime_movie),
             Triple(Constant.MENU_DRAMA, R.string.drama, R.drawable.baseline_movie),
             Triple(Constant.MENU_TV, R.string.live_tv, R.drawable.baseline_live_tv),
@@ -66,41 +66,45 @@ class MainActivity : FragmentActivity() {
             Triple(Constant.MENU_SETTINGS, R.string.settings, R.drawable.baseline_settings)
         )
 
-        val selectedTabIndex = tabs.indexOfFirst { it.first == selectedMenu }.takeIf { it >= 0 } ?: 1
+        val selectedTabIndex = tabs.indexOfFirst { it.first == selectedMenu }.takeIf { it >= 0 } ?: 0
 
-        Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp, bottom = 12.dp)
-            ) {
-                tabs.forEachIndexed { index, (menuId, textRes, iconRes) ->
-                    Tab(
-                        selected = index == selectedTabIndex,
-                        onFocus = { selectedMenu = menuId },
-                        onClick = { selectedMenu = menuId }
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = iconRes),
-                                contentDescription = stringResource(id = textRes),
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(id = textRes),
-                                fontSize = 14.sp
-                            )
-                        }
+        NavigationDrawer(
+            drawerContent = { drawerValue ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .background(Color(0xFF141414))
+                        .padding(vertical = 24.dp, horizontal = 12.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    tabs.forEachIndexed { index, (menuId, textRes, iconRes) ->
+                        NavigationDrawerItem(
+                            selected = index == selectedTabIndex,
+                            onClick = { selectedMenu = menuId },
+                            leadingContent = {
+                                Icon(
+                                    painter = painterResource(id = iconRes),
+                                    contentDescription = stringResource(id = textRes),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            },
+                            modifier = Modifier.padding(vertical = 4.dp).onFocusChanged { state ->
+                                if (state.isFocused) {
+                                    selectedMenu = menuId
+                                }
+                            },
+                            content = {
+                                Text(
+                                    text = stringResource(id = textRes),
+                                    fontSize = 14.sp
+                                )
+                            }
+                        )
                     }
                 }
             }
-
-            Box(modifier = Modifier.fillMaxSize()) {
+        ) {
+            Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
                 when (selectedMenu) {
                     Constant.MENU_ANIME -> AnimeViewCompose(this@MainActivity)
                     Constant.MENU_DRAMA -> DramaViewCompose(this@MainActivity)

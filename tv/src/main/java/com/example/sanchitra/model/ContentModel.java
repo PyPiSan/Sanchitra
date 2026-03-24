@@ -52,4 +52,8 @@ public class ContentModel {
         return episodes;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
 }
