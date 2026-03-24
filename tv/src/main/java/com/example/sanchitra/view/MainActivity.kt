@@ -12,8 +12,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,8 +64,8 @@ class MainActivity : FragmentActivity() {
         }
 
         val tabs = listOf(
-            Triple(Constant.MENU_HOME, R.string.home, R.drawable.baseline_home),
             Triple(Constant.MENU_SEARCH, R.string.search, R.drawable.baseline_search),
+            Triple(Constant.MENU_HOME, R.string.home, R.drawable.baseline_home),
             Triple(Constant.MENU_ANIME, R.string.anime, R.drawable.anime_movie),
             Triple(Constant.MENU_DRAMA, R.string.drama, R.drawable.baseline_movie),
             Triple(Constant.MENU_TV, R.string.live_tv, R.drawable.baseline_live_tv),
@@ -94,16 +96,12 @@ class MainActivity : FragmentActivity() {
                                     tint = Color.White
                                 )
                             },
-                            modifier = Modifier.padding(vertical = 4.dp).onFocusChanged { state ->
-                                if (state.isFocused) {
-                                    selectedMenu = menuId
-                                }
-                            },
+                            modifier = Modifier.padding(vertical = 4.dp),
                             content = {
                                 AnimatedVisibility(
                                     visible = drawerValue == DrawerValue.Open,
-                                    enter = fadeIn(),
-                                    exit = fadeOut()
+                                    enter = expandHorizontally() + fadeIn(),
+                                    exit = shrinkHorizontally() + fadeOut()
                                 ) {
                                     Text(
                                         text = stringResource(id = textRes),
