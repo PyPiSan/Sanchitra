@@ -65,6 +65,7 @@ public class TVContent extends RowsSupportFragment {
         call.enqueue(new Callback<TVChannelListModel>() {
             @Override
             public void onResponse(Call<TVChannelListModel> call, Response<TVChannelListModel> response) {
+                Log.d("TV", "API request: " + call.request().url().toString());
                 Log.d("TV", "Response code is : " + response.code());
                 TVChannelListModel resources = response.body();
                 boolean status = resources.getSuccess();
@@ -85,9 +86,16 @@ public class TVContent extends RowsSupportFragment {
 
             @Override
             public void onFailure(Call<TVChannelListModel> call, Throwable t) {
+                onPostExecute();
                 Log.d("Log4", "Response code is : 400" + t.getMessage());
             }
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        onPostExecute();
     }
 
     private void setupEventListeners() {
@@ -120,7 +128,10 @@ public class TVContent extends RowsSupportFragment {
     }
 
     protected void onPostExecute(){
-        getFragmentManager().beginTransaction().remove(mSpinnerFragment).commit();
+        if (mSpinnerFragment != null && getFragmentManager() != null && !getFragmentManager().isStateSaved()) {
+            getFragmentManager().beginTransaction().remove(mSpinnerFragment).commit();
+            mSpinnerFragment = null;
+        }
     }
 
 }

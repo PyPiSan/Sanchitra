@@ -10,6 +10,11 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -95,10 +100,17 @@ class MainActivity : FragmentActivity() {
                                 }
                             },
                             content = {
-                                Text(
-                                    text = stringResource(id = textRes),
-                                    fontSize = 14.sp
-                                )
+                                AnimatedVisibility(
+                                    visible = drawerValue == DrawerValue.Open,
+                                    enter = fadeIn(),
+                                    exit = fadeOut()
+                                ) {
+                                    Text(
+                                        text = stringResource(id = textRes),
+                                        fontSize = 14.sp,
+                                        color = Color.White
+                                    )
+                                }
                             }
                         )
                     }
@@ -106,13 +118,20 @@ class MainActivity : FragmentActivity() {
             }
         ) {
             Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
-                when (selectedMenu) {
-                    Constant.MENU_ANIME -> AnimeViewCompose(this@MainActivity)
-                    Constant.MENU_DRAMA -> DramaViewCompose(this@MainActivity)
-                    Constant.MENU_TV -> TvViewCompose(this@MainActivity)
-                    Constant.MENU_MOVIE -> MovieViewCompose(this@MainActivity)
-                    Constant.MENU_HOME -> HomeScreen()
-                    else -> HomeScreen()
+                AnimatedContent(
+                    targetState = selectedMenu,
+                    transitionSpec = {
+                        fadeIn() togetherWith fadeOut()
+                    }
+                ) { targetMenu ->
+                    when (targetMenu) {
+                        Constant.MENU_ANIME -> AnimeViewCompose(this@MainActivity)
+                        Constant.MENU_DRAMA -> DramaViewCompose(this@MainActivity)
+                        Constant.MENU_TV -> TvViewCompose(this@MainActivity)
+                        Constant.MENU_MOVIE -> MovieViewCompose(this@MainActivity)
+                        Constant.MENU_HOME -> HomeScreen()
+                        else -> HomeScreen()
+                    }
                 }
             }
         }

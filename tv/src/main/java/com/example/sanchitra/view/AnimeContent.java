@@ -39,9 +39,12 @@ public class AnimeContent extends RowsSupportFragment {
             new ListRowPresenter(FocusHighlight.ZOOM_FACTOR_MEDIUM));
     private HeaderItem header;
 
+    private androidx.fragment.app.Fragment mSpinnerFragment;
+
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        onPreExecute();
         insertDataToCard();
         setAdapter(rootAnimeAdapter);
         setupEventListeners();
@@ -60,6 +63,7 @@ public class AnimeContent extends RowsSupportFragment {
         call.enqueue(new Callback<AnimeContentListModel>() {
             @Override
             public void onResponse(Call<AnimeContentListModel> call, Response<AnimeContentListModel> response) {
+                Log.d("Log1", "API request: " + call.request().url().toString());
                 Log.d("Log1", "Response code is : " + response.code());
                 AnimeContentListModel resources = response.body();
                 boolean status = resources.getSuccess();
@@ -73,15 +77,23 @@ public class AnimeContent extends RowsSupportFragment {
                         header = new HeaderItem(contentListHeader.getContentHeader());
                         rootAnimeAdapter.add(new ListRow(header, animeList));
                     }
+                    onPostExecute();
                 }
 //                rootAdapter.notifyArrayItemRangeChanged(1, 20);
             }
 
             @Override
             public void onFailure(Call<AnimeContentListModel> call, Throwable t) {
+                onPostExecute();
                 Log.d("Log4", "Response code is : 400" + t.getMessage());
             }
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        onPostExecute();
     }
 
     private void setupEventListeners() {
@@ -134,4 +146,19 @@ public class AnimeContent extends RowsSupportFragment {
             }
         }
     }
+
+    protected void onPreExecute(){
+        mSpinnerFragment = new SpinnerView();
+        if (getFragmentManager() != null) {
+            getFragmentManager().beginTransaction().add(android.R.id.content, mSpinnerFragment).commit();
+        }
+    }
+
+    protected void onPostExecute(){
+        if (mSpinnerFragment != null && getFragmentManager() != null && !getFragmentManager().isStateSaved()) {
+            getFragmentManager().beginTransaction().remove(mSpinnerFragment).commit();
+            mSpinnerFragment = null;
+        }
+    }
+
 }
