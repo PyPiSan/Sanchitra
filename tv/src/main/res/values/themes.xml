@@ -6,4 +6,7 @@
     <item name="android:windowAllowEnterTransitionOverlap">true</item>
     </style>
 
+    <style name="Theme.MaterialSpinner" parent="Theme.MaterialComponents.DayNight">
+    </style>
+
 </resources>

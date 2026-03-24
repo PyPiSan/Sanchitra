@@ -1,6 +1,7 @@
 package com.example.sanchitra.view;
 
 import android.os.Bundle;
+import android.content.Context;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +10,10 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.fragment.app.Fragment;
 
+import com.example.sanchitra.R;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 public class SpinnerView extends Fragment {
@@ -20,7 +23,8 @@ public class SpinnerView extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        CircularProgressIndicator progressBar = new CircularProgressIndicator(container.getContext());
+        Context context = new ContextThemeWrapper(container.getContext(), R.style.Theme_MaterialSpinner);
+        CircularProgressIndicator progressBar = new CircularProgressIndicator(context);
         progressBar.setIndeterminate(true);
         if (container instanceof FrameLayout) {
             FrameLayout.LayoutParams layoutParams =
