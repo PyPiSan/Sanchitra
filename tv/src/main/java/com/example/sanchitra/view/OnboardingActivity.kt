@@ -98,7 +98,7 @@ class OnboardingActivity : ComponentActivity() {
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(id = R.mipmap.ic_banner),
+                        painter = painterResource(id = R.mipmap.ic_banner_foreground),
                         contentDescription = "App Logo",
                         modifier = Modifier.size(300.dp),
                         contentScale = ContentScale.Fit
