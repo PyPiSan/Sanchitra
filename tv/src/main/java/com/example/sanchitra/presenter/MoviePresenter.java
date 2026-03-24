@@ -37,7 +37,7 @@ public class MoviePresenter extends Presenter {
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
         Log.d("movie presenter", "presenter Created");
-        ContentModel movieContentModel = (ContentModel) item;
+        String movieContentModel = (String) item;
         String image = "https://imagecdn.me/cover/eye-of-the-storm-2023-1699063261.png";
         Log.d("movie presenter", "onBindViewHolder for " + item.toString());
         ImageCardView contentCard = (ImageCardView) viewHolder.view;

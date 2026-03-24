@@ -6,20 +6,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.progressindicator.CircularProgressIndicator;
+
 public class SpinnerView extends Fragment {
     private static final String TAG = SpinnerView.class.getSimpleName();
-    private static final int SPINNER_WIDTH = 100;
-    private static final int SPINNER_HEIGHT = 100;
+    private static final int SPINNER_WIDTH = ViewGroup.LayoutParams.WRAP_CONTENT;
+    private static final int SPINNER_HEIGHT = ViewGroup.LayoutParams.WRAP_CONTENT;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        ProgressBar progressBar = new ProgressBar(container.getContext());
+        CircularProgressIndicator progressBar = new CircularProgressIndicator(container.getContext());
+        progressBar.setIndeterminate(true);
         if (container instanceof FrameLayout) {
             FrameLayout.LayoutParams layoutParams =
                     new FrameLayout.LayoutParams(SPINNER_WIDTH, SPINNER_HEIGHT, Gravity.CENTER);
