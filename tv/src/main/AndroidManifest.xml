@@ -17,7 +17,7 @@
         android:allowBackup="true"
         android:name=".SanchitraApp"
         android:banner="@raw/ic_banner_foreground"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@raw/sanchitra_raw"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Sanchitra"
@@ -31,7 +31,7 @@
         <activity
             android:name=".OnboardingActivity"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@raw/sanchitra_raw"
             android:enabled="true"
             android:theme="@style/Theme.App.Starting">
             <intent-filter>
