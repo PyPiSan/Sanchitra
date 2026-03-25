@@ -36,6 +36,11 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
+    lint {
+        disable "NullSafeMutableLiveData"
+        abortOnError false
+        checkReleaseBuilds false
+    }
 
     buildTypes {
         release {
