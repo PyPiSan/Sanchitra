@@ -1,4 +1,5 @@
 package com.example.sanchitra.presentation.screens.videoPlayer.components
+
 import PreviousButton
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
@@ -17,8 +18,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesomeMotion
 import androidx.compose.material.icons.filled.ClosedCaption
+import androidx.compose.material.icons.filled.Forward10
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -30,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.example.sanchitra.data.entities.MovieDetails
@@ -78,40 +80,41 @@ fun VideoPlayerControls(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                if (!isLive){
-                PreviousButton(
-                    player = player,
-                    onShowControls = onShowControls
-                )
-                NextButton(
-                    player = player,
-                    onShowControls = onShowControls
-                )
-                RepeatButton(
-                    player = player,
-                    onShowControls = onShowControls,
-                )}
-                VideoPlayerControlsIcon(
-                    icon = Icons.Default.AutoAwesomeMotion,
-                    isPlaying = isPlaying,
-                    contentDescription =
-                    StringConstants.Composable.VideoPlayerControlPlaylistButton,
-                    onShowControls = onShowControls
-                )
-
+                if (!isLive) {
+                    PreviousButton(
+                        player = player,
+                        onShowControls = onShowControls
+                    )
+                    NextButton(
+                        player = player,
+                        onShowControls = onShowControls
+                    )
+                    RepeatButton(
+                        player = player,
+                        onShowControls = onShowControls,
+                    )
+                }
+//                VideoPlayerControlsIcon(
+//                    icon = Icons.Default.AutoAwesomeMotion,
+//                    isPlaying = isPlaying,
+//                    contentDescription =
+//                    StringConstants.Composable.VideoPlayerControlPlaylistButton,
+//                    onShowControls = onShowControls
+//                )
+//
                 VideoPlayerControlsIcon(
                     icon = Icons.Default.ClosedCaption,
                     isPlaying = isPlaying,
                     contentDescription =
-                    StringConstants.Composable.VideoPlayerControlClosedCaptionsButton,
+                        StringConstants.Composable.VideoPlayerControlClosedCaptionsButton,
                     onShowControls = onShowControls
                 )
-
+//
                 VideoPlayerControlsIcon(
                     icon = Icons.Default.Settings,
                     isPlaying = isPlaying,
                     contentDescription =
-                    StringConstants.Composable.VideoPlayerControlSettingsButton,
+                        StringConstants.Composable.VideoPlayerControlSettingsButton,
                     onShowControls = onShowAudioSettings
                 )
             }
@@ -135,6 +138,7 @@ fun VideoPlayerControls(
 @Composable
 fun VideoPlayerControlsVLC(
     isPlaying: Boolean,
+    focusRequester: FocusRequester,
     movieDetails: MovieDetails,
     isLive: Boolean,
     currentTime: Long,
@@ -144,7 +148,6 @@ fun VideoPlayerControlsVLC(
     onSeekBack: () -> Unit,
 ) {
     VideoPlayerMainFrame(
-
         // 🎬 TITLE AREA
         mediaTitle = {
             Column {
@@ -159,39 +162,71 @@ fun VideoPlayerControlsVLC(
                     tertiaryText = movieDetails.director,
                     type = VideoPlayerMediaTitleType.DEFAULT
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                VideoPlayerControlsIcon(
+                    icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    isPlaying = isPlaying,
+                    onClick = onPlayPause,
+                    contentDescription =
+                        StringConstants.Composable.VideoPlayerControlClosedCaptionsButton,
+                    onShowControls = {}
+                )
             }
         },
 
-        // 🎮 ACTION BUTTONS
+        // 🎮 ACTION BUTTONS (Centered Row)
         mediaActions = {
             Row(
-                modifier = Modifier.padding(bottom = 16.dp),
+                modifier = Modifier.padding(bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
                 if (!isLive) {
-                    // ⏪ Seek Back
-                    Button(onClick = onSeekBack) {
-                        Text("⏪ 10s")
-                    }
+//                    PreviousButton(
+//                        player = {},
+//                        onShowControls = {}
+//                    )
+//                    NextButton(
+//                        player = player,
+//                        onShowControls = {}
+//                    )
+//                    RepeatButton(
+//                        player = player,
+//                        onShowControls = {},
+//                    )}
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // ▶️ Play/Pause
-                    Button(onClick = onPlayPause) {
-                        Text(if (isPlaying) "Pause" else "Play")
-                    }
-
-                    // ⏩ Seek Forward
-                    Button(onClick = onSeekForward) {
-                        Text("10s ⏩")
-                    }
-                } else {
-                    // Live stream → only play/pause
-                    Button(onClick = onPlayPause) {
-                        Text(if (isPlaying) "Pause" else "Play")
-                    }
+                    VideoPlayerControlsIcon(
+                        icon = Icons.Default.Forward10,
+                        isPlaying = isPlaying,
+                        contentDescription =
+                            StringConstants.Composable.VideoPlayerControlClosedCaptionsButton,
+                        onShowControls = {}
+                    )
                 }
             }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            VideoPlayerControlsIcon(
+                icon = Icons.Default.ClosedCaption,
+                isPlaying = isPlaying,
+                contentDescription =
+                    StringConstants.Composable.VideoPlayerControlClosedCaptionsButton,
+                onShowControls = {}
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            VideoPlayerControlsIcon(
+                icon = Icons.Default.Settings,
+                isPlaying = isPlaying,
+                contentDescription =
+                    StringConstants.Composable.VideoPlayerControlSettingsButton,
+                onShowControls = {}
+            )
+
         },
 
         // 🎯 SEEKER
@@ -205,10 +240,10 @@ fun VideoPlayerControlsVLC(
                 )
             }
         },
-
         more = null,
     )
 }
+
 
 @Composable
 fun VLCSeeker(
@@ -222,7 +257,7 @@ fun VLCSeeker(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp)
+            .padding(vertical = 8.dp)
     ) {
 
         // Progress bar
@@ -267,7 +302,11 @@ fun formatTime(ms: Long): String {
 
 @Composable
 fun LiveAlwaysFullSeeker() {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+    ) {
         // The track (The background of the seekbar)
         Box(
             modifier = Modifier
@@ -319,6 +358,7 @@ fun AudioTrackSelectorVLC(
         }
     }
 }
+
 @Composable
 fun LiveBadge() {
     Row(
