@@ -1,4 +1,5 @@
 package com.example.sanchitra.presentation.screens.videoPlayer.components
+import android.util.Log
 import com.example.sanchitra.presentation.theme.SanchitraTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -37,7 +38,12 @@ fun VideoPlayerOverlay(
 ) {
     LaunchedEffect(isControlsVisible) {
         if (isControlsVisible) {
-            focusRequester.requestFocus()
+            try {
+                kotlinx.coroutines.android.awaitFrame()
+                focusRequester.requestFocus()
+            } catch (e: Exception) {
+                Log.e("Focus", "Focus request failed", e)
+            }
         }
     }
 

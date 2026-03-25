@@ -86,6 +86,7 @@ fun VideoPlayerScreenContent(
 
     // 🎯 PLAY STREAM
     LaunchedEffect(movieDetails) {
+
         mediaPlayer.attachViews(videoLayout, null, false, false)
 
         val media = Media(
@@ -155,9 +156,11 @@ fun VideoPlayerScreenContent(
                     onSeekForward = {
                         mediaPlayer.time += 10_000
                     },
+                    focusRequester = focusRequester,
                     onSeekBack = {
                         mediaPlayer.time -= 10_000
                     }
+
                 )
             }
         )
@@ -172,13 +175,13 @@ private fun Modifier.dPadEventsVLC(
 ): Modifier = this.handleDPadKeyEvents(
     onLeft = {
         if (!videoPlayerState.isControlsVisible) {
-            player.time = player.time - 10_000
+            player.time -= 10_000
             pulseState.setType(VideoPlayerPulse.Type.BACK)
         }
     },
     onRight = {
         if (!videoPlayerState.isControlsVisible) {
-            player.time = player.time + 10_000
+            player.time += 10_000
             pulseState.setType(VideoPlayerPulse.Type.FORWARD)
         }
     },

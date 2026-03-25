@@ -42,6 +42,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sanchitra.data.entities.Movie
 import com.example.sanchitra.presentation.Screens
+import com.example.sanchitra.presentation.screens.categories.CategoriesScreen
 import com.example.sanchitra.presentation.screens.movies.MoviesScreen
 import com.example.sanchitra.presentation.screens.profile.ProfileScreen
 import com.example.sanchitra.presentation.screens.home.HomeScreen
@@ -229,12 +230,12 @@ private fun Body(
                 isTopBarVisible = isTopBarVisible
             )
         }
-//        composable(Screens.Categories()) {
-//            CategoriesScreen(
-//                onCategoryClick = openCategoryMovieList,
-//                onScroll = updateTopBarVisibility
-//            )
-//        }
+        composable(Screens.Categories()) {
+            CategoriesScreen(
+                onCategoryClick = openCategoryMovieList,
+                onScroll = updateTopBarVisibility
+            )
+        }
         composable(Screens.Movies()) {
             MoviesScreen(
                 onMovieClick = { movie -> openMovieDetailsScreen(movie.id) },
