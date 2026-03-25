@@ -1,8 +1,17 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'org.jetbrains.kotlin.plugin.compose' version '2.3.20'
+
+    // This MUST match the Kotlin version in the top-level file (2.1.0)
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.1.0'
+
     id 'com.google.gms.google-services'
+
+    // This MUST match the Kotlin version (2.1.0)
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.0'
+
+    id 'com.google.dagger.hilt.android' // Version is handled by top-level
+    id 'kotlin-kapt'
 }
 
 def versionMajor = 1
@@ -54,46 +63,146 @@ android {
 
 }
 
-dependencies {
-    def composeBom = platform('androidx.compose:compose-bom:2026.03.00')
-    implementation composeBom
-    androidTestImplementation composeBom
+//dependencies {
+//    // 1. Hilt (Updated to 2.55)
+//    implementation "com.google.dagger:hilt-android:2.55"
+//    kapt "com.google.dagger:hilt-android-compiler:2.55"
+//    implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
+//
+//    // 2. Compose BOM & Core
+//    def composeBom = platform('androidx.compose:compose-bom:2024.12.01')
+//    implementation composeBom
+//    implementation 'androidx.compose.ui:ui'
+//    implementation 'androidx.compose.material3:material3' // Recommended for TV
+//
+//    // 3. Activity and Lifecycle (Using stable versions)
+//    implementation "androidx.activity:activity-compose:1.9.3"
+//    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7"
+//
+//    // 4. TV Specific
+//    implementation "androidx.tv:tv-foundation:1.0.0-alpha11"
+//    implementation "androidx.tv:tv-material:1.0.0-rc02"
+//
+//    implementation 'androidx.compose.ui:ui'
+//    implementation 'androidx.compose.ui:ui-graphics'
+//    implementation 'androidx.compose.ui:ui-tooling-preview'
+//    debugImplementation 'androidx.compose.ui:ui-tooling'
+//
+//    implementation "androidx.activity:activity-compose:1.13.0"
+//    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0"
+//    implementation "androidx.compose.ui:ui-viewbinding"
+//    implementation "androidx.fragment:fragment-ktx:1.8.9"
+//
+//    def tvComposeVersion = "1.0.0-beta01"
+//    implementation "androidx.tv:tv-foundation:$tvComposeVersion"
+//    implementation "androidx.tv:tv-material:$tvComposeVersion"
+//
+//    implementation 'androidx.leanback:leanback:1.2.0'
+//    implementation "androidx.leanback:leanback-tab:1.1.0"
+//    implementation 'androidx.appcompat:appcompat:1.7.1'
+//    implementation 'com.github.bumptech.glide:glide:5.0.5'
+//    // Glide v4 uses this new annotation processor -- see https://bumptech.github.io/glide/doc/generatedapi.html
+//    annotationProcessor 'com.github.bumptech.glide:compiler:5.0.5'
+//    implementation 'com.google.android.material:material:1.13.0'
+//    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+//    implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
+//    implementation 'com.squareup.retrofit2:retrofit:3.0.0'
+//    implementation 'com.squareup.okhttp3:okhttp-urlconnection:5.3.2'
+//
+////    For Ads
+//    implementation platform('com.google.firebase:firebase-bom:34.11.0')
+//    implementation 'com.google.firebase:firebase-analytics'
+//    implementation("com.google.android.gms:play-services-ads:25.1.0")
+//
+////    Exoplayer
+//    implementation 'com.google.android.exoplayer:exoplayer:2.19.1'
+//    implementation 'com.google.android.exoplayer:extension-leanback:2.19.1'
+//    implementation("androidx.media3:media3-exoplayer-hls:1.9.3")
+//    implementation("androidx.compose.foundation:foundation:1.10.5")
+//    implementation("androidx.compose.ui:ui:1.10.5")
+//    implementation("org.videolan.android:libvlc-all:3.5.1")
+//
+////    for Pallet
+//    implementation("androidx.palette:palette-ktx:1.0.0")
+//
+////    for image
+//    implementation("io.coil-kt:coil-compose:2.6.0")
+//    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+//
+//    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+//    implementation("androidx.tv:tv-material:1.0.0-rc01")
+//    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
+//
+////    Splash Screen
+//    implementation "androidx.core:core-splashscreen:1.0.1"
+//
+//}
 
+dependencies {
+    // --- 1. Hilt Dependency Injection ---
+    implementation "com.google.dagger:hilt-android:2.55"
+    kapt "com.google.dagger:hilt-android-compiler:2.55"
+    implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
+
+    // --- 2. Jetpack Compose (BOM manages versions) ---
+    def composeBom = platform('androidx.compose:compose-bom:2024.12.01')
+    implementation composeBom
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.material3:material3'
+    implementation "androidx.compose.material:material-icons-extended"
+    implementation "androidx.compose.foundation:foundation"
+    implementation "androidx.compose.ui:ui-viewbinding"
     debugImplementation 'androidx.compose.ui:ui-tooling'
 
-    implementation "androidx.activity:activity-compose:1.13.0"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0"
-    implementation "androidx.compose.ui:ui-viewbinding"
-    implementation "androidx.fragment:fragment-ktx:1.8.9"
+    // --- 3. Activity, Fragment & Lifecycle (Stable Versions) ---
+    // Using 1.9.3 to avoid the AGP 8.9.1 requirement error
+    implementation "androidx.activity:activity-compose:1.9.3"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.8.7"
+    implementation "androidx.fragment:fragment-ktx:1.8.5"
+    implementation "androidx.core:core-ktx:1.15.0"
+    implementation "androidx.core:core-splashscreen:1.0.1"
 
-    def tvComposeVersion = "1.0.0-beta01"
-    implementation "androidx.tv:tv-foundation:$tvComposeVersion"
-    implementation "androidx.tv:tv-material:$tvComposeVersion"
-
+    // --- 4. TV Specific (Standardized to RC-02) ---
+    implementation "androidx.tv:tv-foundation:1.0.0-alpha11"
+    implementation "androidx.tv:tv-material:1.0.0-rc02"
     implementation 'androidx.leanback:leanback:1.2.0'
     implementation "androidx.leanback:leanback-tab:1.1.0"
-    implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'com.github.bumptech.glide:glide:5.0.5'
-    // Glide v4 uses this new annotation processor -- see https://bumptech.github.io/glide/doc/generatedapi.html
-    annotationProcessor 'com.github.bumptech.glide:compiler:5.0.5'
-    implementation 'com.google.android.material:material:1.13.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-    implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
-    implementation 'com.squareup.retrofit2:retrofit:3.0.0'
-    implementation 'com.squareup.okhttp3:okhttp-urlconnection:5.3.2'
 
-//    For Ads
-    implementation platform('com.google.firebase:firebase-bom:34.11.0')
-    implementation 'com.google.firebase:firebase-analytics'
-    implementation("com.google.android.gms:play-services-ads:25.1.0")
+    // --- 5. Networking & Serialization ---
+    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
+    implementation 'com.squareup.okhttp3:okhttp-urlconnection:4.12.0'
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
 
-//    Exoplayer
+    // --- 6. Media & Video Players ---
+    def media3_version = "1.6.0"
+    implementation "androidx.media3:media3-exoplayer:$media3_version"
+    implementation "androidx.media3:media3-ui:$media3_version"
+    implementation "androidx.media3:media3-ui-compose:$media3_version" // This contains the state classes
+    implementation "androidx.media3:media3-common:$media3_version"
+
+    // Legacy ExoPlayer (If your code specifically requires 2.19)
     implementation 'com.google.android.exoplayer:exoplayer:2.19.1'
     implementation 'com.google.android.exoplayer:extension-leanback:2.19.1'
+    implementation "org.videolan.android:libvlc-all:3.5.1"
 
-//    for Pallet
-    implementation("androidx.palette:palette-ktx:1.0.0")
+    // --- 7. Image Loading & UI Utilities ---
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation 'com.github.bumptech.glide:glide:5.0.5'
+    annotationProcessor 'com.github.bumptech.glide:compiler:5.0.5'
+    implementation "androidx.palette:palette-ktx:1.0.0"
+
+    // --- 8. Firebase, Ads & Google Services ---
+    implementation platform('com.google.firebase:firebase-bom:34.11.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation "com.google.android.gms:play-services-ads:23.6.0"
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+
+    // --- 9. Machine Learning / Edge ---
+    implementation 'com.google.ai.edge.litert:litert-metadata:1.4.2'
 }

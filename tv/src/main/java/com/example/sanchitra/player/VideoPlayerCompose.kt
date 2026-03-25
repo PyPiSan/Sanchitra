@@ -3,25 +3,19 @@ package com.example.sanchitra.player
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
-import android.view.View
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,8 +23,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.tv.material3.*
 import com.example.sanchitra.api.TVRequest
 import com.example.sanchitra.api.WatchRequest
-import com.example.sanchitra.model.EpisodeVideoModel
-import com.example.sanchitra.model.TVVideoModel
+import com.example.sanchitra.data.models.EpisodeVideoModel
+import com.example.sanchitra.data.models.TVVideoModel
 import com.example.sanchitra.utils.Constant
 import com.example.sanchitra.utils.RequestModule
 import com.google.android.exoplayer2.ExoPlayer
@@ -47,7 +41,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import androidx.compose.ui.res.painterResource
 import com.example.sanchitra.R
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.appcompat.view.ContextThemeWrapper
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -127,17 +120,19 @@ fun VideoPlayerScreen(
         isLoading = true
         hasError = false
         if (type == "tv") {
+            Log.d("channelId", channelId)
             val retrofit = Retrofit.Builder()
                 .baseUrl(Constant.local)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
 
             val requestModule = retrofit.create(RequestModule::class.java)
-            val call = requestModule.getTvVideoV2(Constant.key, TVRequest(channelId, language))
+            val call = requestModule.getTvVideoV2("e7y6acFyHGqwtkBLKHx6eA", TVRequest(channelId, language))
 
             call.enqueue(object : Callback<TVVideoModel> {
                 override fun onResponse(call: Call<TVVideoModel>, response: Response<TVVideoModel>) {
                     val resource = response.body()
+                    Log.d("tv", resource.toString())
                     if (response.isSuccessful && resource?.success == true) {
                         Constant.cookies = resource.cookies
                         videoLinks = arrayOf(
@@ -186,8 +181,15 @@ fun VideoPlayerScreen(
                 }
 
                 override fun onFailure(call: Call<EpisodeVideoModel>, t: Throwable) {
+                    Log.d("error", t.message.toString())
                     isLoading = false
                     hasError = true
+                    videoLinks = arrayOf(
+                         "http://116.90.120.151:8000/play/a0gp/index.m3u8",
+                         "http://116.90.120.151:8000/play/a0gp/index.m3u8",
+                        "http://116.90.120.151:8000/play/a0gp/index.m3u8",
+                        "http://116.90.120.151:8000/play/a0gp/index.m3u8"
+                    )
                 }
             })
         }
@@ -204,7 +206,7 @@ fun VideoPlayerScreen(
                 val dataSourceFactory = DefaultHttpDataSource.Factory().apply {
                     setAllowCrossProtocolRedirects(true)
                     setConnectTimeoutMs(10000)
-                    if (type == "tv") {
+                    if (type != "tv") {
                         val map = hashMapOf(
                             "cookie" to (Constant.cookies ?: ""),
                             "x-api-key" to Constant.key

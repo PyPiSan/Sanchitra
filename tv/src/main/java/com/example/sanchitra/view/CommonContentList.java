@@ -16,9 +16,9 @@ import androidx.leanback.widget.RowPresenter;
 
 import android.util.Log;
 import android.view.View;
-import com.example.sanchitra.model.DramaContentListModel;
-import com.example.sanchitra.model.ContentModel;
-import com.example.sanchitra.presenter.CommonContentPresenter;
+import com.example.sanchitra.data.models.DramaContentListModel;
+import com.example.sanchitra.data.models.ContentModel;
+import com.example.sanchitra.presentation.CommonContentPresenter;
 import com.example.sanchitra.utils.Constant;
 import com.example.sanchitra.utils.RequestModule;
 

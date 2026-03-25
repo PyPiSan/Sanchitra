@@ -1,0 +1,201 @@
+package com.example.sanchitra.presentation.screens.videoPlayer
+import android.net.Uri
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.sanchitra.data.entities.MovieDetails
+import com.example.sanchitra.presentation.common.Error
+import com.example.sanchitra.presentation.common.Loading
+import com.example.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerControlsVLC
+import com.example.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerOverlay
+import com.example.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerPulse
+import com.example.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerPulseState
+import com.example.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerState
+import com.example.sanchitra.presentation.screens.videoPlayer.components.rememberVideoPlayerPulseState
+import com.example.sanchitra.presentation.screens.videoPlayer.components.rememberVideoPlayerState
+import com.example.sanchitra.utils.handleDPadKeyEvents
+import org.videolan.libvlc.LibVLC
+import org.videolan.libvlc.Media
+import org.videolan.libvlc.MediaPlayer
+import org.videolan.libvlc.util.VLCVideoLayout
+
+object VideoPlayerScreen {
+    const val MovieIdBundleKey = "movieId"
+}
+
+@Composable
+fun VideoPlayerScreen(
+    onBackPressed: () -> Unit,
+    videoPlayerScreenViewModel: VideoPlayerScreenViewModel = hiltViewModel()
+) {
+    val uiState by videoPlayerScreenViewModel.uiState.collectAsStateWithLifecycle()
+
+    when (val s = uiState) {
+        is VideoPlayerScreenUiState.Loading -> {
+            Loading(modifier = Modifier.fillMaxSize())
+        }
+
+        is VideoPlayerScreenUiState.Error -> {
+            Error(modifier = Modifier.fillMaxSize())
+        }
+
+        is VideoPlayerScreenUiState.Done -> {
+            VideoPlayerScreenContent(
+                movieDetails = s.movieDetails,
+                onBackPressed = onBackPressed
+            )
+        }
+    }
+}
+
+@Composable
+fun VideoPlayerScreenContent(
+    movieDetails: MovieDetails,
+    onBackPressed: () -> Unit
+) {
+    val context = LocalContext.current
+
+    val videoPlayerState = rememberVideoPlayerState(hideSeconds = 4)
+    val pulseState = rememberVideoPlayerPulseState()
+    var showAudioDialog by remember { mutableStateOf(false) }
+
+    // 🔥 VLC INIT
+    val libVLC = remember {
+        LibVLC(context, arrayListOf(
+            "--network-caching=1500",
+            "--live-caching=1500",
+            "--vout=android-display",
+            "--no-drop-late-frames",
+            "--no-skip-frames",
+            "--clock-jitter=0",
+            "--clock-synchro=0"
+        ))
+    }
+
+    val mediaPlayer = remember { MediaPlayer(libVLC) }
+    val videoLayout = remember { VLCVideoLayout(context) }
+
+    // 🎯 PLAY STREAM
+    LaunchedEffect(movieDetails) {
+        mediaPlayer.attachViews(videoLayout, null, false, false)
+
+        val media = Media(
+            libVLC,
+            Uri.parse("http://116.90.120.151:8000/play/a0gp/index.m3u8")
+        )
+
+        media.setHWDecoderEnabled(true, false)
+
+        media.addOption(":network-caching=1500")
+        media.addOption(":clock-jitter=0")
+        media.addOption(":clock-synchro=0")
+        media.addOption(":audio-desync=0")
+        media.addOption(":network-caching=1500") // increase a bit
+
+        mediaPlayer.media = media
+        media.release()
+
+        mediaPlayer.play()
+    }
+
+    // 🔥 CLEANUP
+    DisposableEffect(Unit) {
+        onDispose {
+            mediaPlayer.stop()
+            mediaPlayer.detachViews()
+            mediaPlayer.release()
+            libVLC.release()
+        }
+    }
+
+    BackHandler(onBack = onBackPressed)
+
+    Box(
+        Modifier
+            .dPadEventsVLC(mediaPlayer, videoPlayerState, pulseState)
+            .focusable()
+    ) {
+
+        // 🎯 VIDEO VIEW
+        AndroidView(
+            factory = { videoLayout },
+            modifier = Modifier.fillMaxSize()
+        )
+
+        val focusRequester = remember { FocusRequester() }
+
+        VideoPlayerOverlay(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            focusRequester = focusRequester,
+            isPlaying = mediaPlayer.isPlaying,
+            isControlsVisible = videoPlayerState.isControlsVisible,
+            centerButton = { VideoPlayerPulse(pulseState) },
+            subtitles = {},
+            showControls = videoPlayerState::showControls,
+            controls = {
+                VideoPlayerControlsVLC(
+                    isPlaying = mediaPlayer.isPlaying,
+                    movieDetails = movieDetails,
+                    isLive = true,
+                    currentTime = mediaPlayer.time,
+                    duration = mediaPlayer.length,
+                    onPlayPause = {
+                        if (mediaPlayer.isPlaying) mediaPlayer.pause()
+                        else mediaPlayer.play()
+                    },
+                    onSeekForward = {
+                        mediaPlayer.time += 10_000
+                    },
+                    onSeekBack = {
+                        mediaPlayer.time -= 10_000
+                    }
+                )
+            }
+        )
+    }
+}
+
+// 🎮 REMOTE CONTROL SUPPORT
+private fun Modifier.dPadEventsVLC(
+    player: MediaPlayer,
+    videoPlayerState: VideoPlayerState,
+    pulseState: VideoPlayerPulseState
+): Modifier = this.handleDPadKeyEvents(
+    onLeft = {
+        if (!videoPlayerState.isControlsVisible) {
+            player.time = player.time - 10_000
+            pulseState.setType(VideoPlayerPulse.Type.BACK)
+        }
+    },
+    onRight = {
+        if (!videoPlayerState.isControlsVisible) {
+            player.time = player.time + 10_000
+            pulseState.setType(VideoPlayerPulse.Type.FORWARD)
+        }
+    },
+    onUp = { videoPlayerState.showControls() },
+    onDown = { videoPlayerState.showControls() },
+    onEnter = {
+        if (player.isPlaying) player.pause() else player.play()
+        videoPlayerState.showControls()
+    }
+)
+
+fun getVlcAudioTracks(player: org.videolan.libvlc.MediaPlayer): List<Pair<Int, String>> {
+    return player.audioTracks?.map {
+        Pair(it.id, it.name ?: "Track ${it.id}")
+    } ?: emptyList()
+}
+
+fun setAudioTrack(player: org.videolan.libvlc.MediaPlayer, trackId: Int) {
+    player.audioTrack = trackId
+}

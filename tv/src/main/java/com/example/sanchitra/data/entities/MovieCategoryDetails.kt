@@ -1,0 +1,7 @@
+package com.example.sanchitra.data.entities
+
+data class MovieCategoryDetails(
+    val id: String,
+    val name: String,
+    val movies: MovieList,
+)

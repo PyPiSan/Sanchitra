@@ -20,7 +20,7 @@ public class Constant {
     public final static String animeUrl = "https://anime.pypisan.com/v1/anime/";
     public final static String tvUrl = "https://drama.pypisan.com/v1/tv/";
 
-    public final static  String local = "https://tv.pypisan.com/v1/tv/";
+    public final static  String local = "http://localhost:5002/v1/tv/";
     public static String userUrl = "https://anime.pypisan.com/v1/";
     public static boolean loggedInStatus;
     public static Integer logo;

@@ -1,16 +1,11 @@
 package com.example.sanchitra.view;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.leanback.app.VerticalGridSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
-import androidx.leanback.widget.FocusHighlight;
-import androidx.leanback.widget.ListRowPresenter;
 import androidx.leanback.widget.OnItemViewClickedListener;
 import androidx.leanback.widget.OnItemViewSelectedListener;
 import androidx.leanback.widget.Presenter;
@@ -18,8 +13,7 @@ import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
 import androidx.leanback.widget.VerticalGridPresenter;
 
-import com.example.sanchitra.R;
-import com.example.sanchitra.presenter.MoviePresenter;
+import com.example.sanchitra.presentation.MoviePresenter;
 
 public class MovieContent extends VerticalGridSupportFragment {
 

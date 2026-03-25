@@ -6,7 +6,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.sanchitra.R;
-import com.example.sanchitra.model.ContentModel;
+import com.example.sanchitra.data.models.ContentModel;
 
 public class CardView extends BindableCardView<ContentModel> {
 
