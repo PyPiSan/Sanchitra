@@ -13,13 +13,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.*
 import com.example.sanchitra.api.EpisodeBody
 import com.example.sanchitra.api.Title
-import com.example.sanchitra.model.EpisodeListModel
+import com.example.sanchitra.data.models.EpisodeListModel
 import com.example.sanchitra.player.VideoPlayerActivity
 import com.example.sanchitra.utils.Constant
 import com.example.sanchitra.utils.RequestModule

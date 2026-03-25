@@ -1,12 +1,18 @@
 <resources>
 
-    <style name="Theme.Sanchitra" parent="@style/Theme.Leanback">
-<!--    <item name="android:colorPrimary">@color/primary</item>-->
+    <style name="Theme.Sanchitra" parent="android:Theme.Material.Light.NoActionBar">
+
     <item name="android:windowAllowReturnTransitionOverlap">true</item>
     <item name="android:windowAllowEnterTransitionOverlap">true</item>
     </style>
     <!-- <style name="Theme.Sanchitra" parent="android:Theme&lt;/resources>&#xA;" /> -->
     <style name="Theme.MaterialSpinner" parent="Theme.MaterialComponents.DayNight">
+    </style>
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/sanchitra_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_play_circle</item>
+        <item name="postSplashScreenTheme">@style/Theme.Sanchitra</item>
     </style>
 
 </resources>

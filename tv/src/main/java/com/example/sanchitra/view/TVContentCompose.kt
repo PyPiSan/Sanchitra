@@ -15,11 +15,10 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Card
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Text
-import com.example.sanchitra.model.TVChannelListModel.datum
+import com.example.sanchitra.data.models.TVChannelListModel.datum
 import androidx.compose.foundation.lazy.items
 import androidx.fragment.app.FragmentActivity
-import com.example.sanchitra.model.TVChannelListModel
-import com.example.sanchitra.model.TVContentModel
+import com.example.sanchitra.data.models.TVChannelListModel
 import com.example.sanchitra.player.VideoPlayerActivity
 import com.example.sanchitra.utils.Constant
 import com.example.sanchitra.utils.RequestModule
@@ -30,7 +29,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.appcompat.view.ContextThemeWrapper
 import com.example.sanchitra.R
@@ -53,7 +51,7 @@ fun TVContentCompose(activity: FragmentActivity) {
             .build()
 
         val tvChannelRequest = retrofit.create(RequestModule::class.java)
-        val call = tvChannelRequest.getTvChannelList(Constant.key)
+        val call = tvChannelRequest.getTvChannelList("e7y6acFyHGqwtkBLKHx6eA")
 
         call.enqueue(object : Callback<TVChannelListModel> {
             override fun onResponse(call: Call<TVChannelListModel>, response: Response<TVChannelListModel>) {

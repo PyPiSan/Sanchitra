@@ -18,9 +18,9 @@ import androidx.leanback.widget.RowPresenter;
 import android.util.Log;
 import android.view.View;
 
-import com.example.sanchitra.model.AnimeContentListModel;
-import com.example.sanchitra.model.ContentModel;
-import com.example.sanchitra.presenter.AnimeContentPresenter;
+import com.example.sanchitra.data.models.AnimeContentListModel;
+import com.example.sanchitra.data.models.ContentModel;
+import com.example.sanchitra.presentation.AnimeContentPresenter;
 import com.example.sanchitra.utils.Constant;
 import com.example.sanchitra.utils.RequestModule;
 

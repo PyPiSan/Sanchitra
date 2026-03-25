@@ -1,0 +1,40 @@
+package com.example.sanchitra.data.models;
+
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
+
+public class DramaContentListModel {
+
+    @SerializedName("results")
+    private List<DramaContentListModel.datum> results;
+
+    @SerializedName("success")
+    private Boolean success;
+
+    public List<datum> getData() {
+        return results;
+    }
+
+    public Boolean getSuccess() {
+        return success;
+    }
+
+    public class datum {
+
+        @SerializedName("content_header")
+        private String contentHeader;
+
+        @SerializedName("content_list")
+        private List<ContentModel> contentList;
+
+
+        public String getContentHeader() {
+            return contentHeader;
+        }
+
+        public List<ContentModel> getContentList() {
+            return contentList;
+        }
+    }
+}

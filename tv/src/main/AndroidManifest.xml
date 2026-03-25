@@ -15,7 +15,8 @@
 
     <application
         android:allowBackup="true"
-        android:banner="@mipmap/ic_banner"
+        android:name=".SanchitraApp"
+        android:banner="@raw/ic_banner_foreground"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -23,29 +24,19 @@
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="tiramisu">
         <activity
-            android:name=".view.MainActivity"
+            android:name=".MainActivity"
             android:exported="false"
-            android:theme="@style/Theme.Leanback"/>
+            android:theme="@style/Theme.Sanchitra"/>
+
         <activity
-            android:name=".view.SearchActivity"
-            android:exported="false" />
-        <activity
-            android:name=".player.VideoPlayerActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Leanback" />
-        <activity
-            android:name=".view.DetailViewActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Leanback"/>
-        <activity
-            android:name=".view.OnboardingActivity"
+            android:name=".OnboardingActivity"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:enabled="true"
-            android:theme="@style/Theme.Leanback.Onboarding">
+            android:theme="@style/Theme.App.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
