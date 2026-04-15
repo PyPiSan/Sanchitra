@@ -8,7 +8,7 @@
 
     <uses-feature
         android:name="android.software.leanback"
-        android:required="true" />
+        android:required="false" />
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
@@ -16,8 +16,8 @@
     <application
         android:allowBackup="true"
         android:name=".SanchitraApp"
-        android:banner="@raw/ic_banner_foreground"
-        android:icon="@raw/sanchitra_raw"
+        android:banner="@mipmap/ic_banner"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Sanchitra"
@@ -31,7 +31,7 @@
         <activity
             android:name=".OnboardingActivity"
             android:exported="true"
-            android:icon="@raw/sanchitra_raw"
+            android:icon="@mipmap/ic_launcher"
             android:enabled="true"
             android:theme="@style/Theme.App.Starting">
             <intent-filter>
