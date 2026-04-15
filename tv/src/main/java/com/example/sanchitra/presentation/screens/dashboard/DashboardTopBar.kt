@@ -143,7 +143,7 @@ fun DashboardTopBar(
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
-            JetStreamLogo(
+            SanchitraLogo(
                 modifier = Modifier
                     .alpha(0.75f)
                     .padding(end = 8.dp),
@@ -152,8 +152,9 @@ fun DashboardTopBar(
     }
 }
 
+//Use for brand logo
 @Composable
-private fun JetStreamLogo(
+private fun SanchitraLogo(
     modifier: Modifier = Modifier
 ) {
     Row(
