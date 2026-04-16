@@ -3,6 +3,7 @@ package com.example.sanchitra
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -114,7 +115,13 @@ class OnboardingActivity : ComponentActivity() {
                     SplashScreen()
                 }
 
-                is AuthState.LoggedIn -> {
+                is AuthState.ProfileSelection -> {
+                    ProfileSelectionScreen { profile ->
+                        viewModel.onProfileSelected(profile)
+                    }
+                }
+
+                is AuthState.ProfileSelected -> {
                     LaunchedEffect(Unit) {
                         context.startActivity(Intent(context, MainActivity::class.java))
                         (context as Activity).finish()
@@ -132,6 +139,10 @@ class OnboardingActivity : ComponentActivity() {
                 is AuthState.Error -> {
                     ErrorScreen()
                 }
+
+                else -> {
+                    Log.d("APP_DEBUG", "Unknown state: $state")
+                }
             }
         }
     }
@@ -142,7 +153,7 @@ class OnboardingActivity : ComponentActivity() {
         val profiles = listOf(
             UserProfileMap("Primary", "Primary", null, R.drawable.baseline_account),
             UserProfileMap("Guest", "Guest", null, R.drawable.baseline_account),
-            UserProfileMap("Add Profile", "", null, R.drawable.baseline_account)
+            UserProfileMap("Add Profile", "Add Profile", null, R.drawable.baseline_add)
         )
 
         val configuration = LocalConfiguration.current
@@ -155,21 +166,33 @@ class OnboardingActivity : ComponentActivity() {
         // STATE: Track which index is focused and the current progress
         var focusedIndex by remember { mutableIntStateOf(0) }
         var progress by remember { mutableFloatStateOf(1f) }
+        var focusSession by remember { mutableIntStateOf(0) }
+        var isUserSelecting by remember { mutableStateOf(false) }
 
         // TIMER LOGIC: Restarts whenever focusedIndex changes
-        LaunchedEffect(focusedIndex) {
-            progress = 1f // Reset progress to full
-            val durationMillis = 5000L // 5 seconds to auto-select
+        LaunchedEffect(focusedIndex, focusSession, isUserSelecting) {
+
+            if (isUserSelecting) return@LaunchedEffect
+
+            val session = focusSession
+
+            progress = 1f
+            val durationMillis = 5000L
             val startTime = System.currentTimeMillis()
 
             while (progress > 0f) {
+
+                if (session != focusSession || isUserSelecting) return@LaunchedEffect
+
                 val elapsed = System.currentTimeMillis() - startTime
                 progress = (1f - (elapsed.toFloat() / durationMillis)).coerceAtLeast(0f)
 
                 if (progress <= 0f) {
+                    isUserSelecting = true
                     onProfileSelected(profiles[focusedIndex])
                 }
-                delay(16) // Smooth update (~60fps)
+
+                delay(16)
             }
         }
 
@@ -229,8 +252,16 @@ class OnboardingActivity : ComponentActivity() {
                             .padding(end = 60.dp)
                             .offset(x = xPos, y = yPos),
                         iconSize = iconSize,
-                        onFocusGained = { focusedIndex = index },
-                        onSelected = { onProfileSelected(profile) }
+                        onFocusGained = {
+                            if (focusedIndex != index) {
+                                focusedIndex = index
+                                focusSession++ // 🔥 cancel previous timer
+                            }
+                        },
+                        onSelected = {
+                            isUserSelecting = true // 🔥 stops timer immediately
+                            onProfileSelected(profile)
+                        }
                     )
                 }
             }
