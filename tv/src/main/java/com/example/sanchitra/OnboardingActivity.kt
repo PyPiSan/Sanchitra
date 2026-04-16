@@ -3,12 +3,9 @@ package com.example.sanchitra
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -21,10 +18,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -45,7 +40,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -65,8 +59,9 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import com.example.sanchitra.data.models.UserProfileMap
 import com.example.sanchitra.data.models.UserProfiles
-import com.example.sanchitra.data.util.generateQRCode
+import com.example.sanchitra.presentation.screens.auth.QRLoginScreen
 import com.example.sanchitra.utils.AuthState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -84,6 +79,7 @@ class OnboardingActivity : ComponentActivity() {
         // 2. Hide the Status Bar and Navigation Bar (Immersive Mode)
         val controller = WindowInsetsControllerCompat(window, window.decorView)
         controller.hide(WindowInsetsCompat.Type.systemBars())
+
         // Ensures bars don't pop back in when you touch the remote
         controller.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -126,7 +122,11 @@ class OnboardingActivity : ComponentActivity() {
                 }
 
                 is AuthState.QRLogin -> {
-                    QRLoginScreen(state.qrData)
+                    QRLoginScreen(
+                        state.qrData,
+                        state.deviceCode,
+                        backgroundUrl = "https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/%2Fsanchitra.jpg"
+                    )
                 }
 
                 is AuthState.Error -> {
@@ -138,12 +138,11 @@ class OnboardingActivity : ComponentActivity() {
 
     @OptIn(ExperimentalTvMaterial3Api::class)
     @Composable
-    fun ProfileSelectionScreen(onProfileSelected: (UserProfiles) -> Unit) {
+    fun ProfileSelectionScreen(onProfileSelected: (UserProfileMap) -> Unit) {
         val profiles = listOf(
-            UserProfiles("Primary", R.drawable.baseline_account),
-            UserProfiles("Kids", R.drawable.baseline_account),
-            UserProfiles("Guest", R.drawable.baseline_account),
-            UserProfiles("Add Profile", R.drawable.baseline_account)
+            UserProfileMap("Primary", "Primary", null, R.drawable.baseline_account),
+            UserProfileMap("Guest", "Guest", null, R.drawable.baseline_account),
+            UserProfileMap("Add Profile", "", null, R.drawable.baseline_account)
         )
 
         val configuration = LocalConfiguration.current
@@ -241,7 +240,7 @@ class OnboardingActivity : ComponentActivity() {
     @OptIn(ExperimentalTvMaterial3Api::class)
     @Composable
     fun ProfileArcItem(
-        profile: UserProfiles,
+        profile: UserProfileMap,
         isFocusedByParent: Boolean,
         timerProgress: Float,
         modifier: Modifier,
@@ -305,7 +304,7 @@ class OnboardingActivity : ComponentActivity() {
                     modifier = Modifier.size(iconSize)
                 ) {
                     Image(
-                        painter = painterResource(id = profile.iconRes),
+                        painter = painterResource(id = profile.icon),
                         contentDescription = profile.name,
                         modifier = Modifier
                             .fillMaxSize()
@@ -346,32 +345,6 @@ class OnboardingActivity : ComponentActivity() {
             )
         }
     }
-
-
-    @Composable
-    fun QRLoginScreen(qrData: String) {
-        val qrBitmap = remember(qrData) {
-            generateQRCode(qrData)
-        }
-        Log.d("API_DEBUG", "Auth State is: $qrBitmap")
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-                Text("Scan to Login", color = Color.White)
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Image(
-                    bitmap = qrBitmap.asImageBitmap(),
-                    contentDescription = "QR Code",
-                    modifier = Modifier.size(300.dp)
-                )
-            }
-        }
-    }
 }
 
 @Composable
@@ -397,6 +370,23 @@ fun ErrorScreen() {
         Text(
             text = "Connection Error. Please restart.",
             color = Color.White
+        )
+    }
+}
+
+fun UserProfiles.toUI(): UserProfileMap {
+    return if (!profile_picture.isNullOrBlank()) {
+        UserProfileMap(
+            id = id,
+            name = profile_name,
+            imageUrl = profile_picture,
+            icon = R.drawable.baseline_account
+        )
+    } else {
+        UserProfileMap(
+            id = id,
+            name = profile_name,
+            icon = R.drawable.baseline_account
         )
     }
 }
