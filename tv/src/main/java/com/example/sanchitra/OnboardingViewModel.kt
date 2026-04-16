@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sanchitra.data.models.UserProfileMap
 import com.example.sanchitra.data.repositories.AuthRepository
 import com.example.sanchitra.data.util.getToken
 import com.example.sanchitra.data.util.saveRefreshToken
@@ -18,6 +19,8 @@ import kotlinx.coroutines.launch
 class OnboardingViewModel : ViewModel() {
 
     private val repo = AuthRepository()
+    var profiles by mutableStateOf<List<UserProfileMap>>(emptyList())
+        private set
 
     var authState by mutableStateOf<AuthState>(AuthState.Loading)
         private set
@@ -28,7 +31,7 @@ class OnboardingViewModel : ViewModel() {
             val token = getToken(context)
 
             if (!token.isNullOrEmpty()) {
-                authState = AuthState.LoggedIn
+                loadProfiles(context)
                 return@launch
             }
 
@@ -58,10 +61,41 @@ class OnboardingViewModel : ViewModel() {
                 if (status?.success == true) {
                     saveToken(context, status.data.access_token)
                     saveRefreshToken(context, status.data.refresh_token)
-                    authState = AuthState.LoggedIn
+                    loadProfiles(context)
+//                    authState = AuthState.ProfileSelection
                     break
                 }
             }
         }
+    }
+
+    fun loadProfiles(context: Context) {
+        viewModelScope.launch {
+            try {
+                val result = repo.getUserDetail(context)
+
+                if (result != null) {
+                    profiles = result.profiles.map {
+                        UserProfileMap(
+                            id = it.id,
+                            name = it.profile_name,
+                            imageUrl = it.profile_picture,
+                            icon = R.drawable.baseline_account // fallback
+                        )
+                    }
+
+                    authState = AuthState.ProfileSelection
+                } else {
+                    authState = AuthState.Error
+                }
+
+            } catch (e: Exception) {
+                authState = AuthState.Error
+            }
+        }
+    }
+
+    fun onProfileSelected(profile: UserProfileMap) {
+        authState = AuthState.ProfileSelected
     }
 }
