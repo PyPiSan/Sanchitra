@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sanchitra.data.repositories.AuthRepository
 import com.example.sanchitra.data.util.getToken
+import com.example.sanchitra.data.util.saveRefreshToken
 import com.example.sanchitra.data.util.saveToken
 import com.example.sanchitra.utils.AuthState
 import kotlinx.coroutines.delay
@@ -54,8 +55,9 @@ class OnboardingViewModel : ViewModel() {
 
                 val status = repo.checkLoginStatus(deviceCode)
 
-                if (status?.status == "approved") {
-                    saveToken(context, status.access_token!!)
+                if (status?.success == true) {
+                    saveToken(context, status.data.access_token)
+                    saveRefreshToken(context, status.data.refresh_token)
                     authState = AuthState.LoggedIn
                     break
                 }
