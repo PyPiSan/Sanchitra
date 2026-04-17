@@ -35,7 +35,7 @@ class OnboardingViewModel : ViewModel() {
                 return@launch
             }
 
-            val result = repo.initDeviceLogin()
+            val result = repo.initDeviceLogin(context)
 
             if (result != null && result.success) {
                 authState = AuthState.QRLogin(
@@ -56,7 +56,7 @@ class OnboardingViewModel : ViewModel() {
             while (true) {
                 delay(3000)
 
-                val status = repo.checkLoginStatus(deviceCode)
+                val status = repo.checkLoginStatus(deviceCode, context)
 
                 if (status?.success == true) {
                     saveToken(context, status.data.access_token)
@@ -71,26 +71,45 @@ class OnboardingViewModel : ViewModel() {
 
     fun loadProfiles(context: Context) {
         viewModelScope.launch {
-            try {
-                val result = repo.getUserDetail(context)
+            val result = repo.getUserDetail(context)
 
-                if (result != null) {
-                    profiles = result.profiles.map {
-                        UserProfileMap(
-                            id = it.id,
-                            name = it.profile_name,
-                            imageUrl = it.profile_picture,
-                            icon = R.drawable.baseline_account // fallback
-                        )
-                    }
+            if (result != null) {
 
-                    authState = AuthState.ProfileSelection
+                val apiProfiles = result.profiles.map {
+                    UserProfileMap(
+                        id = it.id,
+                        name = it.profile_name,
+                        imageUrl = it.profile_picture,
+                        icon = R.drawable.baseline_account
+                    )
+                }
+
+                val extraProfiles = listOf(
+                    UserProfileMap(
+                        id = "guest",
+                        name = "Guest",
+                        imageUrl = null,
+                        icon = R.drawable.baseline_account
+                    ),
+                    UserProfileMap(
+                        id = "add",
+                        name = "Add Profile",
+                        imageUrl = null,
+                        icon = R.drawable.baseline_add
+                    )
+                )
+
+                profiles = apiProfiles + extraProfiles
+
+                authState = AuthState.ProfileSelection
+
+            } else {
+                val token = getToken(context)
+                if (token.isNullOrEmpty()) {
+                    start(context)
                 } else {
                     authState = AuthState.Error
                 }
-
-            } catch (e: Exception) {
-                authState = AuthState.Error
             }
         }
     }
