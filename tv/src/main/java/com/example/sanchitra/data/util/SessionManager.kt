@@ -16,3 +16,13 @@ fun getToken(context: Context): String? {
     val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     return prefs.getString("access_token", null)
 }
+
+fun getRefreshTokenFromPrefs(context: Context): String? {
+    val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    return prefs.getString("refresh_token", null)
+}
+
+fun clear(context: Context) {
+    saveToken(context, "")
+    saveRefreshToken(context, "")
+}

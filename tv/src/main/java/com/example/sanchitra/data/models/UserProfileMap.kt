@@ -1,5 +1,8 @@
 package com.example.sanchitra.data.models
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class UserProfileMap(
     val id: String,
     val name: String,
