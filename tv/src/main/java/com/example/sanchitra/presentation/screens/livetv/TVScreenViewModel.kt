@@ -16,44 +16,44 @@ import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class TVScreenViewModel @Inject constructor(
-    private val repository: TVRepository
+    tvRepository: TVRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<TVUiState> =
-        repository.getChannels()
+    val uiState: StateFlow<TVScreenUiState> =
+        tvRepository.getChannels()
             .map { channels ->
 //                Log.d("VM_DEBUG", "Channels received: ${channels.size}")
                 val grouped = channels
                     .filter { it.isValid() }
                     .groupBy { it.category.ifBlank { "Others" } }
 
-                TVUiState.Ready(grouped) as TVUiState   // 👈 force type
+                TVScreenUiState.Ready(grouped) as TVScreenUiState
             }
             .onStart {
-                emit(TVUiState.Loading)
+                emit(TVScreenUiState.Loading)
             }
             .catch { e ->
-                emit(TVUiState.Error(e.message ?: "Something went wrong"))
+                emit(TVScreenUiState.Error(e.message ?: "Something went wrong"))
             }
             .stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5000),
-                TVUiState.Loading
+                TVScreenUiState.Loading
             )
 
     private fun Channel.isValid(): Boolean {
         return name.isNotBlank() && streamUrl.isNotBlank()
     }
 
-    sealed interface TVUiState {
-        object Loading : TVUiState
+    sealed interface TVScreenUiState {
+        data object Loading : TVScreenUiState
 
         data class Ready(
             val categories: Map<String, List<Channel>>
-        ) : TVUiState
+        ) : TVScreenUiState
 
         data class Error(
             val message: String
-        ) : TVUiState
+        ) : TVScreenUiState
     }
 }

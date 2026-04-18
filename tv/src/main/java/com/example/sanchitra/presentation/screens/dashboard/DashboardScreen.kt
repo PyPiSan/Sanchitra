@@ -41,6 +41,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sanchitra.data.entities.Movie
+import com.example.sanchitra.data.models.Channel
 import com.example.sanchitra.presentation.Screens
 import com.example.sanchitra.presentation.screens.categories.CategoriesScreen
 import com.example.sanchitra.presentation.screens.movies.MoviesScreen
@@ -68,6 +69,7 @@ fun DashboardScreen(
     openCategoryMovieList: (categoryId: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
     openVideoPlayer: (Movie) -> Unit,
+    openTVPlayer: (Channel) -> Unit,
     isComingBackFromDifferentScreen: Boolean,
     resetIsComingBackFromDifferentScreen: () -> Unit,
     onBackPressed: () -> Unit
@@ -175,6 +177,7 @@ fun DashboardScreen(
             openCategoryMovieList = openCategoryMovieList,
             openMovieDetailsScreen = openMovieDetailsScreen,
             openVideoPlayer = openVideoPlayer,
+            openTVPlayer = openTVPlayer,
             updateTopBarVisibility = { isTopBarVisible = it },
             isTopBarVisible = isTopBarVisible,
             navController = navController,
@@ -208,6 +211,7 @@ private fun Body(
     openCategoryMovieList: (categoryId: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
     openVideoPlayer: (Movie) -> Unit,
+    openTVPlayer: (Channel) -> Unit,
     updateTopBarVisibility: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
@@ -246,9 +250,7 @@ private fun Body(
         }
         composable(Screens.TV()) {
             TVScreen(
-                onChannelClick = { channel ->
-                    openMovieDetailsScreen(channel.streamUrl)
-                },
+                goToVideoPlayer = openTVPlayer,
                 onScroll = updateTopBarVisibility,
                 isTopBarVisible = isTopBarVisible
             )

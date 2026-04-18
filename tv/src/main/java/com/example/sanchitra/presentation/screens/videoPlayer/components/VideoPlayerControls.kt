@@ -36,6 +36,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.example.sanchitra.data.entities.MovieDetails
+import com.example.sanchitra.data.models.Channel
 import com.example.sanchitra.data.util.StringConstants
 import com.example.sanchitra.presentation.screens.videoPlayer.getVlcAudioTracks
 import com.example.sanchitra.presentation.screens.videoPlayer.setAudioTrack
@@ -45,7 +46,7 @@ import org.videolan.libvlc.MediaPlayer
 @Composable
 fun VideoPlayerControls(
     player: Player,
-    movieDetails: MovieDetails,
+    channel: Channel,
     focusRequester: FocusRequester,
     onShowControls: () -> Unit = {},
     onShowAudioSettings: () -> Unit = {}, // Callback for the audio dialog
@@ -67,9 +68,9 @@ fun VideoPlayerControls(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
                 VideoPlayerMediaTitle(
-                    title = movieDetails.name,
-                    secondaryText = movieDetails.releaseDate,
-                    tertiaryText = movieDetails.director,
+                    title = channel.name,
+                    secondaryText = channel.name,
+                    tertiaryText = "",
                     type = VideoPlayerMediaTitleType.DEFAULT
                 )
             }

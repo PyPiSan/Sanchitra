@@ -27,6 +27,7 @@ import org.videolan.libvlc.LibVLC
 import org.videolan.libvlc.Media
 import org.videolan.libvlc.MediaPlayer
 import org.videolan.libvlc.util.VLCVideoLayout
+import androidx.core.net.toUri
 
 object VideoPlayerScreen {
     const val MovieIdBundleKey = "movieId"
@@ -91,7 +92,7 @@ fun VideoPlayerScreenContent(
 
         val media = Media(
             libVLC,
-            Uri.parse("http://116.90.120.151:8000/play/a0gp/index.m3u8")
+            "http://116.90.120.151:8000/play/a0gp/index.m3u8".toUri()
         )
 
         media.setHWDecoderEnabled(true, false)
@@ -108,7 +109,7 @@ fun VideoPlayerScreenContent(
         mediaPlayer.play()
     }
 
-    // 🔥 CLEANUP
+    // CLEANUP
     DisposableEffect(Unit) {
         onDispose {
             mediaPlayer.stop()
@@ -126,7 +127,7 @@ fun VideoPlayerScreenContent(
             .focusable()
     ) {
 
-        // 🎯 VIDEO VIEW
+        // VIDEO VIEW
         AndroidView(
             factory = { videoLayout },
             modifier = Modifier.fillMaxSize()
@@ -167,7 +168,7 @@ fun VideoPlayerScreenContent(
     }
 }
 
-// 🎮 REMOTE CONTROL SUPPORT
+// REMOTE CONTROL SUPPORT
 private fun Modifier.dPadEventsVLC(
     player: MediaPlayer,
     videoPlayerState: VideoPlayerState,

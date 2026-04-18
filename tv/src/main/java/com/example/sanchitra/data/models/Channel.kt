@@ -1,7 +1,10 @@
 package com.example.sanchitra.data.models
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Channel(
     val id: Int,
     val name: String,
@@ -20,4 +23,4 @@ data class Channel(
 
     @SerializedName("license_key")
     val licenseKey: String?
-)
+): Parcelable

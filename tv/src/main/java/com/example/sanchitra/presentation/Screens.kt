@@ -18,11 +18,13 @@ enum class Screens(
     Categories(isTabItem = true),
     Movies(isTabItem = true),
     TV(isTabItem = true),
-    Favourites(isTabItem = true),
+    Favourites(isTabItem = false),
     Search(isTabItem = true, tabIcon = Icons.Default.Search),
     CategoryMovieList(listOf(CategoryMovieListScreen.CategoryIdBundleKey)),
-    MovieDetails(listOf(MovieDetailsScreen.MovieIdBundleKey)),
+    MovieDetails(listOf(MovieDetailsScreen.MovieIdBundleKey)
+    ),
     Dashboard,
+    TVPlayer(isTabItem = false),
     VideoPlayer(listOf(VideoPlayerScreen.MovieIdBundleKey)
     );
 
