@@ -3,6 +3,7 @@ package com.example.sanchitra.utils
 import com.example.sanchitra.api.RefreshTokenRequest
 import com.example.sanchitra.data.models.DeviceLoginInitResponse
 import com.example.sanchitra.data.models.LoginStatusResponse
+import com.example.sanchitra.data.models.TVResponse
 import com.example.sanchitra.data.models.UserDetailResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -26,8 +27,14 @@ interface APIService {
         @Header("No-Auth") noAuth: Boolean = true
     ): Response<LoginStatusResponse>
 
+//    get user details
     @GET("users/detail/")
     suspend fun getUserDetail(): Response<UserDetailResponse>
+
+//    get TV channel list
+    @GET("home/tv/hd/")
+    suspend fun getLiveTV(): Response<TVResponse>
+
 }
 
 interface RefreshAPIService{

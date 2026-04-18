@@ -17,7 +17,7 @@ enum class Screens(
     Home(isTabItem = true),
     Categories(isTabItem = true),
     Movies(isTabItem = true),
-    Shows(isTabItem = true),
+    TV(isTabItem = true),
     Favourites(isTabItem = true),
     Search(isTabItem = true, tabIcon = Icons.Default.Search),
     CategoryMovieList(listOf(CategoryMovieListScreen.CategoryIdBundleKey)),
