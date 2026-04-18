@@ -46,6 +46,7 @@ import com.example.sanchitra.presentation.screens.categories.CategoriesScreen
 import com.example.sanchitra.presentation.screens.movies.MoviesScreen
 import com.example.sanchitra.presentation.screens.profile.ProfileScreen
 import com.example.sanchitra.presentation.screens.home.HomeScreen
+import com.example.sanchitra.presentation.screens.livetv.TVScreen
 import com.example.sanchitra.utils.Padding
 
 val ParentPadding = PaddingValues(vertical = 16.dp, horizontal = 58.dp)
@@ -243,13 +244,15 @@ private fun Body(
                 isTopBarVisible = isTopBarVisible
             )
         }
-//        composable(Screens.Shows()) {
-//            ShowsScreen(
-//                onTVShowClick = { movie -> openMovieDetailsScreen(movie.id) },
-//                onScroll = updateTopBarVisibility,
-//                isTopBarVisible = isTopBarVisible
-//            )
-//        }
+        composable(Screens.TV()) {
+            TVScreen(
+                onChannelClick = { channel ->
+                    openMovieDetailsScreen(channel.streamUrl)
+                },
+                onScroll = updateTopBarVisibility,
+                isTopBarVisible = isTopBarVisible
+            )
+        }
 //        composable(Screens.Favourites()) {
 //            FavouritesScreen(
 //                onMovieClick = openMovieDetailsScreen,

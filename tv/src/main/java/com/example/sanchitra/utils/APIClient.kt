@@ -14,7 +14,7 @@ object APIClient {
     fun create(context: Context): APIService {
 
         val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(context))          // ✅ attach token
+            .addInterceptor(AuthInterceptor(context))
             .authenticator(TokenAuthenticator(context))
             .build()
 
