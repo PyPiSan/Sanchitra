@@ -13,6 +13,7 @@ import androidx.navigation.navArgument
 import com.example.sanchitra.presentation.screens.categories.CategoryMovieListScreen
 import com.example.sanchitra.presentation.screens.dashboard.DashboardScreen
 import com.example.sanchitra.presentation.screens.movies.MovieDetailsScreen
+import com.example.sanchitra.presentation.screens.videoPlayer.TVPlayerScreen
 import com.example.sanchitra.presentation.screens.videoPlayer.VideoPlayerScreen
 
 @Composable
@@ -91,6 +92,13 @@ fun App(
                     openVideoPlayer = {
                         navController.navigate(Screens.VideoPlayer())
                     },
+                    openTVPlayer = { channel ->
+                        navController.currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("channel", channel)
+
+                        navController.navigate(Screens.TVPlayer())
+                    },
                     onBackPressed = onBackPressed,
                     isComingBackFromDifferentScreen = isComingBackFromDifferentScreen,
                     resetIsComingBackFromDifferentScreen = {
@@ -100,6 +108,15 @@ fun App(
             }
             composable(route = Screens.VideoPlayer()) {
                 VideoPlayerScreen(
+                    onBackPressed = {
+                        if (navController.navigateUp()) {
+                            isComingBackFromDifferentScreen = true
+                        }
+                    }
+                )
+            }
+            composable(route = Screens.TVPlayer()) {
+                TVPlayerScreen(
                     onBackPressed = {
                         if (navController.navigateUp()) {
                             isComingBackFromDifferentScreen = true

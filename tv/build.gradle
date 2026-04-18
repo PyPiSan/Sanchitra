@@ -12,6 +12,7 @@ plugins {
 
     id 'com.google.dagger.hilt.android' // Version is handled by top-level
     id 'kotlin-kapt'
+    id 'kotlin-parcelize'
 }
 
 def versionMajor = 1
@@ -78,6 +79,7 @@ dependencies {
     implementation 'androidx.compose.runtime:runtime:1.10.6'
     implementation 'androidx.compose.foundation:foundation-layout:1.10.6'
     implementation 'androidx.compose.ui:ui:1.10.6'
+    implementation 'androidx.compose.foundation:foundation:1.10.6'
     kapt "com.google.dagger:hilt-android-compiler:2.55"
     implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
 
