@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
@@ -29,22 +28,17 @@ import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.drm.DefaultDrmSessionManager
 import androidx.media3.exoplayer.drm.DrmSessionManager
-import androidx.media3.exoplayer.drm.ExoMediaDrm
 import androidx.media3.exoplayer.drm.FrameworkMediaDrm
 import androidx.media3.exoplayer.drm.LocalMediaDrmCallback
-import androidx.media3.exoplayer.drm.MediaDrmCallback
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
-import androidx.media3.ui.PlayerView
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.media3.ui.compose.modifiers.resizeWithContentScale
-import com.example.sanchitra.data.entities.MovieDetails
 import com.example.sanchitra.data.models.Channel
 import com.example.sanchitra.presentation.common.Error
 import com.example.sanchitra.presentation.common.Loading
 import com.example.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerControls
-import com.example.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerControlsVLC
 import com.example.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerOverlay
 import com.example.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerPulse
 import com.example.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerPulseState
@@ -52,7 +46,6 @@ import com.example.sanchitra.presentation.screens.videoPlayer.components.VideoPl
 import com.example.sanchitra.presentation.screens.videoPlayer.components.rememberVideoPlayerPulseState
 import com.example.sanchitra.presentation.screens.videoPlayer.components.rememberVideoPlayerState
 import com.example.sanchitra.utils.handleDPadKeyEvents
-import java.util.UUID
 
 
 object TVPlayerScreen {

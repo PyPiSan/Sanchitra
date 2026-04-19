@@ -33,7 +33,7 @@
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:enabled="true"
-            android:theme="@style/Theme.App.Starting">
+            android:theme="@style/Theme.Sanchitra">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -1,10 +1,12 @@
 package com.example.sanchitra.presentation.screens.videoPlayer.components
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Forward10
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay10
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -69,5 +71,12 @@ class VideoPlayerPulseState {
 }
 
 @Composable
-fun rememberVideoPlayerPulseState() =
-    remember { VideoPlayerPulseState() }.also { LaunchedEffect(it) { it.observe() } }
+fun rememberVideoPlayerPulseState(): VideoPlayerPulseState {
+    val state = remember { VideoPlayerPulseState() }
+
+    LaunchedEffect(state) {
+        state.observe()
+    }
+
+    return state
+}
