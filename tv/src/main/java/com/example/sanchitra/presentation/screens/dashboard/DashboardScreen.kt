@@ -41,13 +41,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sanchitra.data.entities.Movie
-import com.example.sanchitra.data.models.Channel
 import com.example.sanchitra.presentation.Screens
 import com.example.sanchitra.presentation.screens.categories.CategoriesScreen
 import com.example.sanchitra.presentation.screens.movies.MoviesScreen
 import com.example.sanchitra.presentation.screens.profile.ProfileScreen
 import com.example.sanchitra.presentation.screens.home.HomeScreen
 import com.example.sanchitra.presentation.screens.livetv.TVScreen
+import com.example.sanchitra.presentation.screens.search.SearchScreen
 import com.example.sanchitra.utils.Padding
 
 val ParentPadding = PaddingValues(vertical = 16.dp, horizontal = 58.dp)
@@ -262,10 +262,10 @@ private fun Body(
 //                isTopBarVisible = isTopBarVisible
 //            )
 //        }
-//        composable(Screens.Search()) {
-//            SearchScreen(
-//                onMovieClick = { movie -> openMovieDetailsScreen(movie.id) },
-//                onScroll = updateTopBarVisibility
-//            )
-//        }
+        composable(Screens.Search()) {
+            SearchScreen(
+                onMovieClick = { movie -> openMovieDetailsScreen(movie.id) },
+                onScroll = updateTopBarVisibility
+            )
+        }
     }
