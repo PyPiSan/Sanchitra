@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,27 +25,47 @@ fun VideoPlayerMainFrame(
     more: (@Composable () -> Unit)? = null
 ) {
     Column(Modifier.fillMaxWidth()) {
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom
         ) {
-            Box(Modifier.weight(1f)) { mediaTitle() }
-            mediaActions()
+            Box(Modifier.weight(1f)) {
+                mediaTitle()
+            }
+
+            Box(
+                modifier = Modifier.padding(end = 8.dp)
+            ) {
+                mediaActions()
+            }
         }
-        Spacer(Modifier.height(16.dp))
-        if (seeker != null) {
-            Spacer(Modifier.height(16.dp))
-            seeker()
+
+        Spacer(Modifier.height(12.dp))
+
+        seeker?.let {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+            ) {
+                it()
+            }
         }
+
         if (more != null) {
             Spacer(Modifier.height(12.dp))
-            Box(Modifier.align(Alignment.CenterHorizontally)) {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
                 more()
             }
         }
     }
 }
+
 
 @Preview(device = "id:tv_4k")
 @Composable

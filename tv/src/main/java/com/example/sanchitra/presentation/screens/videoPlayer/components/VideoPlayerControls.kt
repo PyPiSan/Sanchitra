@@ -24,10 +24,15 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -49,11 +54,26 @@ fun VideoPlayerControls(
     channel: Channel,
     focusRequester: FocusRequester,
     onShowControls: () -> Unit = {},
-    onShowAudioSettings: () -> Unit = {}, // Callback for the audio dialog
+    onShowAudioSettings: () -> Unit = {},
 ) {
-    val isPlaying = player.isPlaying
+    var isPlaying by remember { mutableStateOf(player.isPlaying) }
 
-    // Detect if it's an IPTV / Live stream
+    DisposableEffect(player) {
+
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(isPlayingNow: Boolean) {
+                isPlaying = isPlayingNow
+            }
+        }
+
+        player.addListener(listener)
+
+        onDispose {
+            player.removeListener(listener)
+        }
+    }
+
+    // Detect if it's a Live stream
     val isLive = remember(player.mediaItemCount, player.playbackState) {
         player.isCurrentMediaItemLive ||
                 player.duration <= 0 ||
@@ -72,6 +92,22 @@ fun VideoPlayerControls(
                     secondaryText = channel.name,
                     tertiaryText = "",
                     type = VideoPlayerMediaTitleType.DEFAULT
+                )
+
+                VideoPlayerControlsIcon(
+                    modifier = Modifier.focusRequester(focusRequester),
+                    icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    isPlaying = isPlaying,
+                    onClick = {
+                        if (player.isPlaying) {
+                            player.pause()
+                        } else {
+                            player.play()
+                        }
+                    },
+                    contentDescription =
+                        StringConstants.Composable.VideoPlayerControlClosedCaptionsButton,
+                    onShowControls = {}
                 )
             }
         },
@@ -110,7 +146,7 @@ fun VideoPlayerControls(
                         StringConstants.Composable.VideoPlayerControlClosedCaptionsButton,
                     onShowControls = onShowControls
                 )
-//
+
                 VideoPlayerControlsIcon(
                     icon = Icons.Default.Settings,
                     isPlaying = isPlaying,
@@ -123,6 +159,7 @@ fun VideoPlayerControls(
         seeker = {
             if (isLive) {
                 // Show a "Full" Seekbar that doesn't move or calculate math
+                LiveAlwaysFullSeeker()
             } else {
                 // Standard interactive seeker for movies
                 VideoPlayerSeeker(
@@ -149,7 +186,7 @@ fun VideoPlayerControlsVLC(
     onSeekBack: () -> Unit,
 ) {
     VideoPlayerMainFrame(
-        // 🎬 TITLE AREA
+        // TITLE AREA
         mediaTitle = {
             Column {
                 if (isLive) {
