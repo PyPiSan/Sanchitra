@@ -23,6 +23,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -70,7 +75,6 @@ fun ProfileIconWithRing(
         )
 
         Surface(
-            onClick = onSelected,
             shape = CircleShape,
             color = Color(0xFF1a1a1a),
             border = BorderStroke(3.dp, Color.White.copy(alpha = borderAlpha)),
@@ -81,6 +85,16 @@ fun ProfileIconWithRing(
                     else Modifier
                 )
                 .focusable()
+                .onKeyEvent { event ->
+                    if (event.type == KeyEventType.KeyDown &&
+                        event.key == Key.DirectionCenter
+                    ) {
+                        onSelected()
+                        true
+                    } else {
+                        false
+                    }
+                }
                 .shadow(
                     elevation = elevation,
                     shape = CircleShape,

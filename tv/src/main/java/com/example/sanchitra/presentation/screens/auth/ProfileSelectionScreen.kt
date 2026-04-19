@@ -1,5 +1,6 @@
 package com.example.sanchitra.presentation.screens.auth
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -36,7 +37,6 @@ import androidx.tv.material3.Text
 import com.example.sanchitra.data.models.UserProfileMap
 import kotlinx.coroutines.delay
 import kotlin.math.cos
-import kotlin.math.min
 import kotlin.math.sin
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -63,65 +63,68 @@ fun ProfileSelectionScreen(
     val iconSize = screenHeight * 0.12f
 
     var focusedIndex by remember { mutableIntStateOf(0) }
-    var isUserSelecting by remember { mutableStateOf(false) }
+
+    // ✅ FIX 1: single clean selection lock
+    var isSelecting by remember { mutableStateOf(false) }
 
     val progressAnim = remember { Animatable(1f) }
     val focusRequester = remember { FocusRequester() }
 
-    // ✅ Auto-focus Primary
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
 
-    // ✅ Find primary safely (exclude guest/add)
-    val primaryId = profiles.firstOrNull {
-        it.id != "guest" && it.id != "add"
-    }?.id
+    val primaryIndex = remember(profiles) {
+        profiles.indexOfFirst { it.id != "guest" && it.id != "add" }
+    }
 
-    // ✅ Timer logic
-    LaunchedEffect(focusedIndex, isUserSelecting) {
+    // Reset selection state when focus changes
+    LaunchedEffect(focusedIndex) {
+        isSelecting = false
+    }
 
-        val isPrimary = profiles.getOrNull(focusedIndex)?.id == primaryId
+    // TIMER LOGIC (clean)
+    LaunchedEffect(focusedIndex) {
 
-        if (!isPrimary || isUserSelecting) {
+        val isPrimary = focusedIndex == primaryIndex
+
+        if (!isPrimary || isSelecting) {
             progressAnim.snapTo(1f)
             return@LaunchedEffect
         }
 
         progressAnim.snapTo(1f)
-
         delay(300)
 
-        if (!isPrimary || isUserSelecting) return@LaunchedEffect
+        if (!isPrimary || isSelecting) return@LaunchedEffect
 
         progressAnim.animateTo(
             targetValue = 0f,
             animationSpec = tween(5000, easing = LinearEasing)
         )
 
-        if (!isUserSelecting && isPrimary) {
-            isUserSelecting = true
+        // ✅ FIX 2: proper auto-select trigger
+        if (!isSelecting && focusedIndex == primaryIndex) {
+            isSelecting = true
             onProfileSelected(profiles[focusedIndex])
         }
     }
 
-    // ✅ Precompute arc positions
     val density = LocalDensity.current
+
     val adjustedRadius = remember(profiles.size, arcRadius) {
         arcRadius * (1f + (profiles.size - 3) * 0.08f)
     }
-    val arcOffsets = remember(profiles.size, arcRadius) {
 
+    val arcOffsets = remember(profiles.size) {
         val angleRange = 160f
         val itemCount = profiles.size
 
         List(itemCount) { index ->
-
             val fraction = if (itemCount == 1) 0.5f
             else index.toFloat() / (itemCount - 1)
 
             val angle = (-angleRange / 2f) + (fraction * angleRange)
-
             val rad = Math.toRadians(angle.toDouble())
 
             Pair(
@@ -143,7 +146,6 @@ fun ProfileSelectionScreen(
             )
     ) {
 
-        // LEFT TITLE
         Text(
             text = "Who's Watching?",
             color = Color.White,
@@ -156,7 +158,6 @@ fun ProfileSelectionScreen(
             )
         )
 
-        // RIGHT ARC
         Box(
             modifier = Modifier
                 .fillMaxHeight()
@@ -183,13 +184,14 @@ fun ProfileSelectionScreen(
                             ),
                         iconSize = iconSize,
                         focusRequester = if (index == 0) focusRequester else null,
+
                         onFocusGained = {
-                            if (focusedIndex != index) {
-                                focusedIndex = index
-                            }
+                            focusedIndex = index
                         },
+
                         onSelected = {
-                            isUserSelecting = true
+                            if (isSelecting) return@ProfileArcItem
+                            isSelecting = true
 
                             when (profile.id) {
                                 "guest" -> onGuestSelected()

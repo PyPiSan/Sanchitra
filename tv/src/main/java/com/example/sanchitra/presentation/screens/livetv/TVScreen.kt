@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.sanchitra.data.entities.Movie
 import com.example.sanchitra.data.models.Channel
 import com.example.sanchitra.presentation.common.Loading
 import com.example.sanchitra.presentation.screens.dashboard.rememberChildPadding
@@ -23,7 +22,6 @@ import com.example.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 @Composable
 fun TVScreen(
-//    onChannelClick: (Channel) -> Unit,
     goToVideoPlayer: (channel: Channel) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
@@ -35,7 +33,7 @@ fun TVScreen(
     when (val s = uiState ) {
 
         TVScreenViewModel.TVScreenUiState.Loading -> {
-            Loading()
+            Loading(modifier = Modifier.fillMaxSize())
         }
 
         is TVScreenViewModel.TVScreenUiState.Error -> {
@@ -45,7 +43,6 @@ fun TVScreen(
         is TVScreenViewModel.TVScreenUiState.Ready -> {
             TVCatalog(
                 categories = s.categories,
-//                onChannelClick = onChannelClick,
                 goToVideoPlayer = goToVideoPlayer,
                 onScroll = onScroll,
                 isTopBarVisible = isTopBarVisible,
@@ -58,7 +55,6 @@ fun TVScreen(
 @Composable
 fun TVCatalog(
     categories: Map<String, List<Channel>>,
-//    onChannelClick: (Channel) -> Unit,
     goToVideoPlayer: (channel: Channel) -> Unit,
     onScroll:(isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
@@ -98,7 +94,6 @@ fun TVCatalog(
                 modifier = Modifier.padding(top = childPadding.top),
                 title = entry.key,
                 channels = entry.value,
-//                onChannelSelected = onChannelClick
                 goToVideoPlayer = goToVideoPlayer,
             )
 

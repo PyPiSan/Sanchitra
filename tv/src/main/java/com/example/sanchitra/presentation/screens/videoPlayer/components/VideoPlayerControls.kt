@@ -89,7 +89,7 @@ fun VideoPlayerControls(
                 }
                 VideoPlayerMediaTitle(
                     title = channel.name,
-                    secondaryText = channel.name,
+                    secondaryText = "",
                     tertiaryText = "",
                     type = VideoPlayerMediaTitleType.DEFAULT
                 )
