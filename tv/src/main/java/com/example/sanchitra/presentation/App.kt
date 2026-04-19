@@ -92,12 +92,8 @@ fun App(
                     openVideoPlayer = {
                         navController.navigate(Screens.VideoPlayer())
                     },
-                    openTVPlayer = { channel ->
-                        navController.currentBackStackEntry
-                            ?.savedStateHandle
-                            ?.set("channel", channel)
-
-                        navController.navigate(Screens.TVPlayer())
+                    openTVPlayer = { channelId ->
+                        navController.navigate(Screens.TVPlayer.withArgs(channelId))
                     },
                     onBackPressed = onBackPressed,
                     isComingBackFromDifferentScreen = isComingBackFromDifferentScreen,

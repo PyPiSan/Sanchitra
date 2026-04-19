@@ -119,6 +119,8 @@ dependencies {
     // --- 6. Media & Video Players ---
     def media3_version = "1.6.0"
     implementation "androidx.media3:media3-exoplayer:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
+    implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
     implementation "androidx.media3:media3-ui:$media3_version"
     implementation "androidx.media3:media3-ui-compose:$media3_version" // This contains the state classes
     implementation "androidx.media3:media3-common:$media3_version"

@@ -5,4 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface TVRepository {
     fun getChannels(): Flow<List<Channel>>
+    suspend fun getChannelData(id: String, type: String): TVRepositoryImpl.ApiResult<Channel>
 }

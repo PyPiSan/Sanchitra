@@ -1,37 +1,54 @@
 package com.example.sanchitra.presentation.screens.videoPlayer
 
+
 import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sanchitra.data.models.Channel
+import com.example.sanchitra.data.repositories.TVRepository
+import com.example.sanchitra.data.repositories.TVRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-
 @HiltViewModel
 class TVPlayerScreenViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    repository: TVRepository,
 ) : ViewModel() {
 
-    private val channel = savedStateHandle.get<Channel>("channel")
+    val uiState = savedStateHandle
+        .getStateFlow<String?>(TVPlayerScreen.TVIdBundleKey, null)
+        .map { id ->
+            Log.d("VIDEO_DEBUG", "id: $id")
+            if (id == null) {
+                TVPlayerScreenUiState.Error
+            } else {
 
-    val uiState = MutableStateFlow<TVPlayerScreenUiState>(
-        if (channel != null) {
-            TVPlayerScreenUiState.Done(channel)
-        } else {
-            TVPlayerScreenUiState.Error
+                when (val result = repository.getChannelData(id, "hd")) {
+
+                    is TVRepositoryImpl.ApiResult.Success -> {
+                        TVPlayerScreenUiState.Done(result.data)
+                    }
+
+                    is TVRepositoryImpl.ApiResult.Error -> {
+                        TVPlayerScreenUiState.Error
+                    }
+                }
+            }
         }
-    )
-
-    init {
-        Log.d("TVPlayerVM", "channel = $channel")
-    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = TVPlayerScreenUiState.Loading
+        )
 }
 
 @Immutable
