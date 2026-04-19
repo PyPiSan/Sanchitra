@@ -44,6 +44,7 @@ import com.example.sanchitra.data.entities.MovieDetails
 import com.example.sanchitra.data.models.Channel
 import com.example.sanchitra.data.util.StringConstants
 import com.example.sanchitra.presentation.screens.videoPlayer.getVlcAudioTracks
+import com.example.sanchitra.presentation.screens.videoPlayer.selectAudio
 import com.example.sanchitra.presentation.screens.videoPlayer.setAudioTrack
 import org.videolan.libvlc.MediaPlayer
 
@@ -157,15 +158,25 @@ fun VideoPlayerControls(
             }
         },
         seeker = {
-            if (isLive) {
-                // Show a "Full" Seekbar that doesn't move or calculate math
-                LiveAlwaysFullSeeker()
-            } else {
-                // Standard interactive seeker for movies
-                VideoPlayerSeeker(
+            Column {
+                if (isLive) {
+                    // Show a "Full" Seekbar that doesn't move or calculate math
+                    LiveAlwaysFullSeeker()
+                } else {
+                    // Standard interactive seeker for movies
+                    VideoPlayerSeeker(
+                        player = player,
+                        focusRequester = focusRequester,
+                        onShowControls = onShowControls,
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+
+                AudioSettings(
                     player = player,
-                    focusRequester = focusRequester,
-                    onShowControls = onShowControls,
+                    onLanguageSelected = { language ->
+                        selectAudio(player, language)
+                    }
                 )
             }
         },
