@@ -69,7 +69,7 @@ fun DashboardScreen(
     openCategoryMovieList: (categoryId: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
     openVideoPlayer: (Movie) -> Unit,
-    openTVPlayer: (Channel) -> Unit,
+    openTVPlayer: (channelId: Int) -> Unit,
     isComingBackFromDifferentScreen: Boolean,
     resetIsComingBackFromDifferentScreen: () -> Unit,
     onBackPressed: () -> Unit
@@ -211,7 +211,7 @@ private fun Body(
     openCategoryMovieList: (categoryId: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
     openVideoPlayer: (Movie) -> Unit,
-    openTVPlayer: (Channel) -> Unit,
+    openTVPlayer: (channelId: Int) -> Unit,
     updateTopBarVisibility: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
@@ -250,7 +250,7 @@ private fun Body(
         }
         composable(Screens.TV()) {
             TVScreen(
-                goToVideoPlayer = openTVPlayer,
+                goToVideoPlayer = { channel -> openTVPlayer(channel.id) },
                 onScroll = updateTopBarVisibility,
                 isTopBarVisible = isTopBarVisible
             )
