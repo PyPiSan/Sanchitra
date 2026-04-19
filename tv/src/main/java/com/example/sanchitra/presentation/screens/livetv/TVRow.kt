@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
@@ -151,6 +153,8 @@ private fun TVRowItem(
             )
         },
         modifier = Modifier
+            .width(220.dp)
+            .aspectRatio(16f / 9f)
             .onFocusChanged {
                 isFocused = it.isFocused
                 if (it.isFocused) {
@@ -167,7 +171,8 @@ private fun TVRowItem(
             .then(modifier)
     ) {
         ChannelRowItemImage(
-            modifier = Modifier.aspectRatio(itemDirection.aspectRatio),
+//            modifier = Modifier.aspectRatio(itemDirection.aspectRatio),
+            modifier = Modifier.fillMaxSize(),
             showIndexOverImage = showIndexOverImage,
             channel = channel,
             index = index
