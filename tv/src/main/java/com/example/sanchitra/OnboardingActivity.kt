@@ -136,9 +136,9 @@ class OnboardingActivity : ComponentActivity() {
 
                 is AuthState.QRLogin -> {
                     QRLoginScreen(
-                        state.qrData,
+                        state.loginURL,
                         state.deviceCode,
-                        backgroundUrl = "https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/%2Fsanchitra.jpg"
+                        state.backgroundUrl
                     )
                 }
 

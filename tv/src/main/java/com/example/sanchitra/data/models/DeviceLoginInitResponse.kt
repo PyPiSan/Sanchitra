@@ -1,9 +1,17 @@
 package com.example.sanchitra.data.models
 
+import com.google.gson.annotations.SerializedName
+
 data class DeviceLoginInitResponse(
-    val qr_url: String,
-    val device_code: String,
+
+    @SerializedName("qr_url")
+    val loginURL: String,
+
+    @SerializedName("device_code")
+    val deviceCode: String,
+
     val success: Boolean,
-    val message: String
+    val message: String,
+    val banner: String
 
 )

@@ -39,12 +39,13 @@ class OnboardingViewModel : ViewModel() {
 
             if (result != null && result.success) {
                 authState = AuthState.QRLogin(
-                    qrData = result.qr_url,
-                    deviceCode = result.device_code
+                    loginURL = result.loginURL,
+                    deviceCode = result.deviceCode,
+                    backgroundUrl = result.banner
                 )
 //                Log.d("API_DEBUG", "Auth State is: $authState")
 
-                startPolling(result.device_code, context)
+                startPolling(result.deviceCode, context)
             } else {
                 authState = AuthState.Error
             }
