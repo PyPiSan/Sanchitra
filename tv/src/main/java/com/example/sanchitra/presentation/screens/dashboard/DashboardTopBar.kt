@@ -3,6 +3,7 @@ package com.example.sanchitra.presentation.screens.dashboard
 import IconSize
 import JetStreamCardShape
 import LexendExa
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -161,17 +163,18 @@ private fun SanchitraLogo(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            Icons.Default.PlayArrow,
+        Image(
+            painter = painterResource(id = R.mipmap.ic_channel_foreground),
             contentDescription = StringConstants.Composable
                 .ContentDescription.BrandLogoImage,
             modifier = Modifier
-                .padding(end = 4.dp)
-                .size(IconSize)
+                .padding(end = 6.dp)
+                .size(IconSize + 4.dp)
         )
+
         Text(
             text = stringResource(R.string.brand_logo_text),
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
             fontFamily = LexendExa
         )
