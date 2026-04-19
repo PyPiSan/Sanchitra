@@ -19,7 +19,7 @@ enum class Screens(
     Movies(isTabItem = true),
     TV(isTabItem = true),
     Favourites(isTabItem = false),
-    Search(isTabItem = true, tabIcon = Icons.Default.Search),
+    Search(isTabItem = false, tabIcon = Icons.Default.Search),
     CategoryMovieList(listOf(CategoryMovieListScreen.CategoryIdBundleKey)),
     MovieDetails(listOf(MovieDetailsScreen.MovieIdBundleKey)
     ),
