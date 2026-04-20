@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:versionCode="1"
-    android:versionName="1.0">
+    android:versionName="1.20">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -25,13 +25,12 @@
         tools:targetApi="tiramisu">
         <activity
             android:name=".MainActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.Sanchitra"/>
 
         <activity
             android:name=".OnboardingActivity"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher"
             android:enabled="true"
             android:theme="@style/Theme.Sanchitra">
             <intent-filter>
