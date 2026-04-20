@@ -10,7 +10,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
@@ -20,15 +20,21 @@ class TVScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     val uiState: StateFlow<TVScreenUiState> =
-        tvRepository.getChannels()
-            .map { channels ->
-//                Log.d("VM_DEBUG", "Channels received: ${channels.size}")
-                val grouped = channels
-                    .filter { it.isValid() }
-                    .groupBy { it.category.ifBlank { "Others" } }
+        combine(
+            tvRepository.getChannels(),
+            tvRepository.getCarouselTV()
+        ) { channels, carousel ->
 
-                TVScreenUiState.Ready(grouped) as TVScreenUiState
-            }
+            val channelGrouped = channels
+                .filter { it.isValid() }
+                .groupBy { it.category.ifBlank { "Others" } }
+
+
+            TVScreenUiState.Ready(
+                categories = channelGrouped,
+                carousel = carousel
+            ) as TVScreenUiState
+        }
             .onStart {
                 emit(TVScreenUiState.Loading)
             }
@@ -42,14 +48,15 @@ class TVScreenViewModel @Inject constructor(
             )
 
     private fun Channel.isValid(): Boolean {
-        return name.isNotBlank() && streamUrl.isNotBlank()
+        return name.isNotBlank()
     }
 
     sealed interface TVScreenUiState {
         data object Loading : TVScreenUiState
 
         data class Ready(
-            val categories: Map<String, List<Channel>>
+            val categories: Map<String, List<Channel>>,
+            val carousel: List<Channel>
         ) : TVScreenUiState
 
         data class Error(

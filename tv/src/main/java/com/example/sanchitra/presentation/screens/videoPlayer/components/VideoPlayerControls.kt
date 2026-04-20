@@ -172,12 +172,12 @@ fun VideoPlayerControls(
                 }
                 Spacer(modifier = Modifier.height(12.dp))
 
-                AudioSettings(
-                    player = player,
-                    onLanguageSelected = { language ->
-                        selectAudio(player, language)
-                    }
-                )
+//                AudioSettings(
+//                    player = player,
+//                    onLanguageSelected = { language ->
+//                        selectAudio(player, language)
+//                    }
+//                )
             }
         },
         more = null

@@ -2,6 +2,7 @@ package com.example.sanchitra.utils
 
 import com.example.sanchitra.api.RefreshTokenRequest
 import com.example.sanchitra.data.models.Channel
+import com.example.sanchitra.data.models.ChannelDto
 import com.example.sanchitra.data.models.DeviceLoginInitResponse
 import com.example.sanchitra.data.models.LoginStatusResponse
 import com.example.sanchitra.data.models.TVResponse
@@ -36,11 +37,15 @@ interface APIService {
     @GET("home/tv/hd/")
     suspend fun getLiveTV(): Response<TVResponse>
 
+//    get TV carousel
+    @GET("home/tv/carousel/")
+    suspend fun getCarouselTV(): Response<TVResponse>
+
     @GET("home/channels/")
     suspend fun getChannelDetail(
         @Query("id") id: Int,
         @Query("type") type: String
-    ): Response<Channel>
+    ): Response<ChannelDto>
 
 }
 
