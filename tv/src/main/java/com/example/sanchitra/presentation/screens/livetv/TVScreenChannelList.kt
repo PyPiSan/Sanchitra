@@ -44,7 +44,7 @@ fun TVScreenChannelList (
     channelList: List<Channel>,
     startPadding: Dp = rememberChildPadding().start,
     endPadding: Dp = rememberChildPadding().end,
-    onChannelClick: (channel: Channel) -> Unit
+    goToVideoPlayer: (channel: Channel) -> Unit,
 ){
     AnimatedContent(
         modifier = modifier,
@@ -59,7 +59,7 @@ fun TVScreenChannelList (
             items(channelListTarget) {
                 ChannelListItem(
                     itemWidth = 432.dp,
-                    onChannelClick = onChannelClick,
+                    onChannelClick = goToVideoPlayer,
                     channel = it,
                 )
             }
@@ -75,7 +75,7 @@ private fun ChannelListItem(
     onChannelClick: (channel: Channel) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        Spacer(modifier = Modifier.Companion.height(JetStreamBorderWidth))
+        Spacer(modifier = Modifier.height(JetStreamBorderWidth))
         var isFocused by remember { mutableStateOf(false) }
         CompactCard(
             modifier = modifier
@@ -102,7 +102,7 @@ private fun ChannelListItem(
                     label = "",
                 )
                 AsyncImage(
-                    model = channel.logoUrl,
+                    model = channel.bannerUrl,
                     contentDescription = StringConstants
                         .Composable
                         .ContentDescription

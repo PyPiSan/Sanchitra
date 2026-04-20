@@ -1,6 +1,7 @@
 package com.example.sanchitra.presentation.screens.videoPlayer
 
 
+import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -23,14 +24,21 @@ class TVPlayerScreenViewModel @Inject constructor(
     val uiState = savedStateHandle
         .getStateFlow<String?>(TVPlayerScreen.TVIdBundleKey, null)
         .map { id ->
-//            Log.d("VIDEO_DEBUG", "id: $id")
+            Log.d("VIDEO_DEBUG", "id: $id")
+            var typeMedia = ""
             if (id == null) {
                 TVPlayerScreenUiState.Error
             } else {
+                typeMedia = if (id.toInt() > 1000){
+                    "stream"
+                } else{
+                    "hd"
+                }
 
-                when (val result = repository.getChannelData(id, "hd")) {
+                when (val result = repository.getChannelData(id, typeMedia)) {
 
                     is TVRepositoryImpl.ApiResult.Success -> {
+//                        Log.d("VIDEO_DEBUG", "video channel: ${result.data}")
                         TVPlayerScreenUiState.Done(result.data)
                     }
 

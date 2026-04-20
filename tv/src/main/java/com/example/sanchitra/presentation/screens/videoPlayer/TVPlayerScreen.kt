@@ -1,5 +1,6 @@
 package com.example.sanchitra.presentation.screens.videoPlayer
 
+import android.R
 import android.content.Context
 import android.util.Base64
 import android.util.Log
@@ -29,6 +30,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.MimeTypes
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
@@ -166,8 +168,9 @@ private fun Modifier.dPadEvents(
 @Composable
 fun rememberExoPlayer(
     context: Context,
-    channel: Channel
+    channel: Channel,
 ): ExoPlayer {
+
 
     return remember(channel) {
 
@@ -176,24 +179,50 @@ fun rememberExoPlayer(
             ExoPlayer.Builder(context)
                 .build()
                 .apply {
+                    // Set track preferences BEFORE prepare()
+                    trackSelectionParameters = trackSelectionParameters
+                        .buildUpon()
+                        .setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
+                        .setForceHighestSupportedBitrate(true)
+                        .setPreferredAudioLanguage("en")
+                        .build()
                     addListener(object : Player.Listener {
+
+                        override fun onPlayerError(error: PlaybackException) {
+//                            hasError = true
+                            Log.e("PLAYER_ERROR", "Error: ${error.message}", error)
+                        }
+
+                        override fun onPlaybackStateChanged(state: Int) {
+                            if (state == Player.STATE_READY) {
+//                                hasError = false
+                            }
+                        }
+
                         override fun onTracksChanged(tracks: Tracks) {
 
                             tracks.groups.forEach { group ->
 
+                                if (group.type == C.TRACK_TYPE_VIDEO) {
+                                    for (i in 0 until group.length) {
+                                        val format = group.getTrackFormat(i)
+                                        Log.d("VIDEO_INFO",
+                                            "Res=${format.width}x${format.height}, bitrate=${format.bitrate}"
+                                        )
+                                    }
+                                }
+
                                 if (group.type == C.TRACK_TYPE_AUDIO) {
-
-                                    val format = group.getTrackFormat(0)
-
-                                    Log.d("AUDIO_INFO",
-                                        """
-                Codec=${format.codecs}
-                Bitrate=${format.bitrate}
-                Lang=${format.language}
-                Label=${format.label}
-                Mime=${format.sampleMimeType}
-                """.trimIndent()
-                                    )
+                                    for (i in 0 until group.length) {
+                                        val format = group.getTrackFormat(i)
+                                        Log.d("AUDIO_INFO",
+                                            """
+                                Codec=${format.codecs}
+                                Bitrate=${format.bitrate}
+                                Lang=${format.language}
+                                """.trimIndent()
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -254,6 +283,12 @@ fun rememberExoPlayer(
                 .setSeekForwardIncrementMs(10_000L)
                 .setSeekBackIncrementMs(10_000L)
                 .build().apply {
+                    trackSelectionParameters = trackSelectionParameters
+                        .buildUpon()
+                        .setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
+                        .setForceHighestSupportedBitrate(true)
+                        .setPreferredAudioLanguage("en")
+                        .build()
                     addListener(object : Player.Listener {
                         override fun onTracksChanged(tracks: Tracks) {
 

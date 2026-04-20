@@ -69,7 +69,6 @@ fun TVRow(
     channels: List<Channel>,
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
-//    onChannelSelected: (Channel) -> Unit = {}
     goToVideoPlayer: (channel: Channel) -> Unit,
 ) {
     val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
@@ -133,7 +132,6 @@ fun TVRow(
 private fun TVRowItem(
     index: Int,
     channel: Channel,
-//    onChannelSelected: (Channel) -> Unit,
     showItemTitle: Boolean,
     showIndexOverImage: Boolean,
     modifier: Modifier = Modifier,

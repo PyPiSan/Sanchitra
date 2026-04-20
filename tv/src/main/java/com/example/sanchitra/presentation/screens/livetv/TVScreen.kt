@@ -30,7 +30,7 @@ fun TVScreen(
 
     val uiState by tvScreenViewModel.uiState.collectAsStateWithLifecycle()
 
-    when (val s = uiState ) {
+    when (val s = uiState) {
 
         TVScreenViewModel.TVScreenUiState.Loading -> {
             Loading(modifier = Modifier.fillMaxSize())
@@ -42,7 +42,8 @@ fun TVScreen(
 
         is TVScreenViewModel.TVScreenUiState.Ready -> {
             TVCatalog(
-                categories = s.categories,
+                channelCategories = s.categories,
+                carouselList = s.carousel,
                 goToVideoPlayer = goToVideoPlayer,
                 onScroll = onScroll,
                 isTopBarVisible = isTopBarVisible,
@@ -54,9 +55,10 @@ fun TVScreen(
 
 @Composable
 fun TVCatalog(
-    categories: Map<String, List<Channel>>,
+    channelCategories: Map<String, List<Channel>>,
+    carouselList: List<Channel>,
     goToVideoPlayer: (channel: Channel) -> Unit,
-    onScroll:(isTopBarVisible: Boolean) -> Unit,
+    onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -85,8 +87,14 @@ fun TVCatalog(
         modifier = modifier,
         contentPadding = PaddingValues(top = childPadding.top, bottom = 104.dp),
     ) {
+        item{
+            TVScreenChannelList(
+                channelList = carouselList,
+                goToVideoPlayer = goToVideoPlayer,
+            )
+        }
         items(
-            items = categories.entries.toList(),
+            items = channelCategories.entries.toList(),
             key = { it.key }
         ) { entry ->
 
@@ -96,11 +104,6 @@ fun TVCatalog(
                 channels = entry.value,
                 goToVideoPlayer = goToVideoPlayer,
             )
-
-//            TVScreenChannelList(
-//                channelList = entry.value,
-//                onChannelClick = onChannelClick
-//            )
         }
     }
 }
