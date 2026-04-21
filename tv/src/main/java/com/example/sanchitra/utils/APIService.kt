@@ -1,9 +1,10 @@
 package com.example.sanchitra.utils
 
 import com.example.sanchitra.api.RefreshTokenRequest
-import com.example.sanchitra.data.models.Channel
+import com.example.sanchitra.data.entities.IPTVCategoryDto
 import com.example.sanchitra.data.models.ChannelDto
 import com.example.sanchitra.data.models.DeviceLoginInitResponse
+import com.example.sanchitra.data.models.IPTVResponseDto
 import com.example.sanchitra.data.models.LoginStatusResponse
 import com.example.sanchitra.data.models.TVResponse
 import com.example.sanchitra.data.models.UserDetailResponse
@@ -12,6 +13,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface APIService {
@@ -46,6 +48,16 @@ interface APIService {
         @Query("id") id: Int,
         @Query("type") type: String
     ): Response<ChannelDto>
+
+//    IPTV
+
+    @GET("iptv/category/list/")
+    suspend fun getIPTVCategoryList(): Response<List<IPTVCategoryDto>>
+    @GET("iptv/category/{category}")
+    suspend fun getIPTVCategory(
+    @Path("category") category: String
+    ): Response<IPTVResponseDto>
+
 
 }
 

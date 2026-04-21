@@ -4,7 +4,7 @@ package com.example.sanchitra.presentation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.example.sanchitra.presentation.screens.categories.CategoryMovieListScreen
+import com.example.sanchitra.presentation.screens.categories.CategoryIPTVListScreen
 import com.example.sanchitra.presentation.screens.movies.MovieDetailsScreen
 import com.example.sanchitra.presentation.screens.videoPlayer.TVPlayerScreen
 import com.example.sanchitra.presentation.screens.videoPlayer.VideoPlayerScreen
@@ -16,12 +16,13 @@ enum class Screens(
 ) {
     Profile,
     Home(isTabItem = true),
+    TV(isTabItem = true),
     Categories(isTabItem = true),
     Movies(isTabItem = true),
-    TV(isTabItem = true),
+
     Favourites(isTabItem = false),
     Search(isTabItem = true, tabIcon = Icons.Default.Search),
-    CategoryMovieList(listOf(CategoryMovieListScreen.CategoryIdBundleKey)),
+    CategoryIPTVList(listOf(CategoryIPTVListScreen.CategoryNameKey)),
     MovieDetails(listOf(MovieDetailsScreen.MovieIdBundleKey)
     ),
     Dashboard,

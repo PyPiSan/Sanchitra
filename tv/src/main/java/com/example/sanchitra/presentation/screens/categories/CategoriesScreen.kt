@@ -1,4 +1,5 @@
 package com.example.sanchitra.presentation.screens.categories
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
@@ -29,7 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.example.sanchitra.data.entities.MovieCategoryList
+import com.example.sanchitra.data.entities.IPTVCategoryDto
 import com.example.sanchitra.presentation.common.Loading
 import com.example.sanchitra.presentation.common.MovieCard
 import com.example.sanchitra.presentation.screens.dashboard.rememberChildPadding
@@ -53,10 +54,16 @@ fun CategoriesScreen(
         is CategoriesScreenUiState.Ready -> {
             Catalog(
                 gridColumns = gridColumns,
-                movieCategories = s.categoryList,
+                iptvCategories = s.categoryList,
                 onCategoryClick = onCategoryClick,
                 onScroll = onScroll,
                 modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        is CategoriesScreenUiState.Error -> {
+            CategoryErrorScreen(
+                message = s.message
             )
         }
     }
@@ -65,7 +72,7 @@ fun CategoriesScreen(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun Catalog(
-    movieCategories: MovieCategoryList,
+    iptvCategories: List<IPTVCategoryDto>,
     modifier: Modifier = Modifier,
     gridColumns: Int = 4,
     onCategoryClick: (categoryId: String) -> Unit,
@@ -75,8 +82,7 @@ private fun Catalog(
     val lazyGridState = rememberLazyGridState()
     val shouldShowTopBar by remember {
         derivedStateOf {
-            lazyGridState.firstVisibleItemIndex == 0 &&
-                lazyGridState.firstVisibleItemScrollOffset < 100
+            lazyGridState.firstVisibleItemIndex == 0 && lazyGridState.firstVisibleItemScrollOffset < 100
         }
     }
     LaunchedEffect(shouldShowTopBar) {
@@ -84,7 +90,7 @@ private fun Catalog(
     }
 
     AnimatedContent(
-        targetState = movieCategories,
+        targetState = iptvCategories,
         modifier = Modifier
             .padding(horizontal = childPadding.start)
             .padding(top = childPadding.top),
@@ -97,27 +103,23 @@ private fun Catalog(
         ) {
             itemsIndexed(it) { index, movieCategory ->
                 var isFocused by remember { mutableStateOf(false) }
-                MovieCard(
-                    onClick = {
-                        onCategoryClick(movieCategory.id)
-                    },
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .aspectRatio(16 / 9f)
-                        .onFocusChanged {
-                            isFocused = it.isFocused || it.hasFocus
+
+                MovieCard(onClick = {
+                    onCategoryClick(movieCategory.name)
+                }, modifier = Modifier
+                    .padding(8.dp)
+                    .aspectRatio(16 / 9f)
+                    .onFocusChanged {
+                        isFocused = it.isFocused || it.hasFocus
+                    }
+                    .focusProperties {
+                        if (index % gridColumns == 0) {
+                            left = FocusRequester.Cancel
                         }
-                        .focusProperties {
-                            if (index % gridColumns == 0) {
-                                left = FocusRequester.Cancel
-                            }
-                        }
-                ) {
+                    }) {
                     val itemAlpha by animateFloatAsState(
-                        targetValue = if (isFocused) .6f else 0.2f,
-                        label = ""
+                        targetValue = if (isFocused) .6f else 0.2f, label = ""
                     )
-                    val textColor = if (isFocused) Color.White else Color.White
 
                     Box(contentAlignment = Alignment.Center) {
                         Box(modifier = Modifier.alpha(itemAlpha)) {
@@ -126,7 +128,7 @@ private fun Catalog(
                         Text(
                             text = movieCategory.name,
                             style = MaterialTheme.typography.titleMedium.copy(
-                                color = textColor,
+                                color = Color.White
                             )
                         )
                     }

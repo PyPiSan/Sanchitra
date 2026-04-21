@@ -10,7 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.sanchitra.presentation.screens.categories.CategoryMovieListScreen
+import com.example.sanchitra.presentation.screens.categories.CategoryIPTVListScreen
 import com.example.sanchitra.presentation.screens.dashboard.DashboardScreen
 import com.example.sanchitra.presentation.screens.movies.MovieDetailsScreen
 import com.example.sanchitra.presentation.screens.videoPlayer.TVPlayerScreen
@@ -29,24 +29,20 @@ fun App(
         startDestination = Screens.Dashboard(),
         builder = {
             composable(
-                route = Screens.CategoryMovieList(),
+                route = Screens.CategoryIPTVList(),
                 arguments = listOf(
-                    navArgument(CategoryMovieListScreen.CategoryIdBundleKey) {
+                    navArgument(CategoryIPTVListScreen.CategoryNameKey) {
                         type = NavType.StringType
                     }
                 )
             ) {
-                CategoryMovieListScreen(
+                CategoryIPTVListScreen(
                     onBackPressed = {
                         if (navController.navigateUp()) {
                             isComingBackFromDifferentScreen = true
                         }
                     },
-                    onMovieSelected = { movie ->
-                        navController.navigate(
-                            Screens.MovieDetails.withArgs(movie.id)
-                        )
-                    }
+                    onChannelSelected = {}
                 )
             }
             composable(
@@ -79,9 +75,9 @@ fun App(
             }
             composable(route = Screens.Dashboard()) {
                 DashboardScreen(
-                    openCategoryMovieList = { categoryId ->
+                    openCategoryIPTVList = { categoryName ->
                         navController.navigate(
-                            Screens.CategoryMovieList.withArgs(categoryId)
+                            Screens.CategoryIPTVList.withArgs(categoryName)
                         )
                     },
                     openMovieDetailsScreen = { movieId ->
