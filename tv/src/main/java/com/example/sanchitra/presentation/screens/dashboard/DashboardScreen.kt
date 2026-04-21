@@ -66,7 +66,7 @@ fun rememberChildPadding(direction: LayoutDirection = LocalLayoutDirection.curre
 
 @Composable
 fun DashboardScreen(
-    openCategoryMovieList: (categoryId: String) -> Unit,
+    openCategoryIPTVList: (categoryName: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
     openVideoPlayer: (Movie) -> Unit,
     openTVPlayer: (channelId: Int) -> Unit,
@@ -174,7 +174,7 @@ fun DashboardScreen(
         }
 
         Body(
-            openCategoryMovieList = openCategoryMovieList,
+            openCategoryIPTVList = openCategoryIPTVList,
             openMovieDetailsScreen = openMovieDetailsScreen,
             openVideoPlayer = openVideoPlayer,
             openTVPlayer = openTVPlayer,
@@ -208,7 +208,7 @@ private fun BackPressHandledArea(
 
 @Composable
 private fun Body(
-    openCategoryMovieList: (categoryId: String) -> Unit,
+    openCategoryIPTVList: (categoryName: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
     openVideoPlayer: (Movie) -> Unit,
     openTVPlayer: (channelId: Int) -> Unit,
@@ -237,7 +237,7 @@ private fun Body(
         }
         composable(Screens.Categories()) {
             CategoriesScreen(
-                onCategoryClick = openCategoryMovieList,
+                onCategoryClick = openCategoryIPTVList,
                 onScroll = updateTopBarVisibility
             )
         }

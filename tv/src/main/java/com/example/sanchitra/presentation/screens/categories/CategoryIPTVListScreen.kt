@@ -1,4 +1,5 @@
 package com.example.sanchitra.presentation.screens.categories
+
 import JetStreamBottomListPadding
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
@@ -21,42 +22,41 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.example.sanchitra.data.entities.Movie
-import com.example.sanchitra.data.entities.MovieCategoryDetails
+import com.example.sanchitra.data.models.IPTVChannel
 import com.example.sanchitra.presentation.common.Error
 import com.example.sanchitra.presentation.common.Loading
 import com.example.sanchitra.presentation.common.MovieCard
-import com.example.sanchitra.presentation.common.PosterImage
+import com.example.sanchitra.presentation.common.PosterImageIPTVChannel
 import com.example.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.example.sanchitra.utils.focusOnInitialVisibility
 
-object CategoryMovieListScreen {
-    const val CategoryIdBundleKey = "categoryId"
+object CategoryIPTVListScreen {
+    const val CategoryNameKey = "categoryName"
 }
 
 @Composable
-fun CategoryMovieListScreen(
+fun CategoryIPTVListScreen(
     onBackPressed: () -> Unit,
-    onMovieSelected: (Movie) -> Unit,
-    categoryMovieListScreenViewModel: CategoryMovieListScreenViewModel = hiltViewModel()
+    onChannelSelected: (IPTVChannel) -> Unit,
+    categoryIPTVListScreenViewModel: CategoryIPTVListScreenViewModel = hiltViewModel()
 ) {
-    val uiState by categoryMovieListScreenViewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by categoryIPTVListScreenViewModel.uiState.collectAsStateWithLifecycle()
 
     when (val s = uiState) {
-        CategoryMovieListScreenUiState.Loading -> {
+        CategoryIPTVListScreenUiState.Loading -> {
             Loading(modifier = Modifier.fillMaxSize())
         }
 
-        CategoryMovieListScreenUiState.Error -> {
+        CategoryIPTVListScreenUiState.Error -> {
             Error(modifier = Modifier.fillMaxSize())
         }
 
-        is CategoryMovieListScreenUiState.Done -> {
-            val categoryDetails = s.movieCategoryDetails
+        is CategoryIPTVListScreenUiState.Done -> {
             CategoryDetails(
-                categoryDetails = categoryDetails,
+                categoryName = s.categoryName,
+                categoryChannels = s.channels,
                 onBackPressed = onBackPressed,
-                onMovieSelected = onMovieSelected
+                onChannelSelected = onChannelSelected
             )
         }
     }
@@ -64,9 +64,10 @@ fun CategoryMovieListScreen(
 
 @Composable
 private fun CategoryDetails(
-    categoryDetails: MovieCategoryDetails,
+    categoryChannels: List<IPTVChannel>,
+    categoryName: String,
     onBackPressed: () -> Unit,
-    onMovieSelected: (Movie) -> Unit,
+    onChannelSelected: (IPTVChannel) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val childPadding = rememberChildPadding()
@@ -79,7 +80,7 @@ private fun CategoryDetails(
         modifier = modifier,
     ) {
         Text(
-            text = categoryDetails.name,
+            text = categoryName,
             style = MaterialTheme.typography.displaySmall.copy(
                 fontWeight = FontWeight.SemiBold
             ),
@@ -88,19 +89,18 @@ private fun CategoryDetails(
             )
         )
         LazyVerticalGrid(
-            columns = GridCells.Fixed(6),
-            contentPadding = PaddingValues(bottom = JetStreamBottomListPadding)
+            columns = GridCells.Adaptive(minSize = 220.dp),
+            modifier = modifier,
+            contentPadding = PaddingValues(JetStreamBottomListPadding)
         ) {
             itemsIndexed(
-                categoryDetails.movies,
-                key = { _, movie ->
-                    movie.id
-                }
-            ) { index, movie ->
+                categoryChannels,
+                key = { _, channel -> channel.id }
+            ) { index, iptvChannel ->
                 MovieCard(
-                    onClick = { onMovieSelected(movie) },
+                    onClick = { onChannelSelected(iptvChannel) },
                     modifier = Modifier
-                        .aspectRatio(1 / 1.5f)
+                        .aspectRatio(16 / 9f)
                         .padding(8.dp)
                         .then(
                             if (index == 0)
@@ -108,7 +108,7 @@ private fun CategoryDetails(
                             else Modifier
                         ),
                 ) {
-                    PosterImage(movie = movie, modifier = Modifier.fillMaxSize())
+                    PosterImageIPTVChannel(iptvChannel = iptvChannel, modifier = Modifier.fillMaxSize())
                 }
             }
         }
