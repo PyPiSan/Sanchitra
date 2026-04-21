@@ -42,7 +42,9 @@ fun App(
                             isComingBackFromDifferentScreen = true
                         }
                     },
-                    onChannelSelected = {}
+                    onChannelSelected = {
+                        navController.navigate(Screens.VideoPlayer())
+                    }
                 )
             }
             composable(
@@ -85,7 +87,7 @@ fun App(
                             Screens.MovieDetails.withArgs(movieId)
                         )
                     },
-                    openVideoPlayer = {
+                    openVideoPlayer = { iptvChannelId ->
                         navController.navigate(Screens.VideoPlayer())
                     },
                     openTVPlayer = { channelId ->

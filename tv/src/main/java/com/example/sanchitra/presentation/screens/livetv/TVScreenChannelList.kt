@@ -44,7 +44,7 @@ fun TVScreenChannelList (
     channelList: List<Channel>,
     startPadding: Dp = rememberChildPadding().start,
     endPadding: Dp = rememberChildPadding().end,
-    goToVideoPlayer: (channel: Channel) -> Unit,
+    goToTVPlayer: (channel: Channel) -> Unit,
 ){
     AnimatedContent(
         modifier = modifier,
@@ -59,7 +59,7 @@ fun TVScreenChannelList (
             items(channelListTarget) {
                 ChannelListItem(
                     itemWidth = 432.dp,
-                    onChannelClick = goToVideoPlayer,
+                    onChannelClick = goToTVPlayer,
                     channel = it,
                 )
             }

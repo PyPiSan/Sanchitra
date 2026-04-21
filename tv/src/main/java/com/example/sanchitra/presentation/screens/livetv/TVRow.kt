@@ -69,7 +69,7 @@ fun TVRow(
     channels: List<Channel>,
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
-    goToVideoPlayer: (channel: Channel) -> Unit,
+    goToTVPlayer: (channel: Channel) -> Unit,
 ) {
     val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
     Column(
@@ -109,9 +109,9 @@ fun TVRow(
                     }
                     TVRowItem(
                         channel = channel,
-                        goToVideoPlayer = {
+                        goToTVPlayer = {
                             lazyRow.saveFocusedChild()
-                            goToVideoPlayer(channel)
+                            goToTVPlayer(channel)
                         },
                         modifier = itemModifier.weight(1f),
                         index = index,
@@ -137,12 +137,12 @@ private fun TVRowItem(
     modifier: Modifier = Modifier,
     itemDirection: ItemDirection = ItemDirection.Vertical,
     onChannelFocused: (Channel) -> Unit = {},
-    goToVideoPlayer: (channel: Channel) -> Unit,
+    goToTVPlayer: (channel: Channel) -> Unit,
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
     ChannelCard(
-        onClick = { goToVideoPlayer(channel) },
+        onClick = { goToTVPlayer(channel) },
         title = {
             ChannelRowItemText(
                 showItemTitle = showItemTitle,
