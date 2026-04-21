@@ -1,5 +1,9 @@
 package com.example.sanchitra.presentation.screens.videoPlayer
+import android.app.Activity
 import android.net.Uri
+import android.util.Log
+import android.view.WindowManager
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -28,9 +32,11 @@ import org.videolan.libvlc.Media
 import org.videolan.libvlc.MediaPlayer
 import org.videolan.libvlc.util.VLCVideoLayout
 import androidx.core.net.toUri
+import com.example.sanchitra.data.models.IPTVChannel
+import com.example.sanchitra.data.models.Stream
 
 object VideoPlayerScreen {
-    const val MovieIdBundleKey = "movieId"
+    const val IPTVStreamIdBundleKey = "iptvStreamId"
 }
 
 @Composable
@@ -38,20 +44,36 @@ fun VideoPlayerScreen(
     onBackPressed: () -> Unit,
     videoPlayerScreenViewModel: VideoPlayerScreenViewModel = hiltViewModel()
 ) {
-    val uiState by videoPlayerScreenViewModel.uiState.collectAsStateWithLifecycle()
 
-    when (val s = uiState) {
-        is VideoPlayerScreenUiState.Loading -> {
-            Loading(modifier = Modifier.fillMaxSize())
+    val context = LocalContext.current
+    val activity = context as Activity
+
+    DisposableEffect(Unit) {
+        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        onDispose {
+            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
+    }
 
-        is VideoPlayerScreenUiState.Error -> {
+    val sharedVM: PlayerSharedViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
+
+    val channel by sharedVM.selectedChannel.collectAsStateWithLifecycle()
+    val stream by sharedVM.selectedStream.collectAsStateWithLifecycle()
+
+//    Log.d("VIDEO_PLAYER_DEBUG", "Channel: $channel, Stream: $stream")
+
+    when {
+        channel == null || stream == null -> {
+//            Log.d("VIDEO_PLAYER_DEBUG", "Channel or stream is null")
             Error(modifier = Modifier.fillMaxSize())
         }
 
-        is VideoPlayerScreenUiState.Done -> {
+        else -> {
             VideoPlayerScreenContent(
-                movieDetails = s.movieDetails,
+                iptvChannel = channel!!,
+                streams = channel!!.streams,
+                stream = stream!!,
                 onBackPressed = onBackPressed
             )
         }
@@ -60,10 +82,17 @@ fun VideoPlayerScreen(
 
 @Composable
 fun VideoPlayerScreenContent(
-    movieDetails: MovieDetails,
+    iptvChannel : IPTVChannel,
+    streams : List<Stream>,
+    stream: Stream,
     onBackPressed: () -> Unit
 ) {
     val context = LocalContext.current
+
+    var currentIndex by remember {
+        mutableStateOf(streams.indexOfFirst { it.id == stream.id }.coerceAtLeast(0))
+    }
+    val currentStream = streams.getOrNull(currentIndex)
 
     val videoPlayerState = rememberVideoPlayerState(hideSeconds = 4)
     val pulseState = rememberVideoPlayerPulseState()
@@ -86,13 +115,13 @@ fun VideoPlayerScreenContent(
     val videoLayout = remember { VLCVideoLayout(context) }
 
     // 🎯 PLAY STREAM
-    LaunchedEffect(movieDetails) {
+    LaunchedEffect(currentStream) {
 
         mediaPlayer.attachViews(videoLayout, null, false, false)
 
         val media = Media(
             libVLC,
-            "http://116.90.120.151:8000/play/a0gp/index.m3u8".toUri()
+            currentStream?.url?.toUri()
         )
 
         media.setHWDecoderEnabled(true, false)
@@ -146,7 +175,7 @@ fun VideoPlayerScreenContent(
             controls = {
                 VideoPlayerControlsVLC(
                     isPlaying = mediaPlayer.isPlaying,
-                    movieDetails = movieDetails,
+                    iptvChannelDetail = iptvChannel,
                     isLive = true,
                     currentTime = mediaPlayer.time,
                     duration = mediaPlayer.length,
@@ -194,12 +223,12 @@ private fun Modifier.dPadEventsVLC(
     }
 )
 
-fun getVlcAudioTracks(player: org.videolan.libvlc.MediaPlayer): List<Pair<Int, String>> {
+fun getVlcAudioTracks(player: MediaPlayer): List<Pair<Int, String>> {
     return player.audioTracks?.map {
         Pair(it.id, it.name ?: "Track ${it.id}")
     } ?: emptyList()
 }
 
-fun setAudioTrack(player: org.videolan.libvlc.MediaPlayer, trackId: Int) {
+fun setAudioTrack(player: MediaPlayer, trackId: Int) {
     player.audioTrack = trackId
 }

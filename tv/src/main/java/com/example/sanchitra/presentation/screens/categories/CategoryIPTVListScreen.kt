@@ -1,6 +1,7 @@
 package com.example.sanchitra.presentation.screens.categories
 
 import JetStreamBottomListPadding
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,11 +25,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.example.sanchitra.data.models.IPTVChannel
+import com.example.sanchitra.data.models.Stream
 import com.example.sanchitra.presentation.common.Error
 import com.example.sanchitra.presentation.common.Loading
 import com.example.sanchitra.presentation.common.MovieCard
 import com.example.sanchitra.presentation.common.PosterImageIPTVChannel
 import com.example.sanchitra.presentation.screens.dashboard.rememberChildPadding
+import com.example.sanchitra.presentation.screens.videoPlayer.PlayerSharedViewModel
 import com.example.sanchitra.utils.focusOnInitialVisibility
 
 object CategoryIPTVListScreen {
@@ -37,7 +41,7 @@ object CategoryIPTVListScreen {
 @Composable
 fun CategoryIPTVListScreen(
     onBackPressed: () -> Unit,
-    onChannelSelected: (IPTVChannel) -> Unit,
+    onChannelSelected: () -> Unit,
     categoryIPTVListScreenViewModel: CategoryIPTVListScreenViewModel = hiltViewModel()
 ) {
     val uiState by categoryIPTVListScreenViewModel.uiState.collectAsStateWithLifecycle()
@@ -67,11 +71,13 @@ private fun CategoryDetails(
     categoryChannels: List<IPTVChannel>,
     categoryName: String,
     onBackPressed: () -> Unit,
-    onChannelSelected: (IPTVChannel) -> Unit,
+    onChannelSelected: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val childPadding = rememberChildPadding()
     val isFirstItemVisible = remember { mutableStateOf(false) }
+
+    val sharedVM: PlayerSharedViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
 
     BackHandler(onBack = onBackPressed)
 
@@ -98,7 +104,9 @@ private fun CategoryDetails(
                 key = { _, channel -> channel.id }
             ) { index, iptvChannel ->
                 MovieCard(
-                    onClick = { onChannelSelected(iptvChannel) },
+                    onClick = {
+                        sharedVM.setChannel(iptvChannel)
+                        onChannelSelected() },
                     modifier = Modifier
                         .aspectRatio(16 / 9f)
                         .padding(8.dp)

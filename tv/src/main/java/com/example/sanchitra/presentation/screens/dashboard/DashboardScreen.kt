@@ -250,7 +250,7 @@ private fun Body(
         }
         composable(Screens.TV()) {
             TVScreen(
-                goToVideoPlayer = { channel -> openTVPlayer(channel.id) },
+                goToTVPlayer = { channel -> openTVPlayer(channel.id) },
                 onScroll = updateTopBarVisibility,
                 isTopBarVisible = isTopBarVisible
             )

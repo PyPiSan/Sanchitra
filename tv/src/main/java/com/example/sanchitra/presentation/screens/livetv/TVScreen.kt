@@ -22,7 +22,7 @@ import com.example.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 @Composable
 fun TVScreen(
-    goToVideoPlayer: (channel: Channel) -> Unit,
+    goToTVPlayer: (channel: Channel) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
     tvScreenViewModel: TVScreenViewModel = hiltViewModel(),
@@ -44,7 +44,7 @@ fun TVScreen(
             TVCatalog(
                 channelCategories = s.categories,
                 carouselList = s.carousel,
-                goToVideoPlayer = goToVideoPlayer,
+                goToTVPlayer = goToTVPlayer,
                 onScroll = onScroll,
                 isTopBarVisible = isTopBarVisible,
                 modifier = Modifier.fillMaxSize(),
@@ -57,7 +57,7 @@ fun TVScreen(
 fun TVCatalog(
     channelCategories: Map<String, List<Channel>>,
     carouselList: List<Channel>,
-    goToVideoPlayer: (channel: Channel) -> Unit,
+    goToTVPlayer: (channel: Channel) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
     modifier: Modifier = Modifier
@@ -90,7 +90,7 @@ fun TVCatalog(
         item{
             TVScreenChannelList(
                 channelList = carouselList,
-                goToVideoPlayer = goToVideoPlayer,
+                goToTVPlayer = goToTVPlayer,
             )
         }
         items(
@@ -102,7 +102,7 @@ fun TVCatalog(
                 modifier = Modifier.padding(top = childPadding.top),
                 title = entry.key,
                 channels = entry.value,
-                goToVideoPlayer = goToVideoPlayer,
+                goToTVPlayer = goToTVPlayer,
             )
         }
     }

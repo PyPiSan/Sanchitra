@@ -1,4 +1,3 @@
-
 package com.example.sanchitra.presentation
 
 import androidx.compose.material.icons.Icons
@@ -23,11 +22,13 @@ enum class Screens(
     Favourites(isTabItem = false),
     Search(isTabItem = true, tabIcon = Icons.Default.Search),
     CategoryIPTVList(listOf(CategoryIPTVListScreen.CategoryNameKey)),
-    MovieDetails(listOf(MovieDetailsScreen.MovieIdBundleKey)
+    MovieDetails(
+        listOf(MovieDetailsScreen.MovieIdBundleKey)
     ),
     Dashboard,
     TVPlayer(listOf(TVPlayerScreen.TVIdBundleKey)),
-    VideoPlayer(listOf(VideoPlayerScreen.MovieIdBundleKey)
+    VideoPlayer(
+        listOf(VideoPlayerScreen.IPTVStreamIdBundleKey)
     );
 
     operator fun invoke(): String {

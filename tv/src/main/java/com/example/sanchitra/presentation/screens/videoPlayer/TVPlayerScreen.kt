@@ -1,9 +1,11 @@
 package com.example.sanchitra.presentation.screens.videoPlayer
 
 import android.R
+import android.app.Activity
 import android.content.Context
 import android.util.Base64
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
@@ -67,6 +69,18 @@ object TVPlayerScreen {
 fun TVPlayerScreen(
     onBackPressed: () -> Unit, tvPlayerScreenViewModel: TVPlayerScreenViewModel = hiltViewModel()
 ) {
+
+    val context = LocalContext.current
+    val activity = context as Activity
+
+    DisposableEffect(Unit) {
+        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        onDispose {
+            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
     val uiState by tvPlayerScreenViewModel.uiState.collectAsStateWithLifecycle()
 
     when (val s = uiState) {
