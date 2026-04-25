@@ -1,5 +1,6 @@
 package com.example.sanchitra.presentation.screens.livetv
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.focusGroup
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -101,7 +103,7 @@ fun TVRow(
                         firstItem
                     }
             ) {
-                itemsIndexed(tvState, key = { _, channels -> channels.name }) { index, channel ->
+                itemsIndexed(tvState, key = { _, channels -> channels.id }) { index, channel ->
                     val itemModifier = if (index == 0) {
                         Modifier.focusRequester(firstItem)
                     } else {
@@ -113,7 +115,7 @@ fun TVRow(
                             lazyRow.saveFocusedChild()
                             goToTVPlayer(channel)
                         },
-                        modifier = itemModifier.weight(1f),
+                        modifier = itemModifier,
                         index = index,
                         itemDirection = itemDirection,
                         showItemTitle = showItemTitle,

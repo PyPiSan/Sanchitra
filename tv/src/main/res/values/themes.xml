@@ -20,12 +20,12 @@
     </style>
 
     <!-- Splash Screen Theme (This stays the same) -->
-    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenAnimatedIcon">@raw/splash_screen</item>
-        <item name="postSplashScreenTheme">@style/Theme.Sanchitra</item>
+<!--    <style name="Theme.App.Starting" parent="Theme.SplashScreen">-->
+<!--        <item name="windowSplashScreenAnimatedIcon">@raw/splash_screen</item>-->
+<!--        <item name="postSplashScreenTheme">@style/Theme.Sanchitra</item>-->
 
-        <!-- Ensure splash also hides the title -->
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFullscreen">true</item>
-    </style>
+<!--        &lt;!&ndash; Ensure splash also hides the title &ndash;&gt;-->
+<!--        <item name="android:windowNoTitle">true</item>-->
+<!--        <item name="android:windowFullscreen">true</item>-->
+<!--    </style>-->
 </resources>
