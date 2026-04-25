@@ -3,6 +3,7 @@ package com.example.sanchitra.presentation.common
 import JetStreamBorderWidth
 import JetStreamCardShape
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

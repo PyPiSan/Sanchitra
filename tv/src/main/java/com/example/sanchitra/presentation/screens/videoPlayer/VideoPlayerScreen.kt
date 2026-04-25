@@ -98,16 +98,20 @@ fun VideoPlayerScreenContent(
     val pulseState = rememberVideoPlayerPulseState()
     var showAudioDialog by remember { mutableStateOf(false) }
 
-    // 🔥 VLC INIT
+    // VLC INIT
     val libVLC = remember {
         LibVLC(context, arrayListOf(
-            "--network-caching=1500",
-            "--live-caching=1500",
+            "--network-caching=2500",        // 🔥 more buffer
+            "--live-caching=2500",
+            "--file-caching=2500",
             "--vout=android-display",
-            "--no-drop-late-frames",
-            "--no-skip-frames",
-            "--clock-jitter=0",
-            "--clock-synchro=0"
+            "--drop-late-frames",           // ✅ allow smooth playback
+            "--skip-frames",
+            "--codec=mediacodec,all",       // 🔥 force HW decode
+            "--avcodec-fast",               // faster decoding
+            "--avcodec-skiploopfilter=4",   // reduce CPU load
+            "--audio-resampler=soxr",       // better audio sync
+            "--aout=opensles"
         ))
     }
 
@@ -126,15 +130,19 @@ fun VideoPlayerScreenContent(
 
         media.setHWDecoderEnabled(true, false)
 
-        media.addOption(":network-caching=1500")
-        media.addOption(":clock-jitter=0")
-        media.addOption(":clock-synchro=0")
-        media.addOption(":audio-desync=0")
-        media.addOption(":network-caching=1500") // increase a bit
+        media.addOption(":network-caching=2500")
+        media.addOption(":live-caching=2500")
+        media.addOption(":file-caching=2500")
+        media.addOption(":codec=mediacodec,all")
+        media.addOption(":avcodec-fast")
+        media.addOption(":avcodec-skiploopfilter=4")
 
         mediaPlayer.media = media
         media.release()
 
+        mediaPlayer.play()
+        mediaPlayer.pause()
+        kotlinx.coroutines.delay(700)
         mediaPlayer.play()
     }
 

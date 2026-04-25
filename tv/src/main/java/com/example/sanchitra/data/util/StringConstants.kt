@@ -3,7 +3,7 @@ package com.example.sanchitra.data.util
 object StringConstants {
 
     object API {
-        const val TVURL = "https://tv.pypisan.com/api/v1/";
+        const val TVURL = "https://media.pypisan.com/api/v1/";
         const val UIURL = "https://sanchitra.pypisan.com/"
     }
 
