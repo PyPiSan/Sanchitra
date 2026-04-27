@@ -37,7 +37,7 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.example.sanchitra" />
+                  <option name="appId" value="com.pypisan.sanchitra" />
                   <option name="mobileSdkAppId" value="1:724438942455:android:a86296377947e791d5c9f2" />
                   <option name="projectId" value="sanchitra-v1" />
                   <option name="projectNumber" value="724438942455" />
