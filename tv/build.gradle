@@ -15,24 +15,24 @@ plugins {
     id 'kotlin-parcelize'
 }
 
-def versionMajor = 1
+def versionMajor = 2
 def versionMinor = 2
-def versionPatch = 0
+def versionPatch = 2
 def buildType="alpha"
+
+def computedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
+def computedVersionCode = (versionMajor * 10000) + (versionMinor * 100) + versionPatch
 
 android {
     namespace 'com.pypisan.sanchitra'
     compileSdk 36
 
     defaultConfig {
-        applicationId "com.example.sanchitra"
+        applicationId "com.pypisan.sanchitra"
         minSdk 24
-        targetSdk 34
-        versionCode 1
-        versionCode versionMajor * 10000
-        + versionMinor * 100
-        + versionPatch
-        versionName "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
+        targetSdk 35
+        versionCode computedVersionCode
+        versionName computedVersionName
         multiDexEnabled true // add this to enable multi-dex
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -47,7 +47,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            resValue "string", "app_version", "${defaultConfig.versionName}"
+            resValue "string", "app_version", "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
             signingConfig signingConfigs.debug
         }
     }
