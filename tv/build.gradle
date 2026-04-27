@@ -16,12 +16,12 @@ plugins {
 }
 
 def versionMajor = 1
-def versionMinor = 1
-def versionPatch = 1
-def buildType="beta"
+def versionMinor = 2
+def versionPatch = 0
+def buildType="alpha"
 
 android {
-    namespace 'com.example.sanchitra'
+    namespace 'com.pypisan.sanchitra'
     compileSdk 36
 
     defaultConfig {
