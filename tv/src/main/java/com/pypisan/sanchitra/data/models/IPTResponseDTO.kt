@@ -1,5 +1,6 @@
 package com.pypisan.sanchitra.data.models
 
+
 data class IPTVResponseDto(
     val channels: List<IPTVChannelDto>
 )
@@ -16,9 +17,9 @@ data class IPTVChannelDto(
 data class StreamDto(
     val id: Int,
     val url: String,
-    val quality: String,
+    val quality: String?,
     val label: String?,
-    val feed: String,
+    val feed: String?,
     val is_active: Boolean,
     val is_web: Boolean,
     val is_app: Boolean
@@ -46,9 +47,9 @@ fun StreamDto.toDomain(): Stream {
     return Stream(
         id = id,
         url = url,
-        quality = quality,
-        label = label,
-        feed = feed,
+        quality = quality ?: "Unknown",
+        label = label ?: "Unknown",
+        feed = feed ?: "Unknown",
         isActive = is_active,
         isWeb = is_web,
         isApp = is_app
