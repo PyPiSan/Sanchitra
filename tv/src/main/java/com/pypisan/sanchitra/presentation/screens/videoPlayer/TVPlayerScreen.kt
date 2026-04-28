@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -92,7 +94,8 @@ fun TVPlayerScreen(
     }
 }
 
-@OptIn(UnstableApi::class
+@OptIn(
+    UnstableApi::class
 )
 @Composable
 fun TVPlayerScreenContent(
@@ -123,6 +126,7 @@ fun TVPlayerScreenContent(
         )
 
         val focusRequester = remember { FocusRequester() }
+        var subtitlesEnabled by remember { mutableStateOf(true) }
 
         VideoPlayerOverlay(
             modifier = Modifier.align(Alignment.BottomCenter),
@@ -134,7 +138,11 @@ fun TVPlayerScreenContent(
             showControls = videoPlayerState::showControls,
             controls = {
                 VideoPlayerControls(
-                    player = exoPlayer, channel = channel, focusRequester = focusRequester
+                    player = exoPlayer, channel = channel, focusRequester = focusRequester,
+                    onShowSubtitles = {
+                        subtitlesEnabled = !subtitlesEnabled
+                        toggleSubtitles(player = exoPlayer, subtitlesEnabled)
+                    }
                 )
             })
     }
@@ -191,6 +199,8 @@ fun rememberExoPlayer(
                         .setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
                         .setForceHighestSupportedBitrate(true)
                         .setPreferredAudioLanguage("en")
+                        .setPreferredTextLanguage("en")
+                        .setSelectUndeterminedTextLanguage(true)
                         .build()
                     addListener(object : Player.Listener {
 
@@ -202,34 +212,6 @@ fun rememberExoPlayer(
                         override fun onPlaybackStateChanged(state: Int) {
                             if (state == Player.STATE_READY) {
 //                                hasError = false
-                            }
-                        }
-
-                        override fun onTracksChanged(tracks: Tracks) {
-
-                            tracks.groups.forEach { group ->
-
-                                if (group.type == C.TRACK_TYPE_VIDEO) {
-                                    for (i in 0 until group.length) {
-                                        val format = group.getTrackFormat(i)
-                                        Log.d("VIDEO_INFO",
-                                            "Res=${format.width}x${format.height}, bitrate=${format.bitrate}"
-                                        )
-                                    }
-                                }
-
-                                if (group.type == C.TRACK_TYPE_AUDIO) {
-                                    for (i in 0 until group.length) {
-                                        val format = group.getTrackFormat(i)
-                                        Log.d("AUDIO_INFO",
-                                            """
-                                Codec=${format.codecs}
-                                Bitrate=${format.bitrate}
-                                Lang=${format.language}
-                                """.trimIndent()
-                                        )
-                                    }
-                                }
                             }
                         }
                     })
@@ -382,4 +364,13 @@ fun selectAudio(player: Player, language: String) {
         .build()
 
     trackSelector.parameters = params
+}
+
+fun toggleSubtitles(player: ExoPlayer, enable: Boolean) {
+    val params = player.trackSelectionParameters
+        .buildUpon()
+        .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, !enable)
+        .build()
+
+    player.trackSelectionParameters = params
 }
