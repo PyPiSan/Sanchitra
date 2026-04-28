@@ -7,6 +7,11 @@ object StringConstants {
         const val UIURL = "https://sanchitra.pypisan.com/"
     }
 
+    object Profile {
+        var accountsEmail: String? = null
+        var userName: String? = null
+    }
+
     object Movie {
         const val StatusReleased = "Released"
         const val BudgetDefault = "$10M"
@@ -94,7 +99,7 @@ object StringConstants {
             const val SubtitlesSectionSubtitlesItem = "Subtitles"
             const val SubtitlesSectionLanguageItem = "Subtitles Language"
             const val SubtitlesSectionLanguageValue = "English"
-            const val AccountsSelectionSwitchAccountsTitle = "Switch accounts"
+            const val AccountsSelectionSwitchAccountsTitle = "Switch profile"
             const val AccountsSelectionSwitchAccountsEmail = "jack@jetstream.com"
             const val AccountsSelectionLogOut = "Log out"
             const val AccountsSelectionChangePasswordTitle = "Change password"

@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pypisan.sanchitra.data.models.UserProfileMap
 import com.pypisan.sanchitra.data.repositories.AuthRepository
+import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.data.util.getToken
 import com.pypisan.sanchitra.data.util.saveRefreshToken
 import com.pypisan.sanchitra.data.util.saveToken
@@ -74,6 +75,7 @@ class OnboardingViewModel : ViewModel() {
             val result = repo.getUserDetail(context)
 
             if (result != null) {
+                StringConstants.Profile.accountsEmail = result.email;
 
                 val apiProfiles = result.profiles.map {
                     UserProfileMap(
