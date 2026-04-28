@@ -1,5 +1,6 @@
 package com.pypisan.sanchitra.data.repositories
 
+import android.util.Log
 import com.pypisan.sanchitra.data.entities.IPTVCategoryDto
 import com.pypisan.sanchitra.data.models.IPTVChannel
 import com.pypisan.sanchitra.data.models.toDomain
@@ -23,6 +24,8 @@ class IPTVRepositoryImpl @Inject constructor(
             val response = api.getIPTVCategory(category)
 
             if (response.isSuccessful) {
+//                Log.d("IPTVRepositoryImpl", "getIPTVChannelsByCategory: ${response.body()
+//                    ?.channels}")
                 emit(
                     response.body()
                         ?.channels
@@ -30,6 +33,7 @@ class IPTVRepositoryImpl @Inject constructor(
                         .map { it.toDomain() }
                 )
             } else {
+//                Log.d("IPTVRepositoryImpl", "getIPTVChannelsByCategory: ${response.code()}")
                 throw Exception("API Error: ${response.code()}")
             }
         }
@@ -37,6 +41,7 @@ class IPTVRepositoryImpl @Inject constructor(
                 emit(emptyList())
             }
             .flowOn(Dispatchers.IO)
+
 
     override fun getIPTVCategories(): Flow<List<IPTVCategoryDto>> =
         flow {
