@@ -36,11 +36,11 @@ fun AccountsSection() {
             AccountsSectionData(
                 title = StringConstants.Composable.Placeholders
                     .AccountsSelectionSwitchAccountsTitle,
-                value = StringConstants.Composable.Placeholders.AccountsSelectionSwitchAccountsEmail
+                value = StringConstants.Profile.accountsEmail
             ),
             AccountsSectionData(
                 title = StringConstants.Composable.Placeholders.AccountsSelectionLogOut,
-                value = StringConstants.Composable.Placeholders.AccountsSelectionSwitchAccountsEmail
+                value = StringConstants.Profile.accountsEmail
             ),
             AccountsSectionData(
                 title = StringConstants.Composable.Placeholders
