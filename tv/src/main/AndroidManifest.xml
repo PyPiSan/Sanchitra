@@ -21,7 +21,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sanchitra"
         android:enableOnBackInvokedCallback="true"
-        tools:targetApi="tiramisu">
+        tools:targetApi="tiramisu"
+        android:usesCleartextTraffic="true"
+        >
         <activity
             android:name=".MainActivity"
             android:exported="true"
