@@ -117,6 +117,9 @@ fun VideoPlayerScreenContent(
     // 🎯 PLAY STREAM
     LaunchedEffect(currentStream) {
 
+        mediaPlayer.stop()
+        mediaPlayer.detachViews()
+
         mediaPlayer.attachViews(videoLayout, null, false, false)
 
         val media = Media(
@@ -132,13 +135,11 @@ fun VideoPlayerScreenContent(
         media.addOption(":codec=mediacodec,all")
         media.addOption(":avcodec-fast")
         media.addOption(":avcodec-skiploopfilter=4")
+        media.addOption(":no-spu")
 
         mediaPlayer.media = media
         media.release()
 
-        mediaPlayer.play()
-        mediaPlayer.pause()
-        kotlinx.coroutines.delay(700)
         mediaPlayer.play()
     }
 

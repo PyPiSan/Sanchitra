@@ -53,6 +53,7 @@ fun VideoPlayerControls(
     focusRequester: FocusRequester,
     onShowControls: () -> Unit = {},
     onShowAudioSettings: () -> Unit = {},
+    onShowSubtitles: () -> Unit = {}
 ) {
     var isPlaying by remember { mutableStateOf(player.isPlaying) }
 
@@ -142,7 +143,8 @@ fun VideoPlayerControls(
                     isPlaying = isPlaying,
                     contentDescription =
                         StringConstants.Composable.VideoPlayerControlClosedCaptionsButton,
-                    onShowControls = onShowControls
+                    onShowControls = onShowControls,
+                    onClick = onShowSubtitles
                 )
 
                 VideoPlayerControlsIcon(
