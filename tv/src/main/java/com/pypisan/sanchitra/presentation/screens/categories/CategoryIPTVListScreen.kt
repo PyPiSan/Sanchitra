@@ -11,12 +11,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,7 +39,6 @@ import com.pypisan.sanchitra.presentation.common.MovieCard
 import com.pypisan.sanchitra.presentation.common.PosterImageIPTVChannel
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.PlayerSharedViewModel
-import com.pypisan.sanchitra.utils.focusOnInitialVisibility
 
 object CategoryIPTVListScreen {
     const val CategoryNameKey = "categoryName"
@@ -46,11 +53,11 @@ fun CategoryIPTVListScreen(
     val uiState by categoryIPTVListScreenViewModel.uiState.collectAsStateWithLifecycle()
 
     when (val s = uiState) {
-        CategoryIPTVListScreenUiState.Loading -> {
+        is CategoryIPTVListScreenUiState.Loading -> {
             Loading(modifier = Modifier.fillMaxSize())
         }
 
-        CategoryIPTVListScreenUiState.Error -> {
+        is CategoryIPTVListScreenUiState.Error -> {
             Error(modifier = Modifier.fillMaxSize())
         }
 
@@ -75,8 +82,24 @@ private fun CategoryDetails(
 ) {
     val childPadding = rememberChildPadding()
     val isFirstItemVisible = remember { mutableStateOf(false) }
+    val gridState = rememberLazyGridState()
 
     val sharedVM: PlayerSharedViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
+    var lastFocusedIndex by rememberSaveable(categoryName) { mutableIntStateOf(0) }
+
+    val focusRequesters = remember(categoryChannels) {
+        List(categoryChannels.size) { FocusRequester() }
+    }
+
+    LaunchedEffect(categoryChannels) {
+        focusRequesters
+            .getOrNull(lastFocusedIndex)
+            ?.requestFocus()
+    }
+
+    LaunchedEffect(categoryChannels) {
+        gridState.scrollToItem(lastFocusedIndex)
+    }
 
     BackHandler(onBack = onBackPressed)
 
@@ -94,6 +117,7 @@ private fun CategoryDetails(
             )
         )
         LazyVerticalGrid(
+            state = gridState,
             columns = GridCells.Adaptive(minSize = 220.dp),
             modifier = modifier,
             contentPadding = PaddingValues(JetStreamBottomListPadding)
@@ -109,11 +133,12 @@ private fun CategoryDetails(
                     modifier = Modifier
                         .aspectRatio(16 / 9f)
                         .padding(8.dp)
-                        .then(
-                            if (index == 0)
-                                Modifier.focusOnInitialVisibility(isFirstItemVisible)
-                            else Modifier
-                        ),
+                        .focusRequester(focusRequesters[index])
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                lastFocusedIndex = index
+                            }
+                        },
                 ) {
                     PosterImageIPTVChannel(iptvChannel = iptvChannel, modifier = Modifier.fillMaxSize())
                 }

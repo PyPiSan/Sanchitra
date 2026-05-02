@@ -19,10 +19,14 @@ class TVScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     val uiState: StateFlow<TVScreenUiState> =
-        combine(
+        combine<List<Channel>, List<Channel>, TVScreenUiState>(
             tvRepository.getChannels(),
             tvRepository.getCarouselTV()
         ) { channels, carousel ->
+
+            if (channels.isEmpty() && carousel.isEmpty()) {
+                return@combine TVScreenUiState.Loading
+            }
 
             val channelGrouped = channels
                 .filter { it.isValid() }
@@ -32,11 +36,8 @@ class TVScreenViewModel @Inject constructor(
             TVScreenUiState.Ready(
                 categories = channelGrouped,
                 carousel = carousel
-            ) as TVScreenUiState
+            )
         }
-            .onStart {
-                emit(TVScreenUiState.Loading)
-            }
             .catch { e ->
                 emit(TVScreenUiState.Error(e.message ?: "Something went wrong"))
             }

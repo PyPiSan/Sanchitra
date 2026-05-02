@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
@@ -35,14 +34,14 @@ class CategoryIPTVListScreenViewModel @Inject constructor(
                     flowOf(CategoryIPTVListScreenUiState.Error)
                 } else {
                     iptvRepository.getIPTVChannelsByCategory(name)
-                        .map<List<IPTVChannel>, CategoryIPTVListScreenUiState> { channels ->
+                        .map { channels ->
+                            if (channels.isEmpty()) {
+                                return@map CategoryIPTVListScreenUiState.Loading
+                            }
                             CategoryIPTVListScreenUiState.Done(
                                 categoryName = name,
                                 channels = channels
                             )
-                        }
-                        .onStart {
-                            emit(CategoryIPTVListScreenUiState.Loading)
                         }
                         .catch {
                             emit(CategoryIPTVListScreenUiState.Error)

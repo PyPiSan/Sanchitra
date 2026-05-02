@@ -1,7 +1,6 @@
 package com.pypisan.sanchitra.data.repositories
 
 
-
 import com.pypisan.sanchitra.utils.APIService
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -12,6 +11,11 @@ import kotlinx.coroutines.flow.flowOn
 import kotlin.collections.emptyList
 import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.data.models.toDomain
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlin.collections.map
 import kotlin.collections.orEmpty
 
@@ -20,44 +24,81 @@ class TVRepositoryImpl @Inject constructor(
     private val api: APIService
 ) : TVRepository {
 
-    override fun getChannels(): Flow<List<Channel>> = flow {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private val channelsFlow: StateFlow<List<Channel>> = flow {
         val response = api.getLiveTV()
 
         if (response.isSuccessful) {
-            val channels = response.body()?.channels.orEmpty()
-                .map { it.toDomain() }
-//            Log.d("API_DEBUG", "Channels size: ${channels.size}")
-            emit(channels)
+            emit(response.body()?.channels.orEmpty().map { it.toDomain() })
         } else {
-//            Log.e("API_DEBUG", "Error ${response.code()} ${response.message()}")
             emit(emptyList())
         }
-    }
-        .catch { e ->
-//            Log.e("API_DEBUG", "Exception: ${e.message}", e)
-            emit(emptyList())
-        }
-        .flowOn(Dispatchers.IO)
+    }.catch {
+        emit(emptyList())
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = emptyList()
+    )
 
-
-    override fun getCarouselTV(): Flow<List<Channel>> = flow {
+    private val carouselFlow: StateFlow<List<Channel>> = flow {
         val response = api.getCarouselTV()
 
         if (response.isSuccessful) {
-            val channelCarousel = response.body()?.channels.orEmpty()
-                .map { it.toDomain() }
-//            Log.d("API_DEBUG", "Channels size: ${channels.size}")
-            emit(channelCarousel)
+            emit(response.body()?.channels.orEmpty().map { it.toDomain() })
         } else {
-//            Log.e("API_DEBUG", "Error ${response.code()} ${response.message()}")
             emit(emptyList())
         }
-    }
-        .catch { e ->
-//            Log.e("API_DEBUG", "Exception: ${e.message}", e)
-            emit(emptyList())
-        }
-        .flowOn(Dispatchers.IO)
+    }.catch {
+        emit(emptyList())
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    override fun getChannels(): Flow<List<Channel>> = channelsFlow
+    override fun getCarouselTV(): Flow<List<Channel>> = carouselFlow
+
+//    override fun getChannels(): Flow<List<Channel>> = flow {
+//        val response = api.getLiveTV()
+//
+//        if (response.isSuccessful) {
+//            val channels = response.body()?.channels.orEmpty()
+//                .map { it.toDomain() }
+////            Log.d("API_DEBUG", "Channels size: ${channels.size}")
+//            emit(channels)
+//        } else {
+////            Log.e("API_DEBUG", "Error ${response.code()} ${response.message()}")
+//            emit(emptyList())
+//        }
+//    }
+//        .catch { e ->
+////            Log.e("API_DEBUG", "Exception: ${e.message}", e)
+//            emit(emptyList())
+//        }
+//        .flowOn(Dispatchers.IO)
+//
+//
+//    override fun getCarouselTV(): Flow<List<Channel>> = flow {
+//        val response = api.getCarouselTV()
+//
+//        if (response.isSuccessful) {
+//            val channelCarousel = response.body()?.channels.orEmpty()
+//                .map { it.toDomain() }
+////            Log.d("API_DEBUG", "Channels size: ${channels.size}")
+//            emit(channelCarousel)
+//        } else {
+////            Log.e("API_DEBUG", "Error ${response.code()} ${response.message()}")
+//            emit(emptyList())
+//        }
+//    }
+//        .catch { e ->
+////            Log.e("API_DEBUG", "Exception: ${e.message}", e)
+//            emit(emptyList())
+//        }
+//        .flowOn(Dispatchers.IO)
 
 
     override suspend fun getChannelData(id: String, type: String): ApiResult<Channel> {

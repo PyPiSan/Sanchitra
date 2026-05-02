@@ -14,12 +14,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -37,6 +40,7 @@ import coil.compose.AsyncImage
 import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
+import androidx.compose.ui.focus.FocusRequester
 
 @Composable
 fun TVScreenChannelList (
@@ -45,26 +49,52 @@ fun TVScreenChannelList (
     startPadding: Dp = rememberChildPadding().start,
     endPadding: Dp = rememberChildPadding().end,
     goToTVPlayer: (channel: Channel) -> Unit,
+
+    lastFocusedChannelId: Int?,
+    onChannelFocused: (Int) -> Unit,
 ){
-    AnimatedContent(
-        modifier = modifier,
-        targetState = channelList,
-        label = "",
-    ) { channelListTarget ->
+    val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
 
         LazyRow(
-            modifier = Modifier.focusRestorer(),
+            modifier = Modifier
+                .focusRequester(lazyRow)
+                .focusRestorer()
+            ,
             contentPadding = PaddingValues(start = startPadding, end = endPadding)
         ) {
-            items(channelListTarget) {
+            itemsIndexed(channelList, key = { _, c -> c.id }) { index, channel ->
+
+                val focusRequester = remember { FocusRequester() }
+
+                // Restore focus when coming back
+                LaunchedEffect(lastFocusedChannelId) {
+                    if (channel.id == lastFocusedChannelId) {
+                        focusRequester.requestFocus()
+                    }
+                }
+
+                val itemModifier = when {
+                    channel.id == lastFocusedChannelId -> Modifier.focusRequester(focusRequester)
+                    index == 0 -> Modifier.focusRequester(firstItem)
+                    else -> Modifier
+                }
+
                 ChannelListItem(
                     itemWidth = 432.dp,
-                    onChannelClick = goToTVPlayer,
-                    channel = it,
+                    onChannelClick = {
+                        lazyRow.saveFocusedChild()
+                        goToTVPlayer(channel)
+                    },
+                    channel = channel,
+                    modifier = itemModifier
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                onChannelFocused(channel.id)
+                            }
+                        }
                 )
             }
         }
-    }
 }
 
 @Composable
