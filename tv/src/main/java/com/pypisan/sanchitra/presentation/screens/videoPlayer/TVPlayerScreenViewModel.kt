@@ -1,7 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 
-import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -26,7 +25,6 @@ class TVPlayerScreenViewModel @Inject constructor(
         .getStateFlow<String?>(TVPlayerScreen.TVIdBundleKey, null)
         .filterNotNull()
         .map { id ->
-//            Log.d("VIDEO_DEBUG", "id: $id")
 
             val typeMedia = if (id.toInt() > 1000) "stream" else "hd"
 
