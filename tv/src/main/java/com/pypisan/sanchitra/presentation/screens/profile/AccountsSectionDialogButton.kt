@@ -2,6 +2,8 @@ package com.pypisan.sanchitra.presentation.screens.profile
 import JetStreamButtonShape
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
@@ -10,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
 import androidx.tv.material3.Button

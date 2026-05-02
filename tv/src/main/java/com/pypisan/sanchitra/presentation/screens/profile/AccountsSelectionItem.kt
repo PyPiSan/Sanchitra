@@ -1,3 +1,4 @@
+package com.pypisan.sanchitra.presentation.screens.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +20,6 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import androidx.tv.material3.surfaceColorAtElevation
-import com.pypisan.sanchitra.presentation.screens.profile.AccountsSectionData
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
