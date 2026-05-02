@@ -31,15 +31,24 @@ interface APIService {
         @Header("No-Auth") noAuth: Boolean = true
     ): Response<LoginStatusResponse>
 
-//    get user details
+    //    get user details
     @GET("users/detail/")
     suspend fun getUserDetail(): Response<UserDetailResponse>
 
-//    get TV channel list
+    //    logout
+    @GET("users/logout/")
+    suspend fun userLogout(): Response<UserDetailResponse>
+
+    //    delete
+    @GET("users/delete/")
+    suspend fun deleteUserAccount(): Response<UserDetailResponse>
+
+
+    //    get TV channel list
     @GET("home/tv/hd/")
     suspend fun getLiveTV(): Response<TVResponse>
 
-//    get TV carousel
+    //    get TV carousel
     @GET("home/tv/carousel/")
     suspend fun getCarouselTV(): Response<TVResponse>
 
@@ -49,7 +58,7 @@ interface APIService {
         @Query("type") type: String
     ): Response<ChannelDto>
 
-//    IPTV
+    //    IPTV
 
     @GET("iptv/category/list/")
     suspend fun getIPTVCategoryList(): Response<List<IPTVCategoryDto>>

@@ -152,8 +152,7 @@ fun ProfileScreen(
                 .fillMaxSize()
                 .onPreviewKeyEvent {
                     if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
-                        // Using 'while' because AccountsScreen has a grid that has multiple items
-                        // in a row for which we would need to press D-Pad Left multiple times
+
                         while (!isLeftColumnFocused) {
                             focusManager.moveFocus(FocusDirection.Left)
                         }

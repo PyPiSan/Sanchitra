@@ -20,7 +20,7 @@ class AuthRepository {
             if (response.isSuccessful) response.body() else null
 
         } catch (e: Exception) {
-            Log.e("API_DEBUG", "Init API Error: ${e.message}")
+            Log.e("TV", "initDeviceLogin API Error: ${e.message}")
             null
         }
     }
@@ -33,12 +33,12 @@ class AuthRepository {
             val api = APIClient.create(context)
             val response = api.checkLoginStatus(deviceCode)
 
-            Log.d("API_DEBUG", "Status Response: ${response.body()}")
+            Log.d("TV", "checkLoginStatus Response: ${response.body()}")
 
             if (response.isSuccessful) response.body() else null
 
         } catch (e: Exception) {
-            Log.e("API_DEBUG", "Status API Error: ${e.message}")
+            Log.e("TV", "checkLoginStatus API Error: ${e.message}")
             null
         }
     }
@@ -52,12 +52,51 @@ class AuthRepository {
             if (response.isSuccessful) {
                 response.body()
             } else {
-                Log.e("API_DEBUG", "Error Code: ${response.code()}")
+                Log.e("TV", "UserDetail error Code: ${response.code()}")
                 null
             }
 
         } catch (e: Exception) {
-            Log.e("API_DEBUG", "UserDetail API Error: ${e.message}")
+            Log.e("TV", "UserDetail API Error: ${e.message}")
+            null
+        }
+    }
+
+
+    suspend fun userProfileLogout(context: Context): UserDetailResponse? {
+        return try {
+            val api = APIClient.create(context)
+
+            val response = api.userLogout()
+
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                Log.e("TV", "userProfileLogout error Code: ${response.code()}")
+                null
+            }
+
+        } catch (e: Exception) {
+            Log.e("TV", "userLogout API Error: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun userAccountDelete(context: Context): UserDetailResponse? {
+        return try {
+            val api = APIClient.create(context)
+
+            val response = api.deleteUserAccount()
+
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                Log.e("TV", "deleteUserAccount error Code: ${response.code()}")
+                null
+            }
+
+        } catch (e: Exception) {
+            Log.e("TV", "deleteUserAccount API Error: ${e.message}")
             null
         }
     }
