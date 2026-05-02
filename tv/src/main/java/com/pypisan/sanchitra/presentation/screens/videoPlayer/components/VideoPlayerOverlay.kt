@@ -45,7 +45,6 @@ fun VideoPlayerOverlay(
     controls: @Composable () -> Unit = {}
 ) {
 
-    Log.d("TV", "error flag: $isError")
     LaunchedEffect(isControlsVisible) {
         if (isControlsVisible) {
             try {
@@ -87,7 +86,7 @@ fun VideoPlayerOverlay(
 
             // Controls
             AnimatedVisibility(
-                visible = isControlsVisible && !isError,
+                visible = isControlsVisible && !isError && !isBuffering,
                 enter = slideInVertically { it },
                 exit = slideOutVertically { it }
             ) {

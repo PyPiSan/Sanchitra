@@ -1,4 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer.components
+
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.focusable
