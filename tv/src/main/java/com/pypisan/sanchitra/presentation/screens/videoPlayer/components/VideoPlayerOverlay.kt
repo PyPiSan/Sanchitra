@@ -1,4 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer.components
+
 import android.util.Log
 import com.pypisan.sanchitra.presentation.theme.SanchitraTheme
 import androidx.compose.animation.AnimatedVisibility
@@ -7,6 +8,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +18,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -29,20 +34,25 @@ import androidx.compose.ui.unit.dp
 fun VideoPlayerOverlay(
     isPlaying: Boolean,
     modifier: Modifier = Modifier,
+    isError: Boolean = false,
+    isBuffering: Boolean = false,
     isControlsVisible: Boolean = true,
     focusRequester: FocusRequester = remember { FocusRequester() },
     showControls: () -> Unit = {},
+    onRetry: () -> Unit = {},
     centerButton: @Composable () -> Unit = {},
     subtitles: @Composable () -> Unit = {},
     controls: @Composable () -> Unit = {}
 ) {
+
+    Log.d("TV", "error flag: $isError")
     LaunchedEffect(isControlsVisible) {
         if (isControlsVisible) {
             try {
                 kotlinx.coroutines.android.awaitFrame()
                 focusRequester.requestFocus()
             } catch (e: Exception) {
-                Log.e("Focus", "Focus request failed", e)
+                Log.e("TV", "Focus request failed", e)
             }
         }
     }
@@ -55,11 +65,19 @@ fun VideoPlayerOverlay(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        AnimatedVisibility(isControlsVisible, Modifier, fadeIn(), fadeOut()) {
+
+        // Background overlay when controls visible
+        AnimatedVisibility(
+            visible = isControlsVisible && !isError && !isBuffering ,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             CinematicBackground(Modifier.fillMaxSize())
         }
 
+        // Main content
         Column {
+
             Box(
                 Modifier.weight(1f),
                 contentAlignment = Alignment.BottomCenter
@@ -67,11 +85,11 @@ fun VideoPlayerOverlay(
                 subtitles()
             }
 
+            // Controls
             AnimatedVisibility(
-                isControlsVisible,
-                Modifier,
-                slideInVertically { it },
-                slideOutVertically { it }
+                visible = isControlsVisible && !isError,
+                enter = slideInVertically { it },
+                exit = slideOutVertically { it }
             ) {
                 Column(
                     modifier = Modifier
@@ -82,7 +100,57 @@ fun VideoPlayerOverlay(
                 }
             }
         }
-        centerButton()
+
+        if (!isError) {
+            centerButton()
+        }
+
+        if (isBuffering && !isError) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.4f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Color.White)
+            }
+        }
+
+        // ERROR OVERLAY (Retry UI)
+        if (isError) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.85f)),
+                contentAlignment = Alignment.Center
+            ) {
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    Text(
+                        text = "Something went wrong",
+                        color = Color.White
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .focusable()
+                            .clickable { onRetry() }
+                            .background(Color.White)
+                            .padding(horizontal = 24.dp, vertical = 12.dp)
+                    ) {
+                        Text(
+                            text = "Retry",
+                            color = Color.Black
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

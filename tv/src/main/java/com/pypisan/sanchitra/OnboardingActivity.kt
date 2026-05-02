@@ -3,7 +3,6 @@ package com.pypisan.sanchitra
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -23,7 +22,7 @@ import androidx.tv.material3.MaterialTheme
 import com.pypisan.sanchitra.presentation.screens.auth.ProfileSelectionScreen
 import com.pypisan.sanchitra.presentation.screens.auth.QRLoginScreen
 import com.pypisan.sanchitra.presentation.screens.auth.SplashScreen
-import com.pypisan.sanchitra.presentation.screens.common.ErrorScreen
+import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.utils.AuthState
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -98,7 +97,7 @@ class OnboardingActivity : ComponentActivity() {
                 }
 
                 is AuthState.Error -> {
-                    ErrorScreen()
+                    Error()
                 }
 
             }

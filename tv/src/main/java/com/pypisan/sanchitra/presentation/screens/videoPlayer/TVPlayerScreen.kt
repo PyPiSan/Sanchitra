@@ -2,8 +2,6 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 import android.app.Activity
 import android.content.Context
-import android.util.Base64
-import android.util.Log
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
@@ -25,18 +23,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
-import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.drm.DefaultDrmSessionManager
-import androidx.media3.exoplayer.drm.DrmSessionManager
-import androidx.media3.exoplayer.drm.FrameworkMediaDrm
-import androidx.media3.exoplayer.drm.LocalMediaDrmCallback
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
@@ -53,10 +42,10 @@ import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.remembe
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.rememberVideoPlayerState
 import com.pypisan.sanchitra.utils.handleDPadKeyEvents
 import androidx.media3.common.Player
-import androidx.media3.common.Tracks
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import com.pypisan.sanchitra.data.models.AudioTrackInfo
-import kotlinx.coroutines.delay
+import android.util.Log
+import androidx.compose.runtime.saveable.rememberSaveable
 
 object TVPlayerScreen {
     const val TVIdBundleKey = "channelId"
@@ -112,17 +101,18 @@ fun TVPlayerScreenContent(
     val pulseState = rememberVideoPlayerPulseState()
     val renderersFactory = DefaultRenderersFactory(context)
         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+    val isError = rememberSaveable { mutableStateOf(false) }
+    var isBuffering by rememberSaveable { mutableStateOf(false) }
 
-//    val loadControl = DefaultLoadControl.Builder()
-//        .setBufferDurationsMs(
-//            5000,   // min buffer
-//            15000,  // max buffer
-//            1500,   // playback start
-//            3000    // rebuffer
-//        )
-//        .build()
-
-    val exoPlayer = rememberExoPlayer(context, channel, renderersFactory)
+    val exoPlayer = rememberExoPlayer(
+        context = context,
+        channel = channel,
+        onError = { isError.value = true },
+        onBuffering = { state ->
+            isBuffering = state == Player.STATE_BUFFERING
+        },
+        renderersFactory = renderersFactory
+    )
 
     LaunchedEffect(exoPlayer.isPlaying) {
         if (exoPlayer.isPlaying) {
@@ -131,6 +121,24 @@ fun TVPlayerScreenContent(
             videoPlayerState.showControls(false)
         }
     }
+
+    RememberPlaybackWatchdog(
+        exoPlayer = exoPlayer,
+        onFreeze = {
+
+//            Log.e("TV", "FREEZE → RECOVERING STREAM")
+
+            val mediaItem = exoPlayer.currentMediaItem
+
+            if (mediaItem != null) {
+                exoPlayer.stop()
+                exoPlayer.clearMediaItems()
+                exoPlayer.setMediaItem(mediaItem)
+                exoPlayer.seekToDefaultPosition()
+                exoPlayer.play()
+            }
+        }
+    )
 
     BackHandler {
         exoPlayer.release()
@@ -163,6 +171,13 @@ fun TVPlayerScreenContent(
             centerButton = { VideoPlayerPulse(pulseState) },
             subtitles = {},
             showControls = videoPlayerState::showControls,
+            isError = isError.value,
+            isBuffering = isBuffering,
+            onRetry = {
+                exoPlayer.stop()
+                exoPlayer.prepare()
+                exoPlayer.play()
+            },
             controls = {
                 VideoPlayerControls(
                     player = exoPlayer, channel = channel, focusRequester = focusRequester,
@@ -172,6 +187,32 @@ fun TVPlayerScreenContent(
                     }
                 )
             })
+    }
+}
+
+
+@OptIn(UnstableApi::class)
+@Composable
+fun rememberExoPlayer(
+    context: Context,
+    channel: Channel,
+    onError: (PlaybackException) -> Unit,
+    onBuffering: (Int) -> Unit,
+    renderersFactory: DefaultRenderersFactory
+): ExoPlayer {
+
+    return remember(channel.id) {
+        if (!channel.isDrm) {
+            buildDefaultExoPlayer(
+                context,
+                channel,
+                onError,
+                onBuffering,
+                renderersFactory
+            )
+        } else {
+            buildDrmExoPlayer(context, channel)
+        }
     }
 }
 
@@ -198,122 +239,6 @@ private fun Modifier.dPadEvents(
         videoPlayerState.showControls()
     })
 
-
-@OptIn(UnstableApi::class)
-@Composable
-fun rememberExoPlayer(
-    context: Context,
-    channel: Channel,
-    renderersFactory: DefaultRenderersFactory
-): ExoPlayer {
-
-
-    return remember(channel) {
-
-        if (!channel.isDrm) {
-
-            ExoPlayer.Builder(context, renderersFactory)
-                .build()
-                .apply {
-                    // Set track preferences BEFORE prepare()
-                    trackSelectionParameters = trackSelectionParameters
-                        .buildUpon()
-                        .setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
-                        .setForceHighestSupportedBitrate(true)
-                        .setPreferredAudioLanguage("en")
-                        .setPreferredTextLanguage("en")
-                        .setSelectUndeterminedTextLanguage(true)
-                        .build()
-                    addListener(object : Player.Listener {
-
-                        override fun onPlayerError(error: PlaybackException) {
-//                            hasError = true
-                            Log.e("PLAYER_ERROR", "Error: ${error.message}", error)
-                        }
-
-                        override fun onPlaybackStateChanged(state: Int) {
-                            if (state == Player.STATE_READY) {
-//                                hasError = false
-                            }
-                        }
-                    })
-
-                    setMediaItem(MediaItem.fromUri(channel.streamUrl))
-                    prepare()
-                    playWhenReady = true
-                }
-
-        } else {
-
-            val (keyHex, kidHex) = channel.getDrmKeys()!!
-
-            val drmKeyBytes = kidHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-            val encodedDrmKey = Base64.encodeToString(
-                drmKeyBytes,
-                Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
-            )
-
-            val drmKeyIdBytes = keyHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-            val encodedDrmKeyId = Base64.encodeToString(
-                drmKeyIdBytes,
-                Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
-            )
-
-            val drmBody =
-                "{\"keys\":[{\"kty\":\"oct\",\"k\":\"${encodedDrmKey}\",\"kid\":\"${encodedDrmKeyId}\"}],\"type\":\"temporary\"}"
-
-            val dashMediaItem = MediaItem.Builder()
-                .setUri(channel.streamUrl)
-                .setMimeType(MimeTypes.APPLICATION_MPD)
-                .setMediaMetadata(MediaMetadata.Builder().setTitle("test").build())
-                .build()
-
-            val trackSelector = DefaultTrackSelector(context)
-            val loadControl = DefaultLoadControl()
-
-            val drmCallback = LocalMediaDrmCallback(drmBody.toByteArray())
-
-            val drmSessionManager = DefaultDrmSessionManager.Builder()
-                .setPlayClearSamplesWithoutKeys(true)
-                .setMultiSession(false)
-                .setKeyRequestParameters(HashMap())
-                .setUuidAndExoMediaDrmProvider(C.CLEARKEY_UUID, FrameworkMediaDrm.DEFAULT_PROVIDER)
-                .build(drmCallback)
-
-            val customDrmSessionManager: DrmSessionManager = drmSessionManager
-
-            val mediaSourceFactory = DefaultMediaSourceFactory(context)
-                .setDrmSessionManagerProvider { customDrmSessionManager }
-                .createMediaSource(dashMediaItem)
-
-            ExoPlayer.Builder(context)
-                .setTrackSelector(trackSelector)
-                .setLoadControl(loadControl)
-                .setSeekForwardIncrementMs(10_000L)
-                .setSeekBackIncrementMs(10_000L)
-                .build().apply {
-                    trackSelectionParameters = trackSelectionParameters
-                        .buildUpon()
-                        .setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
-                        .setForceHighestSupportedBitrate(true)
-                        .setPreferredAudioLanguage("en")
-                        .build()
-                    addListener(object : Player.Listener {
-                    })
-                    setMediaSource(mediaSourceFactory, true)
-                    prepare()
-                    playWhenReady = true
-                }
-        }
-    }
-}
-
-fun Channel.getDrmKeys(): Pair<String, String>? {
-    if (!isDrm || licenseKey.isNullOrEmpty()) return null
-    val parts = licenseKey.split(":")
-    if (parts.size != 2) return null
-    return parts[0] to parts[1]
-}
 
 @OptIn(UnstableApi::class)
 fun getAudioTracks(player: Player): List<AudioTrackInfo> {
