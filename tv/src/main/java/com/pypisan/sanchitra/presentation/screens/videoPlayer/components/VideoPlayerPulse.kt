@@ -1,8 +1,11 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Forward10
@@ -13,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -37,16 +41,31 @@ fun VideoPlayerPulse(
         VideoPlayerPulse.Type.BACK -> Icons.Default.Replay10
         NONE -> null
     }
+
+    val xOffset = when (state.type) {
+        VideoPlayerPulse.Type.FORWARD -> 120.dp
+        VideoPlayerPulse.Type.BACK -> (-120).dp
+        else -> 0.dp
+    }
+
     if (icon != null) {
-        Icon(
-            icon,
-            contentDescription = null,
-            modifier = Modifier
-                .background(Color.Black.copy(alpha = 0.6f), CircleShape)
-                .size(88.dp)
-                .wrapContentSize()
-                .size(48.dp)
-        )
+        Box(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            Icon(
+                icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(x = xOffset)
+                    .background(
+                        Color.Black.copy(alpha = 0.6f),
+                        CircleShape
+                    )
+                    .size(88.dp)
+                    .padding(20.dp) // controls inner icon spacing
+            )
+        }
     }
 }
 

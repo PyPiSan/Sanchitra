@@ -1,4 +1,4 @@
-
+package com.pypisan.sanchitra.presentation.screens.videoPlayer.components
 import androidx.annotation.OptIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SkipPrevious
@@ -9,7 +9,6 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.state.PreviousButtonState
 import androidx.media3.ui.compose.state.rememberPreviousButtonState
 import com.pypisan.sanchitra.data.util.StringConstants
-import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerControlsIcon
 
 @OptIn(UnstableApi::class)
 @Composable

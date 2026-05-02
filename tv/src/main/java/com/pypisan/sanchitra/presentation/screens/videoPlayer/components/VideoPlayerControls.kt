@@ -1,6 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer.components
 
-import PreviousButton
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,6 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.compose.state.PlayPauseButtonState
+import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.pypisan.sanchitra.data.models.Channel
@@ -53,24 +54,9 @@ fun VideoPlayerControls(
     focusRequester: FocusRequester,
     onShowControls: () -> Unit = {},
     onShowAudioSettings: () -> Unit = {},
-    onShowSubtitles: () -> Unit = {}
+    onShowSubtitles: () -> Unit = {} ,
+    state: PlayPauseButtonState = rememberPlayPauseButtonState(player),
 ) {
-    var isPlaying by remember { mutableStateOf(player.isPlaying) }
-
-    DisposableEffect(player) {
-
-        val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(isPlayingNow: Boolean) {
-                isPlaying = isPlayingNow
-            }
-        }
-
-        player.addListener(listener)
-
-        onDispose {
-            player.removeListener(listener)
-        }
-    }
 
     // Detect if it's a Live stream
     val isLive = remember(player.mediaItemCount, player.playbackState) {
@@ -95,18 +81,12 @@ fun VideoPlayerControls(
 
                 VideoPlayerControlsIcon(
                     modifier = Modifier.focusRequester(focusRequester),
-                    icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                    isPlaying = isPlaying,
-                    onClick = {
-                        if (player.isPlaying) {
-                            player.pause()
-                        } else {
-                            player.play()
-                        }
-                    },
-                    contentDescription =
-                        StringConstants.Composable.VideoPlayerControlClosedCaptionsButton,
-                    onShowControls = {}
+                    icon = if (state.showPlay) Icons.Default.PlayArrow else Icons.Default.Pause,
+                    onClick = state::onClick,
+                    isPlaying = player.isPlaying,
+                    contentDescription = StringConstants
+                        .Composable
+                        .VideoPlayerControlPlayPauseButton
                 )
             }
         },
@@ -140,7 +120,7 @@ fun VideoPlayerControls(
 //
                 VideoPlayerControlsIcon(
                     icon = Icons.Default.ClosedCaption,
-                    isPlaying = isPlaying,
+                    isPlaying = player.isPlaying,
                     contentDescription =
                         StringConstants.Composable.VideoPlayerControlClosedCaptionsButton,
                     onShowControls = onShowControls,
@@ -149,7 +129,7 @@ fun VideoPlayerControls(
 
                 VideoPlayerControlsIcon(
                     icon = Icons.Default.Settings,
-                    isPlaying = isPlaying,
+                    isPlaying = player.isPlaying,
                     contentDescription =
                         StringConstants.Composable.VideoPlayerControlSettingsButton,
                     onShowControls = onShowAudioSettings
@@ -203,40 +183,6 @@ fun LiveAlwaysFullSeeker() {
                     .fillMaxWidth()
                     .height(4.dp)
                     .background(Color.White, shape = RoundedCornerShape(2.dp))
-            )
-        }
-    }
-}
-
-@Composable
-fun AudioTrackSelectorVLC(
-    player: MediaPlayer,
-    onDismiss: () -> Unit
-) {
-    val tracks = remember { getVlcAudioTracks(player) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(300.dp)
-            .background(Color.Black.copy(alpha = 0.9f))
-            .padding(16.dp)
-    ) {
-        Text("Audio Tracks", color = Color.White)
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        tracks.forEach { (id, name) ->
-            Text(
-                text = name,
-                color = Color.White,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        setAudioTrack(player, id)
-                        onDismiss()
-                    }
-                    .padding(12.dp)
             )
         }
     }
