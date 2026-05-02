@@ -1,4 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer.components
+
 import androidx.annotation.IntRange
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,7 +24,7 @@ class VideoPlayerState(
 
     fun showControls(isPlaying: Boolean = true) {
         if (isPlaying) {
-            updateControlVisibility()
+            updateControlVisibility(seconds = 4)
         } else {
             updateControlVisibility(seconds = Int.MAX_VALUE)
         }
@@ -44,12 +45,7 @@ class VideoPlayerState(
     }
 }
 
-/**
- * Create and remember a [VideoPlayerState] instance. Useful when trying to control the state of
- * the [VideoPlayerOverlay]-related composable.
- * @return A remembered instance of [VideoPlayerState].
- * @param hideSeconds How many seconds should the controls be visible before being hidden.
- * */
+
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun rememberVideoPlayerState(

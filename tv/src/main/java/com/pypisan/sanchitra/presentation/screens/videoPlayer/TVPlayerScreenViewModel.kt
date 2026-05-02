@@ -11,6 +11,7 @@ import com.pypisan.sanchitra.data.repositories.TVRepository
 import com.pypisan.sanchitra.data.repositories.TVRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
@@ -23,28 +24,18 @@ class TVPlayerScreenViewModel @Inject constructor(
 
     val uiState = savedStateHandle
         .getStateFlow<String?>(TVPlayerScreen.TVIdBundleKey, null)
+        .filterNotNull()
         .map { id ->
-            Log.d("VIDEO_DEBUG", "id: $id")
-            var typeMedia = ""
-            if (id == null) {
-                TVPlayerScreenUiState.Error
-            } else {
-                typeMedia = if (id.toInt() > 1000){
-                    "stream"
-                } else{
-                    "hd"
+//            Log.d("VIDEO_DEBUG", "id: $id")
+
+            val typeMedia = if (id.toInt() > 1000) "stream" else "hd"
+
+            when (val result = repository.getChannelData(id, typeMedia)) {
+                is TVRepositoryImpl.ApiResult.Success -> {
+                    TVPlayerScreenUiState.Done(result.data)
                 }
-
-                when (val result = repository.getChannelData(id, typeMedia)) {
-
-                    is TVRepositoryImpl.ApiResult.Success -> {
-//                        Log.d("VIDEO_DEBUG", "video channel: ${result.data}")
-                        TVPlayerScreenUiState.Done(result.data)
-                    }
-
-                    is TVRepositoryImpl.ApiResult.Error -> {
-                        TVPlayerScreenUiState.Error
-                    }
+                is TVRepositoryImpl.ApiResult.Error -> {
+                    TVPlayerScreenUiState.Error
                 }
             }
         }

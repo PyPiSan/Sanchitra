@@ -1,7 +1,9 @@
 package com.pypisan.sanchitra.presentation.screens.livetv
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,15 +12,19 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -47,9 +53,10 @@ import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.presentation.common.ChannelCard
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.presentation.common.PosterImageChannel
+import kotlinx.coroutines.android.awaitFrame
+import kotlinx.coroutines.cancel
 
 enum class ItemDirection(val aspectRatio: Float) {
-    Vertical(10.5f / 16f),
     Horizontal(16f / 9f);
 }
 
@@ -58,7 +65,7 @@ enum class ItemDirection(val aspectRatio: Float) {
 @Composable
 fun TVRow(
     modifier: Modifier = Modifier,
-    itemDirection: ItemDirection = ItemDirection.Vertical,
+    itemDirection: ItemDirection = ItemDirection.Horizontal,
     startPadding: Dp = rememberChildPadding().start,
     endPadding: Dp = rememberChildPadding().end,
     title: String? = null,
@@ -70,6 +77,7 @@ fun TVRow(
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
     goToTVPlayer: (channel: Channel) -> Unit,
+    onChannelFocused: (Int) -> Unit,
 ) {
     val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
     Column(
@@ -85,10 +93,6 @@ fun TVRow(
                     .padding(start = startPadding, top = 16.dp, bottom = 16.dp)
             )
         }
-        AnimatedContent(
-            targetState = channels,
-            label = "",
-        ) { tvState ->
             LazyRow(
                 contentPadding = PaddingValues(
                     start = startPadding,
@@ -97,18 +101,20 @@ fun TVRow(
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 modifier = Modifier
                     .focusRequester(lazyRow)
-                    .focusRestorer {
-                        firstItem
-                    }
+                    .focusRestorer()
             ) {
-                itemsIndexed(tvState, key = { _, channels -> channels.id }) { index, channel ->
-                    val itemModifier = if (index == 0) {
-                        Modifier.focusRequester(firstItem)
-                    } else {
-                        Modifier
+                itemsIndexed(channels, key = { _, channels -> channels.id }) { index, channel ->
+
+                    val itemModifier = when {
+                        index == 0 -> Modifier.focusRequester(firstItem)
+                        else -> Modifier
                     }
+
                     TVRowItem(
                         channel = channel,
+                        onChannelFocused = {
+                            onChannelFocused(channel.id)
+                        },
                         goToTVPlayer = {
                             lazyRow.saveFocusedChild()
                             goToTVPlayer(channel)
@@ -121,8 +127,6 @@ fun TVRow(
                     )
                 }
             }
-
-        }
     }
 }
 
@@ -135,8 +139,8 @@ private fun TVRowItem(
     showItemTitle: Boolean,
     showIndexOverImage: Boolean,
     modifier: Modifier = Modifier,
-    itemDirection: ItemDirection = ItemDirection.Vertical,
-    onChannelFocused: (Channel) -> Unit = {},
+    itemDirection: ItemDirection = ItemDirection.Horizontal,
+    onChannelFocused: (Int) -> Unit,
     goToTVPlayer: (channel: Channel) -> Unit,
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -152,11 +156,10 @@ private fun TVRowItem(
         },
         modifier = Modifier
             .width(220.dp)
-            .aspectRatio(16f / 9f)
             .onFocusChanged {
                 isFocused = it.isFocused
-                if (it.isFocused) {
-                    onChannelFocused(channel)
+                if (it.isFocused  && it.hasFocus ) {
+                    onChannelFocused(channel.id)
                 }
             }
             .focusProperties {
@@ -169,8 +172,9 @@ private fun TVRowItem(
             .then(modifier)
     ) {
         ChannelRowItemImage(
-//            modifier = Modifier.aspectRatio(itemDirection.aspectRatio),
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .aspectRatio(itemDirection.aspectRatio),
             showIndexOverImage = showIndexOverImage,
             channel = channel,
             index = index

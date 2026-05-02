@@ -1,5 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.livetv
 
+import android.util.Log
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,7 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,12 +32,10 @@ fun TVScreen(
     isTopBarVisible: Boolean,
     tvScreenViewModel: TVScreenViewModel = hiltViewModel(),
 ) {
-
     val uiState by tvScreenViewModel.uiState.collectAsStateWithLifecycle()
 
     when (val s = uiState) {
-
-        TVScreenViewModel.TVScreenUiState.Loading -> {
+        is TVScreenViewModel.TVScreenUiState.Loading -> {
             Loading(modifier = Modifier.fillMaxSize())
         }
 
@@ -62,8 +65,15 @@ fun TVCatalog(
     isTopBarVisible: Boolean,
     modifier: Modifier = Modifier
 ) {
+
+    var lastFocusedChannelId by rememberSaveable { mutableStateOf<Int?>(null) }
+
     val childPadding = rememberChildPadding()
     val lazyListState = rememberLazyListState()
+
+    val categoryList = remember(channelCategories) {
+        channelCategories.entries.toList()
+    }
 
     val shouldShowTopBar by remember {
         derivedStateOf {
@@ -91,10 +101,12 @@ fun TVCatalog(
             TVScreenChannelList(
                 channelList = carouselList,
                 goToTVPlayer = goToTVPlayer,
+                lastFocusedChannelId = lastFocusedChannelId,
+                onChannelFocused = { lastFocusedChannelId = it }
             )
         }
         items(
-            items = channelCategories.entries.toList(),
+            items = categoryList,
             key = { it.key }
         ) { entry ->
 
@@ -103,6 +115,7 @@ fun TVCatalog(
                 title = entry.key,
                 channels = entry.value,
                 goToTVPlayer = goToTVPlayer,
+                onChannelFocused = { lastFocusedChannelId = it }
             )
         }
     }

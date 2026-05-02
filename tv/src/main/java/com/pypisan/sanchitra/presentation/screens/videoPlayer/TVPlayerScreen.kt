@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,7 +54,9 @@ import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.remembe
 import com.pypisan.sanchitra.utils.handleDPadKeyEvents
 import androidx.media3.common.Player
 import androidx.media3.common.Tracks
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import com.pypisan.sanchitra.data.models.AudioTrackInfo
+import kotlinx.coroutines.delay
 
 object TVPlayerScreen {
     const val TVIdBundleKey = "channelId"
@@ -61,7 +64,8 @@ object TVPlayerScreen {
 
 @Composable
 fun TVPlayerScreen(
-    onBackPressed: () -> Unit, tvPlayerScreenViewModel: TVPlayerScreenViewModel = hiltViewModel()
+    onBackPressed: () -> Unit,
+    tvPlayerScreenViewModel: TVPlayerScreenViewModel = hiltViewModel()
 ) {
 
     val context = LocalContext.current
@@ -99,16 +103,39 @@ fun TVPlayerScreen(
 )
 @Composable
 fun TVPlayerScreenContent(
-    channel: Channel, onBackPressed: () -> Unit
+    channel: Channel,
+    onBackPressed: () -> Unit
 ) {
     val context = LocalContext.current
 
-    val videoPlayerState = rememberVideoPlayerState(hideSeconds = 4)
+    val videoPlayerState = rememberVideoPlayerState()
     val pulseState = rememberVideoPlayerPulseState()
+    val renderersFactory = DefaultRenderersFactory(context)
+        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
 
-    val exoPlayer = rememberExoPlayer(context, channel)
+//    val loadControl = DefaultLoadControl.Builder()
+//        .setBufferDurationsMs(
+//            5000,   // min buffer
+//            15000,  // max buffer
+//            1500,   // playback start
+//            3000    // rebuffer
+//        )
+//        .build()
 
-    BackHandler(onBack = onBackPressed)
+    val exoPlayer = rememberExoPlayer(context, channel, renderersFactory)
+
+    LaunchedEffect(exoPlayer.isPlaying) {
+        if (exoPlayer.isPlaying) {
+            videoPlayerState.showControls(true)
+        } else {
+            videoPlayerState.showControls(false)
+        }
+    }
+
+    BackHandler {
+        exoPlayer.release()
+        onBackPressed()
+    }
 
     Box(
         Modifier
@@ -146,12 +173,6 @@ fun TVPlayerScreenContent(
                 )
             })
     }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            exoPlayer.release()
-        }
-    }
 }
 
 
@@ -183,6 +204,7 @@ private fun Modifier.dPadEvents(
 fun rememberExoPlayer(
     context: Context,
     channel: Channel,
+    renderersFactory: DefaultRenderersFactory
 ): ExoPlayer {
 
 
@@ -190,7 +212,7 @@ fun rememberExoPlayer(
 
         if (!channel.isDrm) {
 
-            ExoPlayer.Builder(context)
+            ExoPlayer.Builder(context, renderersFactory)
                 .build()
                 .apply {
                     // Set track preferences BEFORE prepare()
@@ -224,7 +246,6 @@ fun rememberExoPlayer(
         } else {
 
             val (keyHex, kidHex) = channel.getDrmKeys()!!
-//            Log.d("VIDEO_DEBUG", "kidHex: $kidHex, keyHex: $keyHex")
 
             val drmKeyBytes = kidHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
             val encodedDrmKey = Base64.encodeToString(
@@ -278,27 +299,6 @@ fun rememberExoPlayer(
                         .setPreferredAudioLanguage("en")
                         .build()
                     addListener(object : Player.Listener {
-                        override fun onTracksChanged(tracks: Tracks) {
-
-                            tracks.groups.forEach { group ->
-
-                                if (group.type == C.TRACK_TYPE_AUDIO) {
-
-                                    val format = group.getTrackFormat(0)
-
-                                    Log.d(
-                                        "AUDIO_INFO",
-                                        """
-                Codec=${format.codecs}
-                Bitrate=${format.bitrate}
-                Lang=${format.language}
-                Label=${format.label}
-                Mime=${format.sampleMimeType}
-                """.trimIndent()
-                                    )
-                                }
-                            }
-                        }
                     })
                     setMediaSource(mediaSourceFactory, true)
                     prepare()
@@ -313,19 +313,6 @@ fun Channel.getDrmKeys(): Pair<String, String>? {
     val parts = licenseKey.split(":")
     if (parts.size != 2) return null
     return parts[0] to parts[1]
-}
-
-fun getLanguageName(code: String?): String {
-    return when (code) {
-        "en" -> "English"
-        "hi" -> "Hindi"
-        "ta" -> "Tamil"
-        "te" -> "Telugu"
-        "kn" -> "Kannada"
-        "ml" -> "Malayalam"
-        "mr" -> "Marathi"
-        else -> code ?: "Unknown"
-    }
 }
 
 @OptIn(UnstableApi::class)

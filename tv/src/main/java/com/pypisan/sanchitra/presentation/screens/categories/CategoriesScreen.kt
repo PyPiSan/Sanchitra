@@ -14,8 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -23,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -47,7 +50,7 @@ fun CategoriesScreen(
     val uiState by categoriesScreenViewModel.uiState.collectAsStateWithLifecycle()
 
     when (val s = uiState) {
-        CategoriesScreenUiState.Loading -> {
+        is CategoriesScreenUiState.Loading -> {
             Loading(modifier = Modifier.fillMaxSize())
         }
 
@@ -85,8 +88,22 @@ private fun Catalog(
             lazyGridState.firstVisibleItemIndex == 0 && lazyGridState.firstVisibleItemScrollOffset < 100
         }
     }
+
+    var lastFocusedIndex by rememberSaveable { mutableIntStateOf(0) }
+    val focusRequesters = remember {
+        List(iptvCategories.size) { FocusRequester() }
+    }
+
     LaunchedEffect(shouldShowTopBar) {
         onScroll(shouldShowTopBar)
+    }
+
+    LaunchedEffect(iptvCategories) {
+        if (focusRequesters.isNotEmpty()) {
+            focusRequesters
+                .getOrNull(lastFocusedIndex)
+                ?.requestFocus()
+        }
     }
 
     AnimatedContent(
@@ -110,8 +127,11 @@ private fun Catalog(
                     .padding(8.dp)
                     .aspectRatio(16 / 9f)
                     .onFocusChanged {
-                        isFocused = it.isFocused || it.hasFocus
+                        if (it.isFocused) {
+                            lastFocusedIndex = index
+                        }
                     }
+                    .focusRequester(focusRequesters[index])
                     .focusProperties {
                         if (index % gridColumns == 0) {
                             left = FocusRequester.Cancel

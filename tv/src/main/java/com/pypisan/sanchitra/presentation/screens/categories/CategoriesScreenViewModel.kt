@@ -3,6 +3,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pypisan.sanchitra.data.entities.IPTVCategoryDto
 import com.pypisan.sanchitra.data.repositories.IPTVRepository
+import com.pypisan.sanchitra.presentation.screens.livetv.TVScreenViewModel.TVScreenUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,6 +17,9 @@ class CategoriesScreenViewModel @Inject constructor(
 
     val uiState = iptvRepository.getIPTVCategories()
         .map { categories ->
+            if (categories.isEmpty() ) {
+                return@map CategoriesScreenUiState.Loading
+            }
             CategoriesScreenUiState.Ready(categoryList = categories)
         }
         .stateIn(
