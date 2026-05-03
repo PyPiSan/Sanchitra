@@ -1,94 +1,67 @@
 package com.pypisan.sanchitra.data.util
 
 
-import android.content.Context
-import android.graphics.*
-import androidx.core.graphics.drawable.toBitmap
-import com.pypisan.sanchitra.presentation.screens.auth.getBitmapFromDrawable
-import com.github.alexzhirkevich.customqrgenerator.*
-import com.github.alexzhirkevich.customqrgenerator.vector.*
-import com.github.alexzhirkevich.customqrgenerator.style.Neighbors
-import com.github.alexzhirkevich.customqrgenerator.style.QrBallShape
-import com.github.alexzhirkevich.customqrgenerator.style.QrColor
-import com.github.alexzhirkevich.customqrgenerator.style.QrFrameShape
-import com.github.alexzhirkevich.customqrgenerator.style.QrPixelShape
+import androidx.compose.runtime.Composable
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import io.github.alexzhirkevich.qrose.rememberQrCodePainter
+import androidx.compose.ui.graphics.*
+import io.github.alexzhirkevich.qrose.options.QrBrush
+import io.github.alexzhirkevich.qrose.options.QrFrameShape
+import io.github.alexzhirkevich.qrose.options.QrLogoPadding
+import io.github.alexzhirkevich.qrose.options.QrLogoShape
+import io.github.alexzhirkevich.qrose.options.QrPixelShape
+import io.github.alexzhirkevich.qrose.options.brush
+import io.github.alexzhirkevich.qrose.options.circle
+import io.github.alexzhirkevich.qrose.options.roundCorners
 
 
-fun generateTelegramQR(
-    context: Context,
+@Composable
+fun GenerateQR(
     text: String,
     logoRes: Int? = null
-): Bitmap {
+) {
+    val logoPainter = logoRes?.let { painterResource(id = it) }
+    val painter = rememberQrCodePainter(text) {
 
-    val options = createQrOptions(1024, 1024, .1f) {
-
+        // Colors (gradient like your example)
         colors {
-            dark = QrColor.LinearGradient(
-                startColor = 0xffbc077a.toInt(),
-                endColor = 0xff9a10a4.toInt(),
-                orientation = QrColor.LinearGradient.Orientation.LeftDiagonal
-            )
-            light = QrColor.Solid(0xFFFFFFFF.toInt())
+            dark = QrBrush.brush {
+                Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFFFFE082), // soft gold highlight
+                        Color(0xFFFFC107), // rich gold
+                        Color(0xFFFF5722), // warm red-orange
+                        Color(0xFF8B0000)  // deep red
+                    )
+                )
+            }
         }
 
+        // Shapes (clean + slightly customized)
         shapes {
-            frame = QrFrameShape.RoundCorners(.3f)
-            ball = QrBallShape.Circle()
-            darkPixel = CircleRandomRadius()
+            ball = MyCircleBallShape() // custom shape
+            darkPixel = QrPixelShape.roundCorners()
+            frame = QrFrameShape.roundCorners(0.45f)
+        }
+
+        // Logo (better styling)
+        if (logoPainter != null) {
+            logo {
+                painter = logoPainter
+                size = 0.4f
+                shape = QrLogoShape.circle()
+            }
         }
     }
 
-    // ✅ Use drawable WITHOUT passing options (your version limitation)
-    val drawable = QrCodeDrawable(QrData.Url(text))
-
-    val bitmap = drawable.toBitmap(1024, 1024)
-
-    // ✅ Apply logo manually (reliable across versions)
-    if (logoRes != null) {
-        val canvas = Canvas(bitmap)
-        val logo = context.getBitmapFromDrawable(logoRes)
-
-        val size = (bitmap.width * 0.3f).toInt()
-        val left = (bitmap.width - size) / 2f
-        val top = (bitmap.height - size) / 2f
-
-        val scaled = Bitmap.createScaledBitmap(logo, size, size, true)
-
-        canvas.drawRoundRect(
-            RectF(
-                left - 10,
-                top - 10,
-                left + size + 10,
-                top + size + 10
-            ),
-            30f,
-            30f,
-            Paint().apply { color = Color.WHITE }
-        )
-
-        canvas.drawBitmap(scaled, left, top, null)
-    }
-
-    return bitmap
-}
-
-class CircleRandomRadius : QrPixelShape {
-
-    private val shapes = listOf(
-        QrPixelShape.Circle(.6f),
-        QrPixelShape.Circle(.75f),
-        QrPixelShape.Circle(.9f),
+    Image(
+        painter = painter,
+        contentDescription = "QR",
+        modifier = Modifier.size(220.dp)
     )
-
-    private var lastNeighbors = Neighbors.Empty
-    private var lastShape = shapes[0]
-
-    override fun invoke(i: Int, j: Int, elementSize: Int, neighbors: Neighbors): Boolean {
-        if (lastNeighbors != neighbors) {
-            lastNeighbors = neighbors
-            // ✅ stable (no flicker)
-            lastShape = shapes[(i + j) % shapes.size]
-        }
-        return lastShape.invoke(i, j, elementSize, neighbors)
-    }
 }
