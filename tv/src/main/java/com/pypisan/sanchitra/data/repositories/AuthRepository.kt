@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
+import com.pypisan.sanchitra.data.models.CommonResponse
 import com.pypisan.sanchitra.data.models.DeviceLoginInitResponse
 import com.pypisan.sanchitra.data.models.LoginStatusResponse
 import com.pypisan.sanchitra.data.models.UserDetailResponse
@@ -63,7 +64,7 @@ class AuthRepository {
     }
 
 
-    suspend fun userProfileLogout(context: Context): UserDetailResponse? {
+    suspend fun userProfileLogout(context: Context): CommonResponse? {
         return try {
             val api = APIClient.create(context)
 
@@ -82,7 +83,7 @@ class AuthRepository {
         }
     }
 
-    suspend fun userAccountDelete(context: Context): UserDetailResponse? {
+    suspend fun userAccountDelete(context: Context): CommonResponse? {
         return try {
             val api = APIClient.create(context)
 

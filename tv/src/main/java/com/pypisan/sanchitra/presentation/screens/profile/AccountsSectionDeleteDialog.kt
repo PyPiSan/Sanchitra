@@ -2,7 +2,11 @@ package com.pypisan.sanchitra.presentation.screens.profile
 
 import JetStreamCardShape
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -21,44 +25,83 @@ import com.pypisan.sanchitra.tvmaterial.StandardDialog
 @Composable
 fun AccountsSectionDeleteDialog(
     showDialog: Boolean,
+    isLoading: Boolean,
+    message: String?,
     onDismissRequest: () -> Unit,
+    onConfirmDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     StandardDialog(
         showDialog = showDialog,
         modifier = modifier,
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = {
+            if (!isLoading) onDismissRequest()
+        },
         confirmButton = {
-            AccountsSectionDialogButton(
-                modifier = Modifier.padding(start = 8.dp),
-                text = stringResource(R.string.yes_delete_account),
-                shouldRequestFocus = true,
-                onClick = onDismissRequest
-            )
+            if (!isLoading && message == null) {
+                AccountsSectionDialogButton(
+                    modifier = Modifier.padding(start = 8.dp),
+                    text = stringResource(R.string.yes_delete_account),
+                    shouldRequestFocus = true,
+                    onClick = onConfirmDelete
+                )
+            }
         },
         dismissButton = {
-            AccountsSectionDialogButton(
-                modifier = Modifier.padding(end = 8.dp),
-                text = stringResource(R.string.no_keep_it),
-                shouldRequestFocus = false,
-                onClick = onDismissRequest
-            )
+            if (!isLoading) {
+                AccountsSectionDialogButton(
+                    modifier = Modifier.padding(end = 8.dp),
+                    text = stringResource(R.string.no_keep_it),
+                    shouldRequestFocus = false,
+                    onClick = onDismissRequest
+                )
+            }
         },
         title = {
             Text(
                 modifier = Modifier.padding(start = 8.dp),
-                text = stringResource(R.string.delete_account_dialog_title),
+                text = when {
+                    isLoading -> "Deleting..."
+                    message != null -> message
+                    else -> stringResource(R.string.delete_account_dialog_title)
+                },
                 color = MaterialTheme.colorScheme.surface,
                 style = MaterialTheme.typography.headlineSmall
             )
         },
         text = {
-            Text(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                text = stringResource(R.string.delete_account_dialog_text),
-                color = MaterialTheme.colorScheme.surface,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Column(
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
+                when {
+                    isLoading -> {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Please wait...",
+                            color = MaterialTheme.colorScheme.surface,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    message != null -> {
+                        Text(
+                            text = message,
+                            color = MaterialTheme.colorScheme.surface,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    else -> {
+                        Text(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            text = stringResource(R.string.delete_account_dialog_text),
+                            color = MaterialTheme.colorScheme.surface,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
         },
         containerColor = MaterialTheme.colorScheme.onSurface,
         shape = JetStreamCardShape

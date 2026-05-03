@@ -3,6 +3,7 @@ package com.pypisan.sanchitra.utils
 import com.pypisan.sanchitra.api.RefreshTokenRequest
 import com.pypisan.sanchitra.data.entities.IPTVCategoryDto
 import com.pypisan.sanchitra.data.models.ChannelDto
+import com.pypisan.sanchitra.data.models.CommonResponse
 import com.pypisan.sanchitra.data.models.DeviceLoginInitResponse
 import com.pypisan.sanchitra.data.models.IPTVResponseDto
 import com.pypisan.sanchitra.data.models.LoginStatusResponse
@@ -36,12 +37,12 @@ interface APIService {
     suspend fun getUserDetail(): Response<UserDetailResponse>
 
     //    logout
-    @GET("users/logout/")
-    suspend fun userLogout(): Response<UserDetailResponse>
+    @POST("users/logout/")
+    suspend fun userLogout(): Response<CommonResponse>
 
     //    delete
-    @GET("users/delete/")
-    suspend fun deleteUserAccount(): Response<UserDetailResponse>
+    @POST("users/delete/")
+    suspend fun deleteUserAccount(): Response<CommonResponse>
 
 
     //    get TV channel list
