@@ -59,7 +59,6 @@ fun QRLoginScreen(
     backgroundUrl: String
 ) {
     // Generate QR
-    val context = LocalContext.current
     var isVideoReady by remember { mutableStateOf(false) }
 
     // Setup ExoPlayer
