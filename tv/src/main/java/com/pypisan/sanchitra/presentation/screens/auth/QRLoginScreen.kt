@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,7 +48,7 @@ import coil.compose.AsyncImage
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.data.util.StringConstants.API.UIURL
 import androidx.core.graphics.createBitmap
-import com.pypisan.sanchitra.data.util.generateTelegramQR
+import com.pypisan.sanchitra.data.util.GenerateQR
 
 
 @OptIn(UnstableApi::class)
@@ -59,13 +60,6 @@ fun QRLoginScreen(
 ) {
     // Generate QR
     val context = LocalContext.current
-    val qrBitmap = remember(loginURL, context) {
-        generateTelegramQR(
-            context = context,
-            text = loginURL,
-            logoRes = R.mipmap.ic_channel_foreground
-        )
-    }
     var isVideoReady by remember { mutableStateOf(false) }
 
     // Setup ExoPlayer
@@ -147,28 +141,16 @@ fun QRLoginScreen(
             Column(
                 verticalArrangement = Arrangement.Bottom
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(260.dp)
-                        .shadow(24.dp, RoundedCornerShape(24.dp))
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color.White)
-                        .padding(18.dp)
-                ) {
-                    Image(
-                        bitmap = qrBitmap.asImageBitmap(),
-                        contentDescription = "QR Code",
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
+                GenerateQR(
+                    text = loginURL,
+                    logoRes = R.mipmap.ic_channel_foreground
+                )
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Scan to login",
-                    color = Color.White,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White
                 )
             }
 
@@ -197,10 +179,18 @@ fun QRLoginScreen(
 
                 Text(
                     text = loginCode,
-                    color = Color.White,
                     fontSize = 46.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 6.sp
+                    letterSpacing = 6.sp,
+                    style = TextStyle(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFFFFE082), // gold
+                                Color(0xFFFF5722), // red-orange
+                                Color(0xFFB71C1C)  // deep red
+                            )
+                        )
+                    )
                 )
             }
         }
