@@ -1,11 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.auth
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import androidx.annotation.OptIn
-import android.graphics.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,8 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -27,19 +20,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -47,7 +35,6 @@ import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.data.util.StringConstants.API.UIURL
-import androidx.core.graphics.createBitmap
 import com.pypisan.sanchitra.data.util.GenerateQR
 
 
@@ -193,19 +180,5 @@ fun QRLoginScreen(
                 )
             }
         }
-    }
-}
-
-
-fun Context.getBitmapFromDrawable(resId: Int): Bitmap {
-    val drawable = ContextCompat.getDrawable(this, resId)!!
-    return if (drawable is BitmapDrawable) {
-        drawable.bitmap
-    } else {
-        val bitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
-        val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
-        bitmap
     }
 }
