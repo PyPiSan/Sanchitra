@@ -9,6 +9,7 @@ import com.pypisan.sanchitra.data.models.DeviceLoginInitResponse
 import com.pypisan.sanchitra.data.models.LoginStatusResponse
 import com.pypisan.sanchitra.data.models.UserDetailResponse
 import com.pypisan.sanchitra.utils.APIClient
+import retrofit2.Response
 
 class AuthRepository {
 
@@ -34,7 +35,7 @@ class AuthRepository {
             val api = APIClient.create(context)
             val response = api.checkLoginStatus(deviceCode)
 
-            Log.d("TV", "checkLoginStatus Response: ${response.body()}")
+//            Log.d("TV", "checkLoginStatus Response: ${response.body()}")
 
             if (response.isSuccessful) response.body() else null
 

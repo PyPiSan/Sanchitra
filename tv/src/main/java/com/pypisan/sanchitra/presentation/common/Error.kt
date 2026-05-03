@@ -10,13 +10,18 @@ import androidx.tv.material3.Text
 import com.pypisan.sanchitra.R
 
 @Composable
-fun Error(modifier: Modifier = Modifier) {
+fun Error(
+    modifier: Modifier = Modifier,
+    messageId: Int? = null
+) {
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = stringResource(id = R.string.message_error),
+            text = stringResource(
+                id = messageId ?: R.string.message_error
+            ),
             color = Color.White
         )
     }

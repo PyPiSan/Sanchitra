@@ -16,7 +16,7 @@ plugins {
 
 def versionMajor = 2
 def versionMinor = 2
-def versionPatch = 8
+def versionPatch = 9
 def buildType="beta"
 
 def computedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
@@ -103,7 +103,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-compose:2.8.7"
     implementation "androidx.fragment:fragment-ktx:1.8.5"
     implementation "androidx.core:core-ktx:1.15.0"
-    implementation "androidx.core:core-splashscreen:1.0.1"
+//    implementation "androidx.core:core-splashscreen:1.0.1"
 
     // --- 4. TV Specific (Standardized to RC-02) ---
     implementation "androidx.tv:tv-foundation:1.0.0-alpha11"
