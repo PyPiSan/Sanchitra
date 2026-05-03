@@ -1,5 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.profile
 
+import android.app.Activity
+import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -8,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,8 +21,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.pypisan.sanchitra.MainActivity
+import com.pypisan.sanchitra.OnboardingActivity
 import com.pypisan.sanchitra.data.repositories.AuthRepository
 import com.pypisan.sanchitra.data.util.StringConstants
+import com.pypisan.sanchitra.data.util.clear
+import com.pypisan.sanchitra.data.util.saveRefreshToken
+import com.pypisan.sanchitra.data.util.saveToken
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -45,6 +53,9 @@ fun AccountsSection() {
 
     var isLoggingOut by remember { mutableStateOf(false) }
     var logoutMessage by remember { mutableStateOf<String?>(null) }
+
+    var isDeleting by remember { mutableStateOf(false) }
+    var deleteMessage by remember { mutableStateOf<String?>(null) }
 
 
     val accountsSectionListItems = remember {
@@ -96,15 +107,50 @@ fun AccountsSection() {
 
     AccountsSectionDeleteDialog(
         showDialog = showDeleteDialog,
-        onDismissRequest = { showDeleteDialog = false },
-        modifier = Modifier.width(428.dp)
+        isLoading = isDeleting,
+        message = deleteMessage,
+        onDismissRequest = {
+            showDeleteDialog = false
+            deleteMessage = null
+        },
+        modifier = Modifier.width(600.dp),
+        onConfirmDelete = {
+            isDeleting = true
+
+            scope.launch {
+                val repo = AuthRepository()
+
+                val result = withContext(Dispatchers.IO) {
+                    repo.userAccountDelete(context)
+                }
+
+                isDeleting = false
+
+                if (result != null && result.success) {
+                    deleteMessage = "Account Deletion Successful"
+
+                    delay(1200)
+
+                    clear(context)
+                    context.startActivity(Intent(context, OnboardingActivity::class.java))
+                    (context as Activity).finish()
+
+                } else {
+                    deleteMessage = "Account Deletion Failed"
+
+                    delay(1200)
+                    deleteMessage = null
+                    showDeleteDialog = false
+                }
+            }
+        }
     )
 
     AccountLogoutDialog(
         showDialog = showLogoutDialog,
         isLoading = isLoggingOut,
         message = logoutMessage,
-        modifier = Modifier.width(428.dp),
+        modifier = Modifier.width(600.dp),
         onDismissRequest = {
             showLogoutDialog = false
             logoutMessage = null
@@ -121,12 +167,15 @@ fun AccountsSection() {
 
                 isLoggingOut = false
 
-                if (result != null) {
+                if (result != null && result.success) {
                     logoutMessage = "Logout Successful"
 
                     delay(1200)
 
-                    // SessionManager.clear(context)
+                    clear(context)
+                    context.startActivity(Intent(context, OnboardingActivity::class.java))
+                    (context as Activity).finish()
+
 
                 } else {
                     logoutMessage = "Logout Failed"
