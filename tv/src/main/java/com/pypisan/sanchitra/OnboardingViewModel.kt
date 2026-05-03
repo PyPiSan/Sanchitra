@@ -15,6 +15,7 @@ import com.pypisan.sanchitra.data.util.saveToken
 import com.pypisan.sanchitra.utils.AuthState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 class OnboardingViewModel : ViewModel() {
 
@@ -54,18 +55,25 @@ class OnboardingViewModel : ViewModel() {
 
     private fun startPolling(deviceCode: String, context: Context) {
         viewModelScope.launch {
-            while (true) {
-                delay(3000)
 
-                val status = repo.checkLoginStatus(deviceCode, context)
+            val result = withTimeoutOrNull(5 * 60 * 1000) {
 
-                if (status?.success == true) {
-                    saveToken(context, status.data.access_token)
-                    saveRefreshToken(context, status.data.refresh_token)
-                    loadProfiles(context)
-//                    authState = AuthState.ProfileSelection
-                    break
+                while (true) {
+                    delay(3000)
+
+                    val status = repo.checkLoginStatus(deviceCode, context)
+
+                    if (status?.success == true) {
+                        saveToken(context, status.data.access_token)
+                        saveRefreshToken(context, status.data.refresh_token)
+                        loadProfiles(context)
+                        return@withTimeoutOrNull true
+                    }
                 }
+            }
+
+            if (result == null) {
+                handlePollingTimeout()
             }
         }
     }
@@ -118,5 +126,9 @@ class OnboardingViewModel : ViewModel() {
 
     fun onProfileSelected(profile: UserProfileMap) {
         authState = AuthState.ProfileSelected
+    }
+
+    fun handlePollingTimeout(){
+        authState = AuthState.Error
     }
 }

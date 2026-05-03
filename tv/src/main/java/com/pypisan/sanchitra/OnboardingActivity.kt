@@ -97,7 +97,7 @@ class OnboardingActivity : ComponentActivity() {
                 }
 
                 is AuthState.Error -> {
-                    Error()
+                    Error(messageId = R.string.login_error)
                 }
 
             }
