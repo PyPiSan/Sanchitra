@@ -81,10 +81,9 @@ fun MovieDetails(
                     DotSeparatedRow(
                         modifier = Modifier.padding(top = 20.dp),
                         texts = listOf(
-//                            movieDetails.pgRating,
                             video.meta.releaseDate!!,
                             video.categories.joinToString(", "),
-                            video.duration.toString()
+                            "${video.duration} min"
                         )
                     )
 //                    DirectorScreenplayMusicRow(
@@ -177,10 +176,10 @@ private fun MovieDescription(description: String) {
 private fun MovieLargeTitle(movieTitle: String) {
     Text(
         text = movieTitle,
-        style = MaterialTheme.typography.displayMedium.copy(
+        style = MaterialTheme.typography.headlineLarge.copy(
             fontWeight = FontWeight.Bold
         ),
-        maxLines = 1
+        maxLines = 2
     )
 }
 

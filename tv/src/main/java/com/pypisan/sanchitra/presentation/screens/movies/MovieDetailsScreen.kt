@@ -45,7 +45,6 @@ fun MovieDetailsScreen(
 
     when {
         video == null -> {
-//            Log.e("TV", "Video is null")
             Error(modifier = Modifier.fillMaxSize())
         }
 

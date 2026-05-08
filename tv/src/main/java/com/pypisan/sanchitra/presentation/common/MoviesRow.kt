@@ -221,6 +221,7 @@ private fun MoviesRowItem(
             )
         },
         modifier = Modifier
+            .width(200.dp)
             .onFocusChanged {
                 isFocused = it.isFocused
                 if (it.isFocused) {
