@@ -1,4 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.movies
+
+import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,30 +13,38 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pypisan.sanchitra.data.entities.Movie
-import com.pypisan.sanchitra.data.entities.MovieList
+import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.presentation.common.MoviesRow
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
+
+
+
 @Composable
 fun MoviesScreen(
-    onMovieClick: (movie: Movie) -> Unit,
+    onMovieClick: (video: Videos) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
     moviesScreenViewModel: MoviesScreenViewModel = hiltViewModel(),
 ) {
     val uiState by moviesScreenViewModel.uiState.collectAsStateWithLifecycle()
     when (val s = uiState) {
-        is MoviesScreenUiState.Loading -> Loading()
+        is MoviesScreenUiState.Loading -> Loading(modifier = Modifier.fillMaxSize())
+
+        is MoviesScreenUiState.Error -> {
+            MovieErrorScreen(message = s.message)
+        }
+
         is MoviesScreenUiState.Ready -> {
             Catalog(
-                movieList = s.movieList,
-                popularFilmsThisWeek = s.popularFilmsThisWeek,
+                carouselMovieList = s.carouselMovieList,
+                popularFilms = s.popularFilms,
                 onMovieClick = onMovieClick,
                 onScroll = onScroll,
                 isTopBarVisible = isTopBarVisible,
@@ -45,19 +56,20 @@ fun MoviesScreen(
 
 @Composable
 private fun Catalog(
-    movieList: MovieList,
-    popularFilmsThisWeek: MovieList,
-    onMovieClick: (movie: Movie) -> Unit,
+    carouselMovieList: List<Videos>,
+    popularFilms: List<Videos>,
+    onMovieClick: (video: Videos) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val childPadding = rememberChildPadding()
     val lazyListState = rememberLazyListState()
+    val sharedVideoVM: VideoSharedViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
     val shouldShowTopBar by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex == 0 &&
-                lazyListState.firstVisibleItemScrollOffset == 0
+                    lazyListState.firstVisibleItemScrollOffset == 0
         }
     }
 
@@ -75,16 +87,22 @@ private fun Catalog(
     ) {
         item {
             MoviesScreenMovieList(
-                movieList = movieList,
-                onMovieClick = onMovieClick
+                videoList = carouselMovieList,
+                onMovieClick = { video ->
+                    sharedVideoVM.setVideo(video)
+                    onMovieClick(video)
+                }
             )
         }
         item {
             MoviesRow(
                 modifier = Modifier.padding(top = childPadding.top),
-                title = StringConstants.Composable.PopularFilmsThisWeekTitle,
-                movieList = popularFilmsThisWeek,
-                onMovieSelected = onMovieClick
+                title = StringConstants.Composable.PopularFilmsTitle,
+                videoList = popularFilms,
+                onMovieSelected = { video ->
+                    sharedVideoVM.setVideo(video)
+                    onMovieClick(video)
+                }
             )
         }
     }

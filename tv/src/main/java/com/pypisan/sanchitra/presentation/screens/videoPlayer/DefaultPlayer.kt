@@ -7,6 +7,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import com.pypisan.sanchitra.data.models.Channel
@@ -20,7 +21,17 @@ fun buildDefaultExoPlayer(
     renderersFactory: DefaultRenderersFactory
 ): ExoPlayer {
 
+    val loadControl = DefaultLoadControl.Builder()
+        .setBufferDurationsMs(
+            3000,   // min buffer
+            10000,  // max buffer
+            1500,   // playback buffer
+            2000    // rebuffer
+        )
+        .build()
+
     return ExoPlayer.Builder(context, renderersFactory)
+        .setLoadControl(loadControl)
         .build()
         .apply {
 
@@ -41,24 +52,6 @@ fun buildDefaultExoPlayer(
 
                 override fun onPlaybackStateChanged(state: Int) {
                     onBuffering(state)
-
-//                    when (state) {
-//                        Player.STATE_BUFFERING -> {
-//                            Log.d("TV", "BUFFERING")
-//                        }
-//
-//                        Player.STATE_READY -> {
-//                            Log.d("TV", "READY")
-//                        }
-//
-//                        Player.STATE_ENDED -> {
-//                            Log.d("TV", "ENDED")
-//                        }
-//
-//                        Player.STATE_IDLE -> {
-//                            Log.d("TV", "IDLE")
-//                        }
-//                    }
                 }
             })
 

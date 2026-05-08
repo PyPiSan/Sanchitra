@@ -91,13 +91,13 @@ private fun ImmersiveList(
         contentAlignment = Alignment.BottomStart,
         modifier = modifier
     ) {
-        Background(
-            movie = selectedMovie,
-            visible = isListFocused,
-            modifier = modifier
-                .height(432.dp)
-                .gradientOverlay(gradientColor)
-        )
+//        Background(
+//            movie = selectedMovie,
+//            visible = isListFocused,
+//            modifier = modifier
+//                .height(432.dp)
+//                .gradientOverlay(gradientColor)
+//        )
         Column {
             if (isListFocused) {
                 MovieDescription(
@@ -109,41 +109,41 @@ private fun ImmersiveList(
                 )
             }
 
-            ImmersiveListMoviesRow(
-                movieList = movieList,
-                itemDirection = ItemDirection.Horizontal,
-                title = sectionTitle,
-                showItemTitle = !isListFocused,
-                showIndexOverImage = true,
-                onMovieSelected = onMovieClick,
-                onMovieFocused = onMovieFocused,
-                modifier = Modifier.onFocusChanged(onFocusChanged)
-            )
+//            ImmersiveListMoviesRow(
+//                movieList = movieList,
+//                itemDirection = ItemDirection.Horizontal,
+//                title = sectionTitle,
+//                showItemTitle = !isListFocused,
+//                showIndexOverImage = true,
+//                onMovieSelected = onMovieClick,
+//                onMovieFocused = onMovieFocused,
+//                modifier = Modifier.onFocusChanged(onFocusChanged)
+//            )
         }
     }
 }
 
-@Composable
-private fun Background(
-    movie: Movie,
-    visible: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically(),
-        modifier = modifier
-    ) {
-        Crossfade(
-            targetState = movie,
-            label = "posterUriCrossfade",
-
-        ) {
-            PosterImage(movie = it, modifier = Modifier.fillMaxSize())
-        }
-    }
-}
+//@Composable
+//private fun Background(
+//    movie: Movie,
+//    visible: Boolean,
+//    modifier: Modifier = Modifier,
+//) {
+//    AnimatedVisibility(
+//        visible = visible,
+//        enter = fadeIn() + expandVertically(),
+//        exit = fadeOut() + shrinkVertically(),
+//        modifier = modifier
+//    ) {
+//        Crossfade(
+//            targetState = movie,
+//            label = "posterUriCrossfade",
+//
+//        ) {
+//            PosterImage(movie = it, modifier = Modifier.fillMaxSize())
+//        }
+//    }
+//}
 
 @Composable
 private fun MovieDescription(

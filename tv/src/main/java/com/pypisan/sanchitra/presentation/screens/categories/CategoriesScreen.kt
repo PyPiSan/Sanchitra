@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -30,6 +31,9 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -83,27 +87,37 @@ private fun Catalog(
 ) {
     val childPadding = rememberChildPadding()
     val lazyGridState = rememberLazyGridState()
-    val shouldShowTopBar by remember {
-        derivedStateOf {
-            lazyGridState.firstVisibleItemIndex == 0 && lazyGridState.firstVisibleItemScrollOffset < 100
-        }
-    }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     var lastFocusedIndex by rememberSaveable { mutableIntStateOf(0) }
     val focusRequesters = remember {
         List(iptvCategories.size) { FocusRequester() }
     }
 
-    LaunchedEffect(shouldShowTopBar) {
-        onScroll(shouldShowTopBar)
+    DisposableEffect(lifecycleOwner, iptvCategories) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                focusRequesters
+                    .getOrNull(lastFocusedIndex)
+                    ?.requestFocus()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
-    LaunchedEffect(iptvCategories) {
-        if (focusRequesters.isNotEmpty()) {
-            focusRequesters
-                .getOrNull(lastFocusedIndex)
-                ?.requestFocus()
+    val shouldShowTopBar by remember {
+        derivedStateOf {
+            lazyGridState.firstVisibleItemIndex == 0 && lazyGridState.firstVisibleItemScrollOffset < 100
         }
+    }
+
+    LaunchedEffect(shouldShowTopBar) {
+        onScroll(shouldShowTopBar)
     }
 
     AnimatedContent(
@@ -127,6 +141,7 @@ private fun Catalog(
                     .padding(8.dp)
                     .aspectRatio(16 / 9f)
                     .onFocusChanged {
+                        isFocused = it.isFocused
                         if (it.isFocused) {
                             lastFocusedIndex = index
                         }

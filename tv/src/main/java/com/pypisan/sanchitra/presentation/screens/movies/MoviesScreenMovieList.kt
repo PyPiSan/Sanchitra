@@ -35,7 +35,7 @@ import androidx.tv.material3.CompactCard
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
-import com.pypisan.sanchitra.data.entities.Movie
+import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
@@ -43,14 +43,14 @@ import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 @Composable
 fun MoviesScreenMovieList(
     modifier: Modifier = Modifier,
-    movieList: List<Movie>,
+    videoList: List<Videos>,
     startPadding: Dp = rememberChildPadding().start,
     endPadding: Dp = rememberChildPadding().end,
-    onMovieClick: (movie: Movie) -> Unit
+    onMovieClick: (video: Videos) -> Unit
 ) {
     AnimatedContent(
         modifier = modifier,
-        targetState = movieList,
+        targetState = videoList,
         label = "",
     ) { movieListTarget ->
 
@@ -62,7 +62,7 @@ fun MoviesScreenMovieList(
                 MovieListItem(
                     itemWidth = 432.dp,
                     onMovieClick = onMovieClick,
-                    movie = it,
+                    video = it,
                 )
             }
         }
@@ -72,12 +72,12 @@ fun MoviesScreenMovieList(
 @Composable
 private fun MovieListItem(
     itemWidth: Dp,
-    movie: Movie,
+    video: Videos,
     modifier: Modifier = Modifier,
-    onMovieClick: (movie: Movie) -> Unit
+    onMovieClick: (video: Videos) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        Spacer(modifier = Modifier.Companion.height(JetStreamBorderWidth))
+        Spacer(modifier = Modifier.height(JetStreamBorderWidth))
         var isFocused by remember { mutableStateOf(false) }
         CompactCard(
             modifier = modifier
@@ -97,18 +97,18 @@ private fun MovieListItem(
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurface,
             ),
-            onClick = { onMovieClick(movie) },
+            onClick = { onMovieClick(video) },
             image = {
                 val contentAlpha by animateFloatAsState(
                     targetValue = if (isFocused) 1f else 0.5f,
                     label = "",
                 )
                 AsyncImage(
-                    model = movie.posterUri,
+                    model = video.meta.banner,
                     contentDescription = StringConstants
                         .Composable
                         .ContentDescription
-                        .moviePoster(movie.name),
+                        .moviePoster(video.title),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()
@@ -118,7 +118,7 @@ private fun MovieListItem(
             title = {
                 Column {
                     Text(
-                        text = movie.description,
+                        text = video.title,
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Normal
                         ),
@@ -127,7 +127,7 @@ private fun MovieListItem(
                             .padding(start = 24.dp)
                     )
                     Text(
-                        text = movie.name,
+                        text = video.title,
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding(
                             start = 24.dp,

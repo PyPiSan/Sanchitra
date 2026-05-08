@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlin.collections.emptyList
 import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.data.models.toDomain
@@ -60,45 +59,6 @@ class TVRepositoryImpl @Inject constructor(
 
     override fun getChannels(): Flow<List<Channel>> = channelsFlow
     override fun getCarouselTV(): Flow<List<Channel>> = carouselFlow
-
-//    override fun getChannels(): Flow<List<Channel>> = flow {
-//        val response = api.getLiveTV()
-//
-//        if (response.isSuccessful) {
-//            val channels = response.body()?.channels.orEmpty()
-//                .map { it.toDomain() }
-////            Log.d("API_DEBUG", "Channels size: ${channels.size}")
-//            emit(channels)
-//        } else {
-////            Log.e("API_DEBUG", "Error ${response.code()} ${response.message()}")
-//            emit(emptyList())
-//        }
-//    }
-//        .catch { e ->
-////            Log.e("API_DEBUG", "Exception: ${e.message}", e)
-//            emit(emptyList())
-//        }
-//        .flowOn(Dispatchers.IO)
-//
-//
-//    override fun getCarouselTV(): Flow<List<Channel>> = flow {
-//        val response = api.getCarouselTV()
-//
-//        if (response.isSuccessful) {
-//            val channelCarousel = response.body()?.channels.orEmpty()
-//                .map { it.toDomain() }
-////            Log.d("API_DEBUG", "Channels size: ${channels.size}")
-//            emit(channelCarousel)
-//        } else {
-////            Log.e("API_DEBUG", "Error ${response.code()} ${response.message()}")
-//            emit(emptyList())
-//        }
-//    }
-//        .catch { e ->
-////            Log.e("API_DEBUG", "Exception: ${e.message}", e)
-//            emit(emptyList())
-//        }
-//        .flowOn(Dispatchers.IO)
 
 
     override suspend fun getChannelData(id: String, type: String): ApiResult<Channel> {

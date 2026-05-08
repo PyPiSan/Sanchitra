@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
@@ -40,17 +43,17 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.pypisan.sanchitra.data.entities.Movie
 import com.pypisan.sanchitra.data.entities.MovieList
+import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 enum class ItemDirection(val aspectRatio: Float) {
-    Vertical(10.5f / 16f),
-    Horizontal(16f / 9f);
+    Vertical(10.5f / 16f)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MoviesRow(
-    movieList: MovieList,
+    videoList:  List<Videos>,
     modifier: Modifier = Modifier,
     itemDirection: ItemDirection = ItemDirection.Vertical,
     startPadding: Dp = rememberChildPadding().start,
@@ -62,7 +65,7 @@ fun MoviesRow(
     ),
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
-    onMovieSelected: (movie: Movie) -> Unit = {}
+    onMovieSelected: (video: Videos) -> Unit = {}
 ) {
     val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
 
@@ -79,7 +82,7 @@ fun MoviesRow(
             )
         }
         AnimatedContent(
-            targetState = movieList,
+            targetState = videoList,
             label = "",
         ) { movieState ->
             LazyRow(
@@ -108,7 +111,7 @@ fun MoviesRow(
                             lazyRow.saveFocusedChild()
                             onMovieSelected(it)
                         },
-                        movie = movie,
+                        video = movie,
                         showItemTitle = showItemTitle,
                         showIndexOverImage = showIndexOverImage
                     )
@@ -121,7 +124,7 @@ fun MoviesRow(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ImmersiveListMoviesRow(
-    movieList: MovieList,
+    movieList:  List<Videos>,
     modifier: Modifier = Modifier,
     itemDirection: ItemDirection = ItemDirection.Vertical,
     startPadding: Dp = rememberChildPadding().start,
@@ -133,8 +136,8 @@ fun ImmersiveListMoviesRow(
     ),
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
-    onMovieSelected: (Movie) -> Unit = {},
-    onMovieFocused: (Movie) -> Unit = {}
+    onMovieSelected: (Videos) -> Unit = {},
+    onMovieFocused: (Videos) -> Unit = {}
 ) {
     val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
 
@@ -184,7 +187,7 @@ fun ImmersiveListMoviesRow(
                             onMovieSelected(it)
                         },
                         onMovieFocused = onMovieFocused,
-                        movie = movie,
+                        video = movie,
                         showItemTitle = showItemTitle,
                         showIndexOverImage = showIndexOverImage
                     )
@@ -198,30 +201,30 @@ fun ImmersiveListMoviesRow(
 @Composable
 private fun MoviesRowItem(
     index: Int,
-    movie: Movie,
-    onMovieSelected: (Movie) -> Unit,
+    video: Videos,
+    onMovieSelected: (Videos) -> Unit,
     showItemTitle: Boolean,
     showIndexOverImage: Boolean,
     modifier: Modifier = Modifier,
     itemDirection: ItemDirection = ItemDirection.Vertical,
-    onMovieFocused: (Movie) -> Unit = {},
+    onMovieFocused: (Videos) -> Unit = {},
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
     MovieCard(
-        onClick = { onMovieSelected(movie) },
+        onClick = { onMovieSelected(video) },
         title = {
             MoviesRowItemText(
                 showItemTitle = showItemTitle,
                 isItemFocused = isFocused,
-                movie = movie
+                video = video
             )
         },
         modifier = Modifier
             .onFocusChanged {
                 isFocused = it.isFocused
                 if (it.isFocused) {
-                    onMovieFocused(movie)
+                    onMovieFocused(video)
                 }
             }
             .focusProperties {
@@ -234,9 +237,10 @@ private fun MoviesRowItem(
             .then(modifier)
     ) {
         MoviesRowItemImage(
-            modifier = Modifier.aspectRatio(itemDirection.aspectRatio),
+            modifier = Modifier
+                .aspectRatio(itemDirection.aspectRatio),
             showIndexOverImage = showIndexOverImage,
-            movie = movie,
+            video = video,
             index = index
         )
     }
@@ -244,14 +248,14 @@ private fun MoviesRowItem(
 
 @Composable
 private fun MoviesRowItemImage(
-    movie: Movie,
+    video: Videos,
     showIndexOverImage: Boolean,
     index: Int,
     modifier: Modifier = Modifier,
 ) {
     Box(contentAlignment = Alignment.CenterStart) {
         PosterImage(
-            movie = movie,
+            video = video,
             modifier = modifier
                 .fillMaxWidth()
                 .drawWithContent {
@@ -287,7 +291,7 @@ private fun MoviesRowItemImage(
 private fun MoviesRowItemText(
     showItemTitle: Boolean,
     isItemFocused: Boolean,
-    movie: Movie,
+    video: Videos,
     modifier: Modifier = Modifier
 ) {
     if (showItemTitle) {
@@ -296,7 +300,7 @@ private fun MoviesRowItemText(
             label = "",
         )
         Text(
-            text = movie.name,
+            text = video.title,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.SemiBold
             ),
@@ -305,7 +309,7 @@ private fun MoviesRowItemText(
                 .alpha(movieNameAlpha)
                 .fillMaxWidth()
                 .padding(top = 4.dp),
-            maxLines = 1,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
     }

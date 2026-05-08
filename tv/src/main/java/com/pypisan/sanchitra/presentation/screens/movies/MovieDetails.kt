@@ -1,4 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.movies
+
 import JetStreamButtonShape
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
@@ -40,6 +41,7 @@ import coil.request.ImageRequest
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.data.entities.MovieDetails
+import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.util.StringConstants
 
 import kotlinx.coroutines.launch
@@ -47,7 +49,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MovieDetails(
-    movieDetails: MovieDetails,
+    video: Videos,
     goToMoviePlayer: () -> Unit
 ) {
     val childPadding = rememberChildPadding()
@@ -61,7 +63,7 @@ fun MovieDetails(
             .bringIntoViewRequester(bringIntoViewRequester)
     ) {
         MovieImageWithGradients(
-            movieDetails = movieDetails,
+            video = video,
             modifier = Modifier.fillMaxSize()
         )
 
@@ -70,26 +72,26 @@ fun MovieDetails(
             Column(
                 modifier = Modifier.padding(start = childPadding.start)
             ) {
-                MovieLargeTitle(movieTitle = movieDetails.name)
+                MovieLargeTitle(movieTitle = video.title)
 
                 Column(
                     modifier = Modifier.alpha(0.75f)
                 ) {
-                    MovieDescription(description = movieDetails.description)
+                    MovieDescription(description = video.meta.description)
                     DotSeparatedRow(
                         modifier = Modifier.padding(top = 20.dp),
                         texts = listOf(
-                            movieDetails.pgRating,
-                            movieDetails.releaseDate,
-                            movieDetails.categories.joinToString(", "),
-                            movieDetails.duration
+//                            movieDetails.pgRating,
+                            video.meta.releaseDate!!,
+                            video.categories.joinToString(", "),
+                            video.duration.toString()
                         )
                     )
-                    DirectorScreenplayMusicRow(
-                        director = movieDetails.director,
-                        screenplay = movieDetails.screenplay,
-                        music = movieDetails.music
-                    )
+//                    DirectorScreenplayMusicRow(
+//                        director = movieDetails.director,
+//                        screenplay = movieDetails.screenplay,
+//                        music = movieDetails.music
+//                    )
                 }
                 WatchTrailerButton(
                     modifier = Modifier.onFocusChanged {
@@ -184,17 +186,17 @@ private fun MovieLargeTitle(movieTitle: String) {
 
 @Composable
 private fun MovieImageWithGradients(
-    movieDetails: MovieDetails,
+    video: Videos,
     modifier: Modifier = Modifier,
     gradientColor: Color = MaterialTheme.colorScheme.surface,
 ) {
     AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current).data(movieDetails.posterUri)
+        model = ImageRequest.Builder(LocalContext.current).data(video.meta.banner)
             .crossfade(true).build(),
         contentDescription = StringConstants
             .Composable
             .ContentDescription
-            .moviePoster(movieDetails.name),
+            .moviePoster(video.title),
         contentScale = ContentScale.Crop,
         modifier = modifier.drawWithContent {
             drawContent()

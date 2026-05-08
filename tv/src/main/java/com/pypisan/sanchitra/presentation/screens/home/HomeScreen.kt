@@ -108,14 +108,14 @@ private fun Catalog(
                  */
             )
         }
-        item(contentType = "MoviesRow") {
-            MoviesRow(
-                modifier = Modifier.padding(top = 16.dp),
-                movieList = trendingMovies,
-                title = StringConstants.Composable.HomeScreenTrendingTitle,
-                onMovieSelected = onMovieClick
-            )
-        }
+//        item(contentType = "MoviesRow") {
+//            MoviesRow(
+//                modifier = Modifier.padding(top = 16.dp),
+//                movieList = trendingMovies,
+//                title = StringConstants.Composable.HomeScreenTrendingTitle,
+//                onMovieSelected = onMovieClick
+//            )
+//        }
         item(contentType = "Top10MoviesList") {
             Top10MoviesList(
                 movieList = top10Movies,
@@ -125,13 +125,13 @@ private fun Catalog(
                 },
             )
         }
-        item(contentType = "MoviesRow") {
-            MoviesRow(
-                modifier = Modifier.padding(top = 16.dp),
-                movieList = nowPlayingMovies,
-                title = StringConstants.Composable.HomeScreenNowPlayingMoviesTitle,
-                onMovieSelected = onMovieClick
-            )
-        }
+//        item(contentType = "MoviesRow") {
+//            MoviesRow(
+//                modifier = Modifier.padding(top = 16.dp),
+//                movieList = nowPlayingMovies,
+//                title = StringConstants.Composable.HomeScreenNowPlayingMoviesTitle,
+//                onMovieSelected = onMovieClick
+//            )
+//        }
     }
 }

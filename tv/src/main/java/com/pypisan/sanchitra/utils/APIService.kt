@@ -7,6 +7,7 @@ import com.pypisan.sanchitra.data.models.CommonResponse
 import com.pypisan.sanchitra.data.models.DeviceLoginInitResponse
 import com.pypisan.sanchitra.data.models.IPTVResponseDto
 import com.pypisan.sanchitra.data.models.LoginStatusResponse
+import com.pypisan.sanchitra.data.models.MovieListResponseDTO
 import com.pypisan.sanchitra.data.models.TVResponse
 import com.pypisan.sanchitra.data.models.UserDetailResponse
 import retrofit2.Response
@@ -67,6 +68,13 @@ interface APIService {
     suspend fun getIPTVCategory(
     @Path("category") category: String
     ): Response<IPTVResponseDto>
+
+    //  Movies
+    @GET("videos/")
+    suspend fun getMoviesList(): Response<MovieListResponseDTO>
+
+    @GET("home/video/carousel/")
+    suspend fun getCarouselVideoList(): Response<MovieListResponseDTO>
 
 
 }
