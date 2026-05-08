@@ -203,13 +203,13 @@ fun SearchResult(
             }
         }
 
-        item {
-            MoviesRow(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = childPadding.top * 2),
-                movieList = movieList
-            ) { selectedMovie -> onMovieClick(selectedMovie) }
-        }
+//        item {
+//            MoviesRow(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .padding(top = childPadding.top * 2),
+//                movieList = movieList
+//            ) { selectedMovie -> onMovieClick(selectedMovie) }
+//        }
     }
 }

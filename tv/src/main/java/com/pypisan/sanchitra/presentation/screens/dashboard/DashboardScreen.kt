@@ -243,7 +243,7 @@ private fun Body(
         }
         composable(Screens.Movies()) {
             MoviesScreen(
-                onMovieClick = { movie -> openMovieDetailsScreen(movie.id) },
+                onMovieClick = { movie -> openMovieDetailsScreen(movie.id.toString()) },
                 onScroll = updateTopBarVisibility,
                 isTopBarVisible = isTopBarVisible
             )

@@ -12,22 +12,23 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.pypisan.sanchitra.data.entities.Movie
+import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.data.models.IPTVChannel
 import com.pypisan.sanchitra.data.util.StringConstants
 
 @Composable
 fun PosterImage(
-    movie: Movie,
+    video: Videos,
     modifier: Modifier = Modifier,
 ) {
     AsyncImage(
         modifier = modifier,
         model = ImageRequest.Builder(LocalContext.current)
             .crossfade(true)
-            .data(movie.posterUri)
+            .data(video.image)
             .build(),
-        contentDescription = StringConstants.Composable.ContentDescription.moviePoster(movie.name),
+        contentDescription = StringConstants.Composable.ContentDescription.moviePoster(video.title),
         contentScale = ContentScale.Crop
     )
 }

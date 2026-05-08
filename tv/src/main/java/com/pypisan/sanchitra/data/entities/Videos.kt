@@ -1,0 +1,23 @@
+package com.pypisan.sanchitra.data.entities
+
+
+data class Videos(
+    val id: Int,
+    val title: String,
+    val image: String,
+    val logo: String?,
+    val url: String,
+    val meta: VideoMeta,
+    val categories: List<String>,
+    val duration: Int,
+    val language: List<String>
+)
+
+data class VideoMeta(
+    val banner: String?,
+    val description: String,
+    val trailer: String?,
+    val releaseDate: String?,
+    val subtitleUrl: String?,
+
+)

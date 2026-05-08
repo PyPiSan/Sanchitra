@@ -59,15 +59,6 @@ fun App(
                     goToMoviePlayer = {
                         navController.navigate(Screens.VideoPlayer())
                     },
-                    refreshScreenWithNewMovie = { movie ->
-                        navController.navigate(
-                            Screens.MovieDetails.withArgs(movie.id)
-                        ) {
-                            popUpTo(Screens.MovieDetails()) {
-                                inclusive = true
-                            }
-                        }
-                    },
                     onBackPressed = {
                         if (navController.navigateUp()) {
                             isComingBackFromDifferentScreen = true

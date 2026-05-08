@@ -1,51 +1,72 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
-import android.util.Log
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import kotlinx.coroutines.delay
 
 @Composable
 fun RememberPlaybackWatchdog(
     exoPlayer: ExoPlayer,
     onFreeze: () -> Unit
 ) {
+
     LaunchedEffect(exoPlayer) {
 
         var lastPosition = 0L
         var freezeStart = 0L
+        var freezeReported = false
 
         while (true) {
-            kotlinx.coroutines.delay(1500)
 
-            val current = exoPlayer.currentPosition
-            val isPlaying = exoPlayer.isPlaying
+            delay(1500)
 
-            // ignore buffering state completely
-            if (isPlaying) {
+            if (!exoPlayer.isPlaying) {
+                freezeStart = 0L
+                freezeReported = false
+                continue
+            }
 
-                if (current == lastPosition) {
+            // Ignore normal buffering
+            if (exoPlayer.playbackState == Player.STATE_BUFFERING) {
+                freezeStart = 0L
+                freezeReported = false
+                continue
+            }
 
-                    if (freezeStart == 0L) {
-                        freezeStart = System.currentTimeMillis()
-                    }
+            val currentPosition = exoPlayer.currentPosition
 
-                    val frozenFor = System.currentTimeMillis() - freezeStart
+            // tolerance avoids false positives
+            val stuck =
+                kotlin.math.abs(currentPosition - lastPosition) < 300
 
-                    if (frozenFor > 6000) {
-//                        Log.e("TV", "REAL FREEZE DETECTED")
-                        onFreeze()
-                        freezeStart = 0L
-                    }
+            if (stuck) {
 
-                } else {
-                    freezeStart = 0L
+                if (freezeStart == 0L) {
+                    freezeStart = System.currentTimeMillis()
                 }
 
-                lastPosition = current
+                val frozenFor =
+                    System.currentTimeMillis() - freezeStart
+
+                if (
+                    frozenFor > 6000 &&
+                    !freezeReported
+                ) {
+
+                    freezeReported = true
+                    onFreeze()
+                }
+
             } else {
+
                 freezeStart = 0L
+                freezeReported = false
             }
+
+            lastPosition = currentPosition
         }
     }
 }

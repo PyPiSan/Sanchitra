@@ -100,6 +100,8 @@ fun TVPlayerScreenContent(
     val videoPlayerState = rememberVideoPlayerState()
     val pulseState = rememberVideoPlayerPulseState()
     val renderersFactory = DefaultRenderersFactory(context)
+        .setEnableDecoderFallback(true)
+        .forceEnableMediaCodecAsynchronousQueueing()
         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
     val isError = rememberSaveable { mutableStateOf(false) }
     var isBuffering by rememberSaveable { mutableStateOf(false) }
@@ -125,8 +127,6 @@ fun TVPlayerScreenContent(
     RememberPlaybackWatchdog(
         exoPlayer = exoPlayer,
         onFreeze = {
-
-//            Log.e("TV", "FREEZE → RECOVERING STREAM")
 
             val mediaItem = exoPlayer.currentMediaItem
 

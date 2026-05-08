@@ -1,4 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.movies
+
+
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -16,48 +19,41 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.MaterialTheme
 import com.pypisan.sanchitra.R
-import com.pypisan.sanchitra.data.entities.Movie
-import com.pypisan.sanchitra.data.entities.MovieDetails
-import com.pypisan.sanchitra.data.util.StringConstants
+import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.presentation.common.Error
-import com.pypisan.sanchitra.presentation.common.Loading
-import com.pypisan.sanchitra.presentation.common.MoviesRow
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 object MovieDetailsScreen {
     const val MovieIdBundleKey = "movieId"
 }
-
 @Composable
 fun MovieDetailsScreen(
     goToMoviePlayer: () -> Unit,
     onBackPressed: () -> Unit,
-    refreshScreenWithNewMovie: (Movie) -> Unit,
-    movieDetailsScreenViewModel: MovieDetailsScreenViewModel = hiltViewModel()
 ) {
-    val uiState by movieDetailsScreenViewModel.uiState.collectAsStateWithLifecycle()
 
-    when (val s = uiState) {
-        is MovieDetailsScreenUiState.Loading -> {
-            Loading(modifier = Modifier.fillMaxSize())
-        }
+    val sharedVideoVM: VideoSharedViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
 
-        is MovieDetailsScreenUiState.Error -> {
+    val video by sharedVideoVM.selectedVideo.collectAsStateWithLifecycle()
+
+    when {
+        video == null -> {
+//            Log.e("TV", "Video is null")
             Error(modifier = Modifier.fillMaxSize())
         }
 
-        is MovieDetailsScreenUiState.Done -> {
+        else -> {
             Details(
-                movieDetails = s.movieDetails,
+                video = video!!,
                 goToMoviePlayer = goToMoviePlayer,
                 onBackPressed = onBackPressed,
-                refreshScreenWithNewMovie = refreshScreenWithNewMovie,
                 modifier = Modifier
                     .fillMaxSize()
                     .animateContentSize()
@@ -68,10 +64,9 @@ fun MovieDetailsScreen(
 
 @Composable
 private fun Details(
-    movieDetails: MovieDetails,
+    video: Videos,
     goToMoviePlayer: () -> Unit,
     onBackPressed: () -> Unit,
-    refreshScreenWithNewMovie: (Movie) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val childPadding = rememberChildPadding()
@@ -83,34 +78,34 @@ private fun Details(
     ) {
         item {
             MovieDetails(
-                movieDetails = movieDetails,
+                video = video,
                 goToMoviePlayer = goToMoviePlayer
             )
         }
 
-        item {
-            CastAndCrewList(
-                castAndCrew = movieDetails.castAndCrew
-            )
-        }
+//        item {
+//            CastAndCrewList(
+//                castAndCrew = movieDetails.castAndCrew
+//            )
+//        }
 
-        item {
-            MoviesRow(
-                title = StringConstants
-                    .Composable
-                    .movieDetailsScreenSimilarTo(movieDetails.name),
-                titleStyle = MaterialTheme.typography.titleMedium,
-                movieList = movieDetails.similarMovies,
-                onMovieSelected = refreshScreenWithNewMovie
-            )
-        }
+//        item {
+//            MoviesRow(
+//                title = StringConstants
+//                    .Composable
+//                    .movieDetailsScreenSimilarTo(movieDetails.name),
+//                titleStyle = MaterialTheme.typography.titleMedium,
+//                movieList = movieDetails.similarMovies,
+//                onMovieSelected = refreshScreenWithNewMovie
+//            )
+//        }
 
-        item {
-            MovieReviews(
-                modifier = Modifier.padding(top = childPadding.top),
-                reviewsAndRatings = movieDetails.reviewsAndRatings
-            )
-        }
+//        item {
+//            MovieReviews(
+//                modifier = Modifier.padding(top = childPadding.top),
+//                reviewsAndRatings = movieDetails.reviewsAndRatings
+//            )
+//        }
 
         item {
             Box(
@@ -132,27 +127,27 @@ private fun Details(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 val itemModifier = Modifier.width(192.dp)
-
-                TitleValueText(
-                    modifier = itemModifier,
-                    title = stringResource(R.string.status),
-                    value = movieDetails.status
-                )
+//
+//                TitleValueText(
+//                    modifier = itemModifier,
+//                    title = stringResource(R.string.status),
+//                    value = movieDetails.status
+//                )
                 TitleValueText(
                     modifier = itemModifier,
                     title = stringResource(R.string.original_language),
-                    value = movieDetails.originalLanguage
+                    value = video.language.toString()
                 )
-                TitleValueText(
-                    modifier = itemModifier,
-                    title = stringResource(R.string.budget),
-                    value = movieDetails.budget
-                )
-                TitleValueText(
-                    modifier = itemModifier,
-                    title = stringResource(R.string.revenue),
-                    value = movieDetails.revenue
-                )
+//                TitleValueText(
+//                    modifier = itemModifier,
+//                    title = stringResource(R.string.budget),
+//                    value = movieDetails.budget
+//                )
+//                TitleValueText(
+//                    modifier = itemModifier,
+//                    title = stringResource(R.string.revenue),
+//                    value = movieDetails.revenue
+//                )
             }
         }
     }

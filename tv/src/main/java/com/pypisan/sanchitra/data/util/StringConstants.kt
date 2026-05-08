@@ -5,6 +5,8 @@ object StringConstants {
     object API {
         const val TVURL = "https://media.pypisan.com/api/v1/";
         const val UIURL = "https://sanchitra.pypisan.com/"
+
+        const val VIDEOURL = "https://tv.pypisan.com/api/v1/";
     }
 
     object Profile {
@@ -58,7 +60,7 @@ object StringConstants {
         const val MovieDetailsFailureSubject = "movie details"
         const val HomeScreenTrendingTitle = "Trending"
         const val HomeScreenNowPlayingMoviesTitle = "Now Playing Movies"
-        const val PopularFilmsThisWeekTitle = "Popular films this week"
+        const val PopularFilmsTitle = "Popular films"
         const val BingeWatchDramasTitle = "Bingewatch dramas"
         fun movieDetailsScreenSimilarTo(name: String) = "Similar to $name"
         fun reviewCount(count: String) = "$count reviews"
