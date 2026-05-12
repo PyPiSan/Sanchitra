@@ -9,6 +9,7 @@ import com.pypisan.sanchitra.data.models.IPTVResponseDto
 import com.pypisan.sanchitra.data.models.LoginStatusResponse
 import com.pypisan.sanchitra.data.models.MovieListResponseDTO
 import com.pypisan.sanchitra.data.models.TVResponse
+import com.pypisan.sanchitra.data.models.TrendingResponseDTO
 import com.pypisan.sanchitra.data.models.UserDetailResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -60,10 +61,15 @@ interface APIService {
         @Query("type") type: String
     ): Response<ChannelDto>
 
-    //    IPTV
+    @POST("home/featured/trends/view/")
+    suspend fun updateViewCount(
+        @Query("channel_id") channelID: Int,
+    ): Response<CommonResponse>
 
+    //    IPTV
     @GET("iptv/category/list/")
     suspend fun getIPTVCategoryList(): Response<List<IPTVCategoryDto>>
+
     @GET("iptv/category/{category}")
     suspend fun getIPTVCategory(
     @Path("category") category: String
@@ -76,6 +82,10 @@ interface APIService {
     @GET("home/video/carousel/")
     suspend fun getCarouselVideoList(): Response<MovieListResponseDTO>
 
+
+    //    Home
+    @GET("home/trending/live/channels/")
+    suspend fun getTrending(): Response<TrendingResponseDTO>
 
 }
 

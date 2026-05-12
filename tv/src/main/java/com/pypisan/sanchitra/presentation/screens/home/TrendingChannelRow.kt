@@ -1,9 +1,6 @@
-package com.pypisan.sanchitra.presentation.screens.livetv
+package com.pypisan.sanchitra.presentation.screens.home
 
-import android.util.Log
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,19 +9,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -50,11 +43,12 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.pypisan.sanchitra.data.models.Channel
+import com.pypisan.sanchitra.data.models.TrendingChannel
 import com.pypisan.sanchitra.presentation.common.ChannelCard
-import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.presentation.common.PosterImageChannel
-import kotlinx.coroutines.android.awaitFrame
-import kotlinx.coroutines.cancel
+import com.pypisan.sanchitra.presentation.common.PosterImageTrendingChannel
+import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
+
 
 enum class ItemDirection(val aspectRatio: Float) {
     Horizontal(16f / 9f);
@@ -63,7 +57,7 @@ enum class ItemDirection(val aspectRatio: Float) {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun TVRow(
+fun TrendingChannelRow(
     modifier: Modifier = Modifier,
     itemDirection: ItemDirection = ItemDirection.Horizontal,
     startPadding: Dp = rememberChildPadding().start,
@@ -73,7 +67,7 @@ fun TVRow(
         fontWeight = FontWeight.Medium,
         fontSize = 30.sp
     ),
-    channels: List<Channel>,
+    channels: List<TrendingChannel>,
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
     goToTVPlayer:  (id: Int) -> Unit,
@@ -93,49 +87,49 @@ fun TVRow(
                     .padding(start = startPadding, top = 16.dp, bottom = 16.dp)
             )
         }
-            LazyRow(
-                contentPadding = PaddingValues(
-                    start = startPadding,
-                    end = endPadding,
-                ),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                modifier = Modifier
-                    .focusRequester(lazyRow)
-                    .focusRestorer()
-            ) {
-                itemsIndexed(channels, key = { _, channels -> channels.id }) { index, channel ->
+        LazyRow(
+            contentPadding = PaddingValues(
+                start = startPadding,
+                end = endPadding,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            modifier = Modifier
+                .focusRequester(lazyRow)
+                .focusRestorer()
+        ) {
+            itemsIndexed(channels, key = { _, channels -> channels.id }) { index, channel ->
 
-                    val itemModifier = when {
-                        index == 0 -> Modifier.focusRequester(firstItem)
-                        else -> Modifier
-                    }
-
-                    TVRowItem(
-                        channel = channel,
-                        onChannelFocused = {
-                            onChannelFocused(channel.id)
-                        },
-                        goToTVPlayer = {
-                            lazyRow.saveFocusedChild()
-                            goToTVPlayer(channel.id)
-                        },
-                        modifier = itemModifier,
-                        index = index,
-                        itemDirection = itemDirection,
-                        showItemTitle = showItemTitle,
-                        showIndexOverImage = showIndexOverImage,
-                    )
+                val itemModifier = when {
+                    index == 0 -> Modifier.focusRequester(firstItem)
+                    else -> Modifier
                 }
+
+                TrendingChannelRowItem(
+                    channel = channel,
+                    onChannelFocused = {
+                        onChannelFocused(channel.id)
+                    },
+                    goToTVPlayer = {
+                        lazyRow.saveFocusedChild()
+                        goToTVPlayer(channel.id)
+                    },
+                    modifier = itemModifier,
+                    index = index,
+                    itemDirection = itemDirection,
+                    showItemTitle = showItemTitle,
+                    showIndexOverImage = showIndexOverImage,
+                )
             }
+        }
     }
 }
 
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun TVRowItem(
+private fun TrendingChannelRowItem(
     index: Int,
-    channel: Channel,
+    channel: TrendingChannel,
     showItemTitle: Boolean,
     showIndexOverImage: Boolean,
     modifier: Modifier = Modifier,
@@ -185,13 +179,13 @@ private fun TVRowItem(
 
 @Composable
 private fun ChannelRowItemImage(
-    channel: Channel,
+    channel: TrendingChannel,
     showIndexOverImage: Boolean,
     index: Int,
     modifier: Modifier = Modifier,
 ) {
     Box(contentAlignment = Alignment.CenterStart) {
-        PosterImageChannel(
+        PosterImageTrendingChannel(
             channel = channel,
             modifier = modifier
                 .fillMaxWidth()
@@ -228,7 +222,7 @@ private fun ChannelRowItemImage(
 private fun ChannelRowItemText(
     showItemTitle: Boolean,
     isItemFocused: Boolean,
-    channel: Channel,
+    channel: TrendingChannel,
     modifier: Modifier = Modifier
 ) {
     if (showItemTitle) {

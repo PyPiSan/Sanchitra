@@ -15,6 +15,7 @@ import com.pypisan.sanchitra.data.entities.Movie
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.data.models.IPTVChannel
+import com.pypisan.sanchitra.data.models.TrendingChannel
 import com.pypisan.sanchitra.data.util.StringConstants
 
 @Composable
@@ -37,6 +38,34 @@ fun PosterImage(
 @Composable
 fun PosterImageChannel(
     channel: Channel,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF1E1E1E),
+                        Color(0xFF2C2C2C)
+                    )
+                )
+            )
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(channel.logoUrl)
+                .crossfade(true)
+                .build(),
+            contentDescription = channel.name,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit
+        )
+    }
+}
+
+@Composable
+fun PosterImageTrendingChannel(
+    channel: TrendingChannel,
     modifier: Modifier = Modifier,
 ) {
     Box(

@@ -48,7 +48,7 @@ fun TVScreenChannelList (
     channelList: List<Channel>,
     startPadding: Dp = rememberChildPadding().start,
     endPadding: Dp = rememberChildPadding().end,
-    goToTVPlayer: (channel: Channel) -> Unit,
+    goToTVPlayer:  (id: Int) -> Unit,
 
     lastFocusedChannelId: Int?,
     onChannelFocused: (Int) -> Unit,
@@ -83,7 +83,7 @@ fun TVScreenChannelList (
                     itemWidth = 432.dp,
                     onChannelClick = {
                         lazyRow.saveFocusedChild()
-                        goToTVPlayer(channel)
+                        goToTVPlayer(channel.id)
                     },
                     channel = channel,
                     modifier = itemModifier
@@ -102,7 +102,7 @@ private fun ChannelListItem(
     itemWidth: Dp,
     channel: Channel,
     modifier: Modifier = Modifier,
-    onChannelClick: (channel: Channel) -> Unit
+    onChannelClick:  (id: Int) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.height(JetStreamBorderWidth))
@@ -125,7 +125,7 @@ private fun ChannelListItem(
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurface,
             ),
-            onClick = { onChannelClick(channel) },
+            onClick = { onChannelClick(channel.id) },
             image = {
                 val contentAlpha by animateFloatAsState(
                     targetValue = if (isFocused) 1f else 0.5f,

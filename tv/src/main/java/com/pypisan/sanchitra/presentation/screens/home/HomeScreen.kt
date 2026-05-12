@@ -1,4 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.home
+
+
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.common.Loading
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,6 +16,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -22,14 +25,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pypisan.sanchitra.data.entities.Movie
 import com.pypisan.sanchitra.data.entities.MovieList
-import com.pypisan.sanchitra.data.util.StringConstants
-import com.pypisan.sanchitra.presentation.common.MoviesRow
+import com.pypisan.sanchitra.data.models.TrendingChannel
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 @Composable
 fun HomeScreen(
     onMovieClick: (movie: Movie) -> Unit,
-    goToVideoPlayer: (movie: Movie) -> Unit,
+    goToTVPlayer:  (id: Int) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
     homeScreeViewModel: HomeScreeViewModel = hiltViewModel(),
@@ -39,13 +41,12 @@ fun HomeScreen(
     when (val s = uiState) {
         is HomeScreenUiState.Ready -> {
             Catalog(
-                featuredMovies = s.featuredMovieList,
-                trendingMovies = s.trendingMovieList,
+                featuredHome = s.featuredHomeList,
+                trendingHomeChannels = s.trendingHomeChannels,
                 top10Movies = s.top10MovieList,
-                nowPlayingMovies = s.nowPlayingMovieList,
                 onMovieClick = onMovieClick,
                 onScroll = onScroll,
-                goToVideoPlayer = goToVideoPlayer,
+                goToTVPlayer = goToTVPlayer,
                 isTopBarVisible = isTopBarVisible,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -58,13 +59,12 @@ fun HomeScreen(
 
 @Composable
 private fun Catalog(
-    featuredMovies: MovieList,
-    trendingMovies: MovieList,
+    featuredHome: List<TrendingChannel>,
+    trendingHomeChannels: List<TrendingChannel>,
     top10Movies: MovieList,
-    nowPlayingMovies: MovieList,
     onMovieClick: (movie: Movie) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
-    goToVideoPlayer: (movie: Movie) -> Unit,
+    goToTVPlayer:  (id: Int) -> Unit,
     modifier: Modifier = Modifier,
     isTopBarVisible: Boolean = true,
 ) {
@@ -72,6 +72,8 @@ private fun Catalog(
     val lazyListState = rememberLazyListState()
     val childPadding = rememberChildPadding()
     var immersiveListHasFocus by remember { mutableStateOf(false) }
+    val groupedTrendingChannels = trendingHomeChannels.groupBy { it.category }
+    var lastFocusedChannelId by rememberSaveable { mutableStateOf<Int?>(null) }
 
     val shouldShowTopBar by remember {
         derivedStateOf {
@@ -94,11 +96,11 @@ private fun Catalog(
         modifier = modifier,
     ) {
 
-        item(contentType = "FeaturedMoviesCarousel") {
-            FeaturedMoviesCarousel(
-                movies = featuredMovies,
+        item(contentType = "FeaturedHomeCarousel") {
+            FeaturedHomeCarousel(
+                channels = featuredHome,
                 padding = childPadding,
-                goToVideoPlayer = goToVideoPlayer,
+                goToTVPlayer = goToTVPlayer,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(324.dp)
@@ -125,13 +127,18 @@ private fun Catalog(
                 },
             )
         }
-//        item(contentType = "MoviesRow") {
-//            MoviesRow(
-//                modifier = Modifier.padding(top = 16.dp),
-//                movieList = nowPlayingMovies,
-//                title = StringConstants.Composable.HomeScreenNowPlayingMoviesTitle,
-//                onMovieSelected = onMovieClick
-//            )
-//        }
+
+        groupedTrendingChannels.forEach { (category, channels) ->
+
+            item(contentType = "TrendingChannelRow") {
+                TrendingChannelRow(
+                    modifier = Modifier.padding(top = 16.dp),
+                    channels = channels,
+                    title = category,
+                    goToTVPlayer = goToTVPlayer,
+                    onChannelFocused = { lastFocusedChannelId = it }
+                )
+            }
+        }
     }
 }
