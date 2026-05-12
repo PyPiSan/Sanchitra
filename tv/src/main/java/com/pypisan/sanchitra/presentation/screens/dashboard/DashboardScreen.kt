@@ -230,7 +230,7 @@ private fun Body(
                 onMovieClick = { selectedMovie ->
                     openMovieDetailsScreen(selectedMovie.id)
                 },
-                goToVideoPlayer = openVideoPlayer,
+                goToTVPlayer = { channel -> openTVPlayer(channel) },
                 onScroll = updateTopBarVisibility,
                 isTopBarVisible = isTopBarVisible
             )
@@ -250,7 +250,7 @@ private fun Body(
         }
         composable(Screens.TV()) {
             TVScreen(
-                goToTVPlayer = { channel -> openTVPlayer(channel.id) },
+                goToTVPlayer = { channel -> openTVPlayer(channel) },
                 onScroll = updateTopBarVisibility,
                 isTopBarVisible = isTopBarVisible
             )

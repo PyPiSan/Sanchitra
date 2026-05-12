@@ -1,7 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.livetv
 
 import android.util.Log
-import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -27,7 +26,7 @@ import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 @Composable
 fun TVScreen(
-    goToTVPlayer: (channel: Channel) -> Unit,
+    goToTVPlayer: (id: Int) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
     tvScreenViewModel: TVScreenViewModel = hiltViewModel(),
@@ -60,7 +59,7 @@ fun TVScreen(
 fun TVCatalog(
     channelCategories: Map<String, List<Channel>>,
     carouselList: List<Channel>,
-    goToTVPlayer: (channel: Channel) -> Unit,
+    goToTVPlayer:  (id: Int) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
     modifier: Modifier = Modifier

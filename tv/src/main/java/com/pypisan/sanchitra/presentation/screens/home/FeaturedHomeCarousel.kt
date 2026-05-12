@@ -54,6 +54,7 @@ import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.data.entities.Movie
+import com.pypisan.sanchitra.data.models.TrendingChannel
 import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.utils.Padding
 import com.pypisan.sanchitra.utils.handleDPadKeyEvents
@@ -66,10 +67,10 @@ val CarouselSaver = Saver<CarouselState, Int>(
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun FeaturedMoviesCarousel(
-    movies: List<Movie>,
+fun FeaturedHomeCarousel(
+    channels: List<TrendingChannel>,
     padding: Padding,
-    goToVideoPlayer: (movie: Movie) -> Unit,
+    goToTVPlayer:  (id: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val carouselState = rememberSaveable(saver = CarouselSaver) { CarouselState(0) }
@@ -98,13 +99,13 @@ fun FeaturedMoviesCarousel(
                     StringConstants.Composable.ContentDescription.MoviesCarousel
             }
             .handleDPadKeyEvents(onEnter = {
-                goToVideoPlayer(movies[carouselState.activeItemIndex])
+                goToTVPlayer(channels[carouselState.activeItemIndex].id)
             }),
-        itemCount = movies.size,
+        itemCount = channels.size,
         carouselState = carouselState,
         carouselIndicator = {
             CarouselIndicator(
-                itemCount = movies.size,
+                itemCount = channels.size,
                 activeItemIndex = carouselState.activeItemIndex
             )
         },
@@ -113,12 +114,12 @@ fun FeaturedMoviesCarousel(
         contentTransformEndToStart = fadeIn(tween(durationMillis = 1000))
             .togetherWith(fadeOut(tween(durationMillis = 1000))),
         content = { index ->
-            val movie = movies[index]
+            val channel = channels[index]
             // background
-            CarouselItemBackground(movie = movie, modifier = Modifier.fillMaxSize())
+            CarouselItemBackground(channel = channel, modifier = Modifier.fillMaxSize())
             // foreground
             CarouselItemForeground(
-                movie = movie,
+                channel = channel,
                 isCarouselFocused = isCarouselFocused,
                 modifier = Modifier.fillMaxSize()
             )
@@ -155,7 +156,7 @@ private fun BoxScope.CarouselIndicator(
 
 @Composable
 private fun CarouselItemForeground(
-    movie: Movie,
+    channel: TrendingChannel,
     modifier: Modifier = Modifier,
     isCarouselFocused: Boolean = false
 ) {
@@ -170,7 +171,7 @@ private fun CarouselItemForeground(
             verticalArrangement = Arrangement.Bottom
         ) {
             Text(
-                text = movie.name,
+                text = channel.name,
                 style = MaterialTheme.typography.displayMedium.copy(
                     shadow = Shadow(
                         color = Color.Black.copy(alpha = 0.5f),
@@ -181,7 +182,7 @@ private fun CarouselItemForeground(
                 maxLines = 1
             )
             Text(
-                text = movie.description,
+                text = channel.name,
                 style = MaterialTheme.typography.titleMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface.copy(
                         alpha = 0.65f
@@ -206,13 +207,13 @@ private fun CarouselItemForeground(
 }
 
 @Composable
-private fun CarouselItemBackground(movie: Movie, modifier: Modifier = Modifier) {
+private fun CarouselItemBackground(channel: TrendingChannel, modifier: Modifier = Modifier) {
     AsyncImage(
-        model = movie.posterUri,
+        model = channel.bannerUrl,
         contentDescription = StringConstants
             .Composable
             .ContentDescription
-            .moviePoster(movie.name),
+            .moviePoster(channel.name),
         modifier = modifier
             .drawWithContent {
                 drawContent()

@@ -3,6 +3,9 @@ package com.pypisan.sanchitra.presentation.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pypisan.sanchitra.data.entities.MovieList
+import com.pypisan.sanchitra.data.models.TrendingChannel
+import com.pypisan.sanchitra.data.models.TrendingResponse
+import com.pypisan.sanchitra.data.repositories.HomeRepository
 import com.pypisan.sanchitra.data.repositories.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -12,19 +15,43 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
-class HomeScreeViewModel @Inject constructor(movieRepository: MovieRepository) : ViewModel() {
+class HomeScreeViewModel @Inject constructor(
+    movieRepository: MovieRepository,
+    homeRepository: HomeRepository
+) : ViewModel() {
 
     val uiState: StateFlow<HomeScreenUiState> = combine(
         movieRepository.getFeaturedMovies(),
         movieRepository.getTrendingMovies(),
         movieRepository.getTop10Movies(),
         movieRepository.getNowPlayingMovies(),
-    ) { featuredMovieList, trendingMovieList, top10MovieList, nowPlayingMovieList ->
+        homeRepository.getTrendingLiveChannels()
+    ) { featuredMovieList,
+        trendingMovieList,
+        top10MovieList,
+        nowPlayingMovieList,
+        trendingChannels ->
+
+        if (trendingChannels.data.isEmpty()) {
+            return@combine HomeScreenUiState.Loading
+        }
+
+        val featuredHomeList = trendingChannels.data
+            .firstOrNull { it.category.equals("featured", ignoreCase = true) }
+            ?.channels
+            .orEmpty()
+
+        val trendingHomeChannels = trendingChannels.data
+            .firstOrNull { it.category.equals("trending", ignoreCase = true) }
+            ?.channels
+            .orEmpty()
+
         HomeScreenUiState.Ready(
-            featuredMovieList,
-            trendingMovieList,
-            top10MovieList,
-            nowPlayingMovieList
+            featuredHomeList = featuredHomeList,
+            trendingHomeChannels = trendingHomeChannels,
+            trendingMovieList = trendingMovieList,
+            top10MovieList = top10MovieList,
+            nowPlayingMovieList = nowPlayingMovieList,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -36,10 +63,12 @@ class HomeScreeViewModel @Inject constructor(movieRepository: MovieRepository) :
 sealed interface HomeScreenUiState {
     data object Loading : HomeScreenUiState
     data object Error : HomeScreenUiState
+
     data class Ready(
-        val featuredMovieList: MovieList,
+        val featuredHomeList: List<TrendingChannel>,
+        val trendingHomeChannels: List<TrendingChannel>,
         val trendingMovieList: MovieList,
         val top10MovieList: MovieList,
-        val nowPlayingMovieList: MovieList
+        val nowPlayingMovieList: MovieList,
     ) : HomeScreenUiState
 }
