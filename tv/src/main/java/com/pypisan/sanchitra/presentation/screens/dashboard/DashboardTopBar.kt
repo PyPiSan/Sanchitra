@@ -167,7 +167,7 @@ private fun SanchitraLogo(
                 .ContentDescription.BrandLogoImage,
             modifier = Modifier
                 .padding(end = 6.dp)
-                .size(IconSize + 4.dp)
+                .size(IconSize + 15.dp)
         )
 
         Text(

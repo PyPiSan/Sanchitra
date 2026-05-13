@@ -9,6 +9,7 @@ import com.pypisan.sanchitra.data.models.IPTVResponseDto
 import com.pypisan.sanchitra.data.models.LoginStatusResponse
 import com.pypisan.sanchitra.data.models.MovieListResponseDTO
 import com.pypisan.sanchitra.data.models.TVResponse
+import com.pypisan.sanchitra.data.models.TrendingMovieResponseDTO
 import com.pypisan.sanchitra.data.models.TrendingResponseDTO
 import com.pypisan.sanchitra.data.models.UserDetailResponse
 import retrofit2.Response
@@ -86,6 +87,9 @@ interface APIService {
     //    Home
     @GET("home/trending/live/channels/")
     suspend fun getTrending(): Response<TrendingResponseDTO>
+
+    @GET("home/trending/movies/")
+    suspend fun getTrendingMovies(): Response<TrendingMovieResponseDTO>
 
 }
 

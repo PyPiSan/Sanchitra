@@ -18,7 +18,7 @@
     <string name="yes_delete_account">Yes, delete my account</string>
     <string name="no_keep_it">No, keep it</string>
     <string name="search_screen_et_placeholder">Search for movies, shows and more…</string>
-    <string name="top_10_movies_title">Top 10 in the US</string>
+    <string name="top_10_movies_title">Top 10 Movies</string>
     <string name="profile_screen_listItem_icon_content_description">%s icon</string>
     <string name="language_section_listItem_icon_content_description">%s language option</string>
     <string name="movie_category_desc">movie category %s</string>

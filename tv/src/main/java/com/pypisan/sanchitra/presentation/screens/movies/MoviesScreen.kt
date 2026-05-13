@@ -23,9 +23,6 @@ import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.presentation.common.MoviesRow
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
-
-
-
 @Composable
 fun MoviesScreen(
     onMovieClick: (video: Videos) -> Unit,

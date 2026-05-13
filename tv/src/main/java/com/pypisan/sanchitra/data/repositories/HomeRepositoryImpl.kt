@@ -1,7 +1,9 @@
 package com.pypisan.sanchitra.data.repositories
 
 
+import com.pypisan.sanchitra.data.models.TrendingMovieResponse
 import com.pypisan.sanchitra.data.models.TrendingResponse
+import com.pypisan.sanchitra.data.models.toTrendingMovieResponse
 import com.pypisan.sanchitra.data.models.toTrendingResponse
 import com.pypisan.sanchitra.utils.APIService
 import kotlinx.coroutines.CoroutineScope
@@ -41,5 +43,26 @@ class HomeRepositoryImpl @Inject constructor(
     )
 
     override fun getTrendingLiveChannels(): StateFlow<TrendingResponse> = liveChannelTrendingFlow
+
+    private val movieTrendingFlow: StateFlow<TrendingMovieResponse> = flow {
+        val response = api.getTrendingMovies()
+
+        if (response.isSuccessful) {
+            emit(
+                response.body()?.toTrendingMovieResponse()
+                    ?: TrendingMovieResponse(emptyList())
+            )
+        } else {
+            emit(TrendingMovieResponse(emptyList()))
+        }
+    }.catch {
+        emit(TrendingMovieResponse(emptyList()))
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = TrendingMovieResponse(emptyList())
+    )
+
+    override fun getTrendingMovies(): StateFlow<TrendingMovieResponse> = movieTrendingFlow
 
 }

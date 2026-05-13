@@ -3,10 +3,10 @@ package com.pypisan.sanchitra.data.util
 object StringConstants {
 
     object API {
-        const val TVURL = "https://media.pypisan.com/api/v1/";
+        const val TVURL = "https://media.pypisan.com/api/v1/"
         const val UIURL = "https://sanchitra.pypisan.com/"
 
-        const val VIDEOURL = "https://tv.pypisan.com/api/v1/";
+        const val VIDEOURL = "https://tv.pypisan.com/api/v1/"
     }
 
     object Profile {
@@ -58,8 +58,7 @@ object StringConstants {
         const val CategoryDetailsFailureSubject = "category details"
         const val MoviesFailureSubject = "movies"
         const val MovieDetailsFailureSubject = "movie details"
-        const val HomeScreenTrendingTitle = "Trending"
-        const val HomeScreenNowPlayingMoviesTitle = "Now Playing Movies"
+        const val HomeScreenTrendingTitle = "Trending Movies"
         const val PopularFilmsTitle = "Popular films"
         const val BingeWatchDramasTitle = "Bingewatch dramas"
         fun movieDetailsScreenSimilarTo(name: String) = "Similar to $name"
@@ -102,7 +101,6 @@ object StringConstants {
             const val SubtitlesSectionLanguageItem = "Subtitles Language"
             const val SubtitlesSectionLanguageValue = "English"
             const val AccountsSelectionSwitchAccountsTitle = "Switch profile"
-            const val AccountsSelectionSwitchAccountsEmail = "jack@jetstream.com"
             const val AccountsSelectionLogOut = "Log out"
             const val AccountsSelectionChangePasswordTitle = "Change password"
             const val AccountsSelectionChangePasswordValue = "••••••••••••••"
