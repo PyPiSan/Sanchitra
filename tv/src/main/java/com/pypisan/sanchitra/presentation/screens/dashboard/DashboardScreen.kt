@@ -227,8 +227,7 @@ private fun Body(
         }
         composable(Screens.Home()) {
             HomeScreen(
-                onMovieClick = { selectedMovie ->
-                    openMovieDetailsScreen(selectedMovie.id)
+                onMovieClick = { movie -> openMovieDetailsScreen(movie.id.toString())
                 },
                 goToTVPlayer = { channel -> openTVPlayer(channel) },
                 onScroll = updateTopBarVisibility,

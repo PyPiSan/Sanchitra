@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -41,13 +39,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.pypisan.sanchitra.data.entities.Movie
-import com.pypisan.sanchitra.data.entities.MovieList
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 enum class ItemDirection(val aspectRatio: Float) {
-    Vertical(10.5f / 16f)
+    Vertical(10.5f / 16f),
+    Horizontal(16f / 9f);
 }
 
 @OptIn(ExperimentalComposeUiApi::class)

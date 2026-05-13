@@ -1,4 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.home
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.expandVertically
@@ -33,8 +34,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import bringIntoViewIfChildrenAreFocused
 import com.pypisan.sanchitra.R
-import com.pypisan.sanchitra.data.entities.Movie
-import com.pypisan.sanchitra.data.entities.MovieList
+import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.presentation.common.ItemDirection
 import com.pypisan.sanchitra.presentation.common.PosterImage
 import com.pypisan.sanchitra.presentation.common.ImmersiveListMoviesRow
@@ -42,10 +42,10 @@ import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 @Composable
 fun Top10MoviesList(
-    movieList: MovieList,
+    movieList: List<Videos>,
     modifier: Modifier = Modifier,
     gradientColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-    onMovieClick: (movie: Movie) -> Unit
+    onMovieClick: (video: Videos) -> Unit
 ) {
     var isListFocused by remember { mutableStateOf(false) }
     var selectedMovie by remember(movieList) { mutableStateOf(movieList.first()) }
@@ -77,27 +77,27 @@ fun Top10MoviesList(
 
 @Composable
 private fun ImmersiveList(
-    selectedMovie: Movie,
+    selectedMovie: Videos,
     isListFocused: Boolean,
     gradientColor: Color,
-    movieList: MovieList,
+    movieList: List<Videos>,
     sectionTitle: String?,
     onFocusChanged: (FocusState) -> Unit,
-    onMovieFocused: (Movie) -> Unit,
-    onMovieClick: (Movie) -> Unit,
+    onMovieFocused: (Videos) -> Unit,
+    onMovieClick: (Videos) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
         contentAlignment = Alignment.BottomStart,
         modifier = modifier
     ) {
-//        Background(
-//            movie = selectedMovie,
-//            visible = isListFocused,
-//            modifier = modifier
-//                .height(432.dp)
-//                .gradientOverlay(gradientColor)
-//        )
+        Background(
+            movie = selectedMovie,
+            visible = isListFocused,
+            modifier = modifier
+                .height(432.dp)
+                .gradientOverlay(gradientColor)
+        )
         Column {
             if (isListFocused) {
                 MovieDescription(
@@ -109,55 +109,55 @@ private fun ImmersiveList(
                 )
             }
 
-//            ImmersiveListMoviesRow(
-//                movieList = movieList,
-//                itemDirection = ItemDirection.Horizontal,
-//                title = sectionTitle,
-//                showItemTitle = !isListFocused,
-//                showIndexOverImage = true,
-//                onMovieSelected = onMovieClick,
-//                onMovieFocused = onMovieFocused,
-//                modifier = Modifier.onFocusChanged(onFocusChanged)
-//            )
+            ImmersiveListMoviesRow(
+                movieList = movieList,
+                itemDirection = ItemDirection.Horizontal,
+                title = sectionTitle,
+                showItemTitle = !isListFocused,
+                showIndexOverImage = true,
+                onMovieSelected = onMovieClick,
+                onMovieFocused = onMovieFocused,
+                modifier = Modifier.onFocusChanged(onFocusChanged)
+            )
         }
     }
 }
 
-//@Composable
-//private fun Background(
-//    movie: Movie,
-//    visible: Boolean,
-//    modifier: Modifier = Modifier,
-//) {
-//    AnimatedVisibility(
-//        visible = visible,
-//        enter = fadeIn() + expandVertically(),
-//        exit = fadeOut() + shrinkVertically(),
-//        modifier = modifier
-//    ) {
-//        Crossfade(
-//            targetState = movie,
-//            label = "posterUriCrossfade",
-//
-//        ) {
-//            PosterImage(movie = it, modifier = Modifier.fillMaxSize())
-//        }
-//    }
-//}
+@Composable
+private fun Background(
+    movie: Videos,
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically(),
+        modifier = modifier
+    ) {
+        Crossfade(
+            targetState = movie,
+            label = "posterUriCrossfade",
+
+        ) {
+            PosterImage(video = it, modifier = Modifier.fillMaxSize())
+        }
+    }
+}
 
 @Composable
 private fun MovieDescription(
-    movie: Movie,
+    movie: Videos,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(text = movie.name, style = MaterialTheme.typography.displaySmall)
+        Text(text = movie.title, style = MaterialTheme.typography.displaySmall)
         Text(
             modifier = Modifier.fillMaxWidth(0.5f),
-            text = movie.description,
+            text = movie.meta.description,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
             fontWeight = FontWeight.Light

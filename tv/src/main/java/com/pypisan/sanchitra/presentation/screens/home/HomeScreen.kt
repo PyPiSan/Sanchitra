@@ -1,6 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.home
 
 
+import androidx.activity.ComponentActivity
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.common.Loading
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,17 +21,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pypisan.sanchitra.data.entities.Movie
-import com.pypisan.sanchitra.data.entities.MovieList
+import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.models.TrendingChannel
+import com.pypisan.sanchitra.data.util.StringConstants
+import com.pypisan.sanchitra.presentation.common.MoviesRow
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
+import com.pypisan.sanchitra.presentation.screens.movies.VideoSharedViewModel
 
 @Composable
 fun HomeScreen(
-    onMovieClick: (movie: Movie) -> Unit,
+    onMovieClick: (video: Videos) -> Unit,
     goToTVPlayer:  (id: Int) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
@@ -44,6 +48,7 @@ fun HomeScreen(
                 featuredHome = s.featuredHomeList,
                 trendingHomeChannels = s.trendingHomeChannels,
                 top10Movies = s.top10MovieList,
+                trendingMovies = s.trendingMovieList,
                 onMovieClick = onMovieClick,
                 onScroll = onScroll,
                 goToTVPlayer = goToTVPlayer,
@@ -61,8 +66,9 @@ fun HomeScreen(
 private fun Catalog(
     featuredHome: List<TrendingChannel>,
     trendingHomeChannels: List<TrendingChannel>,
-    top10Movies: MovieList,
-    onMovieClick: (movie: Movie) -> Unit,
+    top10Movies: List<Videos>,
+    trendingMovies: List<Videos>,
+    onMovieClick: (video: Videos) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     goToTVPlayer:  (id: Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -74,6 +80,7 @@ private fun Catalog(
     var immersiveListHasFocus by remember { mutableStateOf(false) }
     val groupedTrendingChannels = trendingHomeChannels.groupBy { it.category }
     var lastFocusedChannelId by rememberSaveable { mutableStateOf<Int?>(null) }
+    val sharedVideoVM: VideoSharedViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
 
     val shouldShowTopBar by remember {
         derivedStateOf {
@@ -110,18 +117,24 @@ private fun Catalog(
                  */
             )
         }
-//        item(contentType = "MoviesRow") {
-//            MoviesRow(
-//                modifier = Modifier.padding(top = 16.dp),
-//                movieList = trendingMovies,
-//                title = StringConstants.Composable.HomeScreenTrendingTitle,
-//                onMovieSelected = onMovieClick
-//            )
-//        }
+        item(contentType = "MoviesRow") {
+            MoviesRow(
+                modifier = Modifier.padding(top = 16.dp),
+                videoList = trendingMovies,
+                title = StringConstants.Composable.HomeScreenTrendingTitle,
+                onMovieSelected = { video ->
+                    sharedVideoVM.setVideo(video)
+                    onMovieClick(video)
+                }
+            )
+        }
         item(contentType = "Top10MoviesList") {
             Top10MoviesList(
                 movieList = top10Movies,
-                onMovieClick = onMovieClick,
+                onMovieClick = { video ->
+                    sharedVideoVM.setVideo(video)
+                    onMovieClick(video)
+                },
                 modifier = Modifier.onFocusChanged {
                     immersiveListHasFocus = it.hasFocus
                 },
