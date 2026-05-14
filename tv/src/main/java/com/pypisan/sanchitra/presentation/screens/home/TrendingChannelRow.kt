@@ -28,7 +28,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component2
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
@@ -45,13 +44,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.data.models.TrendingChannel
 import com.pypisan.sanchitra.presentation.common.ChannelCard
-import com.pypisan.sanchitra.presentation.common.PosterImageChannel
 import com.pypisan.sanchitra.presentation.common.PosterImageTrendingChannel
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
-import kotlinx.coroutines.android.awaitFrame
 
 
 enum class ItemDirection(val aspectRatio: Float) {
