@@ -92,7 +92,7 @@ fun MovieDetails(
 //                        music = movieDetails.music
 //                    )
                 }
-                WatchTrailerButton(
+                WatchMovieButton(
                     modifier = Modifier.onFocusChanged {
                         if (it.isFocused) {
                             coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
@@ -106,7 +106,7 @@ fun MovieDetails(
 }
 
 @Composable
-private fun WatchTrailerButton(
+private fun WatchMovieButton(
     modifier: Modifier = Modifier,
     goToMoviePlayer: () -> Unit
 ) {

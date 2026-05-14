@@ -16,11 +16,13 @@ object StringConstants {
 
     object Movie {
         const val StatusReleased = "Released"
-        const val BudgetDefault = "$10M"
-        const val WorldWideGrossDefault = "$20M"
+        const val BudgetDefault = "$100M"
+        const val WorldWideGrossDefault = "$720M"
 
         object Reviewer {
             const val FreshTomatoes = "Fresh Tomatoes"
+            const val FreshTomatoesScore = "89%"
+            const val FreshTomatoesReviewCount = "125"
             const val FreshTomatoesImageUrl = ""
             const val ReviewerName = "Rater"
             const val ImageUrl = ""

@@ -26,20 +26,24 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.MaterialTheme
 import com.pypisan.sanchitra.R
+import com.pypisan.sanchitra.data.entities.MovieReviewsAndRatings
 import com.pypisan.sanchitra.data.entities.Videos
+import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 object MovieDetailsScreen {
     const val MovieIdBundleKey = "movieId"
 }
+
 @Composable
 fun MovieDetailsScreen(
     goToMoviePlayer: () -> Unit,
     onBackPressed: () -> Unit,
 ) {
 
-    val sharedVideoVM: VideoSharedViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
+    val sharedVideoVM: VideoSharedViewModel =
+        hiltViewModel(LocalContext.current as ComponentActivity)
 
     val video by sharedVideoVM.selectedVideo.collectAsStateWithLifecycle()
 
@@ -82,29 +86,37 @@ private fun Details(
             )
         }
 
-//        item {
-//            CastAndCrewList(
-//                castAndCrew = movieDetails.castAndCrew
-//            )
-//        }
 
 //        item {
 //            MoviesRow(
 //                title = StringConstants
 //                    .Composable
-//                    .movieDetailsScreenSimilarTo(movieDetails.name),
+//                    .movieDetailsScreenSimilarTo(video.title),
 //                titleStyle = MaterialTheme.typography.titleMedium,
-//                movieList = movieDetails.similarMovies,
+//                videoList = video,
 //                onMovieSelected = refreshScreenWithNewMovie
 //            )
 //        }
 
-//        item {
-//            MovieReviews(
-//                modifier = Modifier.padding(top = childPadding.top),
-//                reviewsAndRatings = movieDetails.reviewsAndRatings
-//            )
-//        }
+        item {
+            MovieReviews(
+                modifier = Modifier.padding(top = childPadding.top),
+                reviewsAndRatings = listOf(
+                    MovieReviewsAndRatings(
+                        StringConstants.Movie.Reviewer.FreshTomatoes,
+                        StringConstants.Movie.Reviewer.FreshTomatoesImageUrl,
+                        StringConstants.Movie.Reviewer.FreshTomatoesReviewCount,
+                        StringConstants.Movie.Reviewer.FreshTomatoesScore
+                    ),
+                    MovieReviewsAndRatings(
+                        StringConstants.Movie.Reviewer.ReviewerName,
+                        StringConstants.Movie.Reviewer.ImageUrl,
+                        StringConstants.Movie.Reviewer.DefaultCount,
+                        StringConstants.Movie.Reviewer.DefaultRating
+                    )
+                )
+            )
+        }
 
         item {
             Box(
@@ -126,27 +138,27 @@ private fun Details(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 val itemModifier = Modifier.width(192.dp)
-//
-//                TitleValueText(
-//                    modifier = itemModifier,
-//                    title = stringResource(R.string.status),
-//                    value = movieDetails.status
-//                )
+
+                TitleValueText(
+                    modifier = itemModifier,
+                    title = stringResource(R.string.status),
+                    value = StringConstants.Movie.StatusReleased
+                )
                 TitleValueText(
                     modifier = itemModifier,
                     title = stringResource(R.string.original_language),
-                    value = video.language.toString()
+                    value = video.language.joinToString(", ")
                 )
-//                TitleValueText(
-//                    modifier = itemModifier,
-//                    title = stringResource(R.string.budget),
-//                    value = movieDetails.budget
-//                )
-//                TitleValueText(
-//                    modifier = itemModifier,
-//                    title = stringResource(R.string.revenue),
-//                    value = movieDetails.revenue
-//                )
+                TitleValueText(
+                    modifier = itemModifier,
+                    title = stringResource(R.string.budget),
+                    value = StringConstants.Movie.BudgetDefault
+                )
+                TitleValueText(
+                    modifier = itemModifier,
+                    title = stringResource(R.string.revenue),
+                    value = StringConstants.Movie.WorldWideGrossDefault
+                )
             }
         }
     }
