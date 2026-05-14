@@ -40,7 +40,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
-import com.pypisan.sanchitra.data.entities.MovieDetails
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.util.StringConstants
 
