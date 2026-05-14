@@ -1,8 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 import android.content.Context
-import android.media.session.PlaybackState
-import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -10,12 +8,11 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
-import com.pypisan.sanchitra.data.models.Channel
 
 @androidx.annotation.OptIn(UnstableApi::class)
 fun buildDefaultExoPlayer(
     context: Context,
-    channel: Channel,
+    stream: String,
     onError: (PlaybackException) -> Unit,
     onBuffering: (Int) -> Unit,
     renderersFactory: DefaultRenderersFactory
@@ -55,7 +52,7 @@ fun buildDefaultExoPlayer(
                 }
             })
 
-            setMediaItem(MediaItem.fromUri(channel.streamUrl))
+            setMediaItem(MediaItem.fromUri(stream))
             prepare()
             playWhenReady = true
         }
