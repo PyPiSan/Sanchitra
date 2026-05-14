@@ -1,4 +1,5 @@
 package com.pypisan.sanchitra.presentation.common
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.focusGroup
@@ -12,10 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -50,7 +54,7 @@ enum class ItemDirection(val aspectRatio: Float) {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MoviesRow(
-    videoList:  List<Videos>,
+    videoList: List<Videos>,
     modifier: Modifier = Modifier,
     itemDirection: ItemDirection = ItemDirection.Vertical,
     startPadding: Dp = rememberChildPadding().start,
@@ -62,52 +66,85 @@ fun MoviesRow(
     ),
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
+    isActive: Boolean = false,
+    onMovieFocused: () -> Unit = {},
     onMovieSelected: (video: Videos) -> Unit = {}
 ) {
-    val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
+
+    var focusedItem by rememberSaveable {
+        mutableStateOf<Pair<Int, Int>?>(null)
+    }
+
+    val listState = rememberLazyListState()
 
     Column(
         modifier = modifier.focusGroup()
     ) {
+
         if (title != null) {
             Text(
                 text = title,
                 style = titleStyle,
-                modifier = Modifier
-                    .alpha(1f)
-                    .padding(start = startPadding, top = 16.dp, bottom = 16.dp)
+                modifier = Modifier.padding(
+                    start = startPadding,
+                    top = 16.dp,
+                    bottom = 16.dp
+                )
             )
         }
+
         AnimatedContent(
             targetState = videoList,
-            label = "",
+            label = ""
         ) { movieState ->
+
             LazyRow(
+                state = listState,
                 contentPadding = PaddingValues(
                     start = startPadding,
                     end = endPadding,
                 ),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
-                modifier = Modifier
-                    .focusRequester(lazyRow)
-                    .focusRestorer {
-                        firstItem
-                    }
+                modifier = Modifier.focusRestorer()
             ) {
-                itemsIndexed(movieState, key = { _, movie -> movie.id }) { index, movie ->
-                    val itemModifier = if (index == 0) {
-                        Modifier.focusRequester(firstItem)
-                    } else {
-                        Modifier
+
+                itemsIndexed(
+                    items = movieState,
+                    key = { _, movie -> movie.id }
+                ) { index, movie ->
+
+                    val focusRequester = remember {
+                        FocusRequester()
                     }
+
+                    LaunchedEffect(focusedItem, isActive) {
+
+                        if (!isActive) return@LaunchedEffect
+
+                        val saved = focusedItem
+
+                        if (
+                            saved != null &&
+                            saved.first == index &&
+                            saved.second == movie.id
+                        ) {
+                            focusRequester.requestFocus()
+                        }
+                    }
+
                     MoviesRowItem(
-                        modifier = itemModifier.weight(1f),
+                        modifier = Modifier
+                            .focusRequester(focusRequester)
+                            .onFocusChanged {
+                                if (it.isFocused) {
+                                    focusedItem = index to movie.id
+                                    onMovieFocused()
+                                }
+                            },
+
                         index = index,
                         itemDirection = itemDirection,
-                        onMovieSelected = {
-                            lazyRow.saveFocusedChild()
-                            onMovieSelected(it)
-                        },
+                        onMovieSelected = onMovieSelected,
                         video = movie,
                         showItemTitle = showItemTitle,
                         showIndexOverImage = showIndexOverImage

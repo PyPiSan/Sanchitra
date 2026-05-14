@@ -1,7 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.movies
 
 import JetStreamBorderWidth
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
@@ -14,13 +13,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -46,25 +49,59 @@ fun MoviesScreenMovieList(
     videoList: List<Videos>,
     startPadding: Dp = rememberChildPadding().start,
     endPadding: Dp = rememberChildPadding().end,
-    onMovieClick: (video: Videos) -> Unit
+    onMovieClick: (video: Videos) -> Unit,
+    lastFocusedMovieId: Int?,
+    onMovieFocused: (Int) -> Unit,
+    isActive: Boolean,
 ) {
-    AnimatedContent(
-        modifier = modifier,
-        targetState = videoList,
-        label = "",
-    ) { movieListTarget ->
 
-        LazyRow(
-            modifier = Modifier.focusRestorer(),
-            contentPadding = PaddingValues(start = startPadding, end = endPadding)
-        ) {
-            items(movieListTarget) {
-                MovieListItem(
-                    itemWidth = 432.dp,
-                    onMovieClick = onMovieClick,
-                    video = it,
-                )
+    val listState = rememberLazyListState()
+
+    LazyRow(
+        modifier = modifier.focusRestorer(),
+        state = listState,
+        contentPadding = PaddingValues(
+            start = startPadding,
+            end = endPadding
+        )
+    ) {
+
+        items(
+            items = videoList,
+            key = { it.id }
+        ) { movie ->
+
+            val focusRequester = remember {
+                FocusRequester()
             }
+
+            LaunchedEffect(
+                lastFocusedMovieId,
+                isActive
+            ) {
+
+                if (
+                    isActive &&
+                    movie.id == lastFocusedMovieId
+                ) {
+                    focusRequester.requestFocus()
+                }
+            }
+
+            MovieListItem(
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+                    .onFocusChanged {
+
+                        if (it.isFocused) {
+                            onMovieFocused(movie.id)
+                        }
+                    },
+
+                itemWidth = 432.dp,
+                onMovieClick = onMovieClick,
+                video = movie,
+            )
         }
     }
 }

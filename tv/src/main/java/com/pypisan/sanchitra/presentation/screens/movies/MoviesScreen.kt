@@ -1,6 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.movies
 
-import android.util.Log
+
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -60,9 +63,26 @@ private fun Catalog(
     isTopBarVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
+
     val childPadding = rememberChildPadding()
+
     val lazyListState = rememberLazyListState()
-    val sharedVideoVM: VideoSharedViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
+
+    var lastFocusedMovieId by rememberSaveable {
+        mutableStateOf<Int?>(null)
+    }
+
+    var focusedSection by rememberSaveable {
+        mutableStateOf(0)
+    }
+
+    var focusedRowIndex by rememberSaveable {
+        mutableStateOf(0)
+    }
+
+    val sharedVideoVM: VideoSharedViewModel =
+        hiltViewModel(LocalContext.current as ComponentActivity)
+
     val shouldShowTopBar by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex == 0 &&
@@ -70,33 +90,61 @@ private fun Catalog(
         }
     }
 
+    LaunchedEffect(Unit) {
+        lazyListState.scrollToItem(focusedRowIndex)
+    }
+
     LaunchedEffect(shouldShowTopBar) {
         onScroll(shouldShowTopBar)
     }
+
     LaunchedEffect(isTopBarVisible) {
-        if (isTopBarVisible) lazyListState.animateScrollToItem(0)
+        if (isTopBarVisible) {
+            lazyListState.animateScrollToItem(0)
+        }
     }
 
     LazyColumn(
         modifier = modifier,
         state = lazyListState,
-        contentPadding = PaddingValues(top = childPadding.top, bottom = 104.dp)
+        contentPadding = PaddingValues(
+            top = childPadding.top,
+            bottom = 104.dp
+        )
     ) {
+
         item {
+
             MoviesScreenMovieList(
                 videoList = carouselMovieList,
                 onMovieClick = { video ->
                     sharedVideoVM.setVideo(video)
                     onMovieClick(video)
+                },
+                lastFocusedMovieId = lastFocusedMovieId,
+                isActive = focusedSection == 0,
+                onMovieFocused = {
+                    focusedSection = 0
+                    focusedRowIndex = 0
+                    lastFocusedMovieId = it
                 }
             )
         }
+
         item {
+
             MoviesRow(
                 modifier = Modifier.padding(top = childPadding.top),
                 title = StringConstants.Composable.PopularFilmsTitle,
                 videoList = popularFilms,
+                isActive = focusedSection == 1,
+                onMovieFocused = {
+                    focusedSection = 1
+                    focusedRowIndex = 1
+                },
                 onMovieSelected = { video ->
+                    focusedRowIndex = 1
+
                     sharedVideoVM.setVideo(video)
                     onMovieClick(video)
                 }
