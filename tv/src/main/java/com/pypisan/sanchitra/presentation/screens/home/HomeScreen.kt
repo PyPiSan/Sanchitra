@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,7 +36,7 @@ import com.pypisan.sanchitra.presentation.screens.movies.VideoSharedViewModel
 @Composable
 fun HomeScreen(
     onMovieClick: (video: Videos) -> Unit,
-    goToTVPlayer:  (id: Int) -> Unit,
+    goToTVPlayer: (id: Int) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
     homeScreeViewModel: HomeScreeViewModel = hiltViewModel(),
@@ -70,17 +71,35 @@ private fun Catalog(
     trendingMovies: List<Videos>,
     onMovieClick: (video: Videos) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
-    goToTVPlayer:  (id: Int) -> Unit,
+    goToTVPlayer: (id: Int) -> Unit,
     modifier: Modifier = Modifier,
     isTopBarVisible: Boolean = true,
 ) {
 
     val lazyListState = rememberLazyListState()
     val childPadding = rememberChildPadding()
+
+    var focusedSection by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var focusedRowIndex by rememberSaveable {
+        mutableIntStateOf(0)
+    }
+
+    var lastFocusedMovieId by rememberSaveable {
+        mutableStateOf<Int?>(null)
+    }
+
+    var lastFocusedChannelId by rememberSaveable {
+        mutableStateOf<Int?>(null)
+    }
+
     var immersiveListHasFocus by remember { mutableStateOf(false) }
+
     val groupedTrendingChannels = trendingHomeChannels.groupBy { it.category }
-    var lastFocusedChannelId by rememberSaveable { mutableStateOf<Int?>(null) }
-    val sharedVideoVM: VideoSharedViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
+    val sharedVideoVM: VideoSharedViewModel =
+        hiltViewModel(LocalContext.current as ComponentActivity)
 
     val shouldShowTopBar by remember {
         derivedStateOf {
@@ -92,6 +111,7 @@ private fun Catalog(
     LaunchedEffect(shouldShowTopBar) {
         onScroll(shouldShowTopBar)
     }
+
     LaunchedEffect(isTopBarVisible) {
         if (isTopBarVisible) lazyListState.animateScrollToItem(0)
     }
@@ -108,20 +128,34 @@ private fun Catalog(
                 channels = featuredHome,
                 padding = childPadding,
                 goToTVPlayer = goToTVPlayer,
+
+//                isActive = focusedSection == "carousel",
+//
+//                onFocused = {
+//                    focusedSection = "carousel"
+//                    focusedRowIndex = 0
+//                },
+
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(324.dp)
-                /*
-                 Setting height for the FeaturedMovieCarousel to keep it rendered with same height,
-                 regardless of the top bar's visibility
-                 */
             )
         }
+
         item(contentType = "MoviesRow") {
+
             MoviesRow(
                 modifier = Modifier.padding(top = 16.dp),
                 videoList = trendingMovies,
                 title = StringConstants.Composable.HomeScreenTrendingTitle,
+
+                isActive = focusedSection == "movies",
+
+                onMovieFocused = {
+                    focusedSection = "movies"
+                    focusedRowIndex = 1
+                },
+
                 onMovieSelected = { video ->
                     sharedVideoVM.setVideo(video)
                     onMovieClick(video)
@@ -129,29 +163,55 @@ private fun Catalog(
             )
         }
         item(contentType = "Top10MoviesList") {
+
             Top10MoviesList(
                 movieList = top10Movies,
+
+                isActive = focusedSection == "top10",
+
+                onMovieFocused = {
+                    focusedSection = "top10"
+                    focusedRowIndex = 2
+                },
+
                 onMovieClick = { video ->
                     sharedVideoVM.setVideo(video)
                     onMovieClick(video)
                 },
+
                 modifier = Modifier.onFocusChanged {
                     immersiveListHasFocus = it.hasFocus
                 },
             )
         }
 
-        groupedTrendingChannels.forEach { (category, channels) ->
+        groupedTrendingChannels.entries.toList().forEachIndexed { index, entry ->
+
+            val category = entry.key
+            val channels = entry.value
 
             item(contentType = "TrendingChannelRow") {
+
                 TrendingChannelRow(
                     modifier = Modifier.padding(top = 16.dp),
+
                     channels = channels,
                     title = category,
+
+                    isActive = focusedSection == "channel_$index",
+
+                    lastFocusedChannelId = lastFocusedChannelId,
+
+                    onChannelFocused = {
+                        focusedSection = "channel_$index"
+                        focusedRowIndex = index + 3
+                        lastFocusedChannelId = it
+                    },
+
                     goToTVPlayer = goToTVPlayer,
-                    onChannelFocused = { lastFocusedChannelId = it }
                 )
             }
         }
+
     }
 }

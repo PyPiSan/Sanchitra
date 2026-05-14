@@ -13,7 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +51,7 @@ import com.pypisan.sanchitra.presentation.common.ChannelCard
 import com.pypisan.sanchitra.presentation.common.PosterImageChannel
 import com.pypisan.sanchitra.presentation.common.PosterImageTrendingChannel
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
+import kotlinx.coroutines.android.awaitFrame
 
 
 enum class ItemDirection(val aspectRatio: Float) {
@@ -70,12 +74,21 @@ fun TrendingChannelRow(
     channels: List<TrendingChannel>,
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
-    goToTVPlayer:  (id: Int) -> Unit,
+    goToTVPlayer: (id: Int) -> Unit,
     onChannelFocused: (Int) -> Unit,
+    isActive: Boolean = false,
+    lastFocusedChannelId: Int?,
 ) {
-    val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
+
+    val bringIntoViewRequester = remember {
+        BringIntoViewRequester()
+    }
+
+    val (lazyRow) = remember { FocusRequester.createRefs() }
     Column(
-        modifier = modifier.focusGroup()
+        modifier = modifier
+            .focusGroup()
+            .bringIntoViewRequester(bringIntoViewRequester)
     ) {
 
         if (title != null) {
@@ -99,9 +112,22 @@ fun TrendingChannelRow(
         ) {
             itemsIndexed(channels, key = { _, channels -> channels.id }) { index, channel ->
 
-                val itemModifier = when {
-                    index == 0 -> Modifier.focusRequester(firstItem)
-                    else -> Modifier
+                val focusRequester = remember {
+                    FocusRequester()
+                }
+
+                LaunchedEffect(
+                    lastFocusedChannelId,
+                    isActive
+                ) {
+
+                    if (
+                        isActive &&
+                        channel.id == lastFocusedChannelId
+                    ) {
+                        bringIntoViewRequester.bringIntoView()
+                        focusRequester.requestFocus()
+                    }
                 }
 
                 TrendingChannelRowItem(
@@ -110,10 +136,10 @@ fun TrendingChannelRow(
                         onChannelFocused(channel.id)
                     },
                     goToTVPlayer = {
-                        lazyRow.saveFocusedChild()
                         goToTVPlayer(channel.id)
                     },
-                    modifier = itemModifier,
+                    modifier = Modifier
+                        .focusRequester(focusRequester),
                     index = index,
                     itemDirection = itemDirection,
                     showItemTitle = showItemTitle,
@@ -135,7 +161,7 @@ private fun TrendingChannelRowItem(
     modifier: Modifier = Modifier,
     itemDirection: ItemDirection = ItemDirection.Horizontal,
     onChannelFocused: (Int) -> Unit,
-    goToTVPlayer:  (id: Int) -> Unit,
+    goToTVPlayer: (id: Int) -> Unit,
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -152,7 +178,7 @@ private fun TrendingChannelRowItem(
             .width(220.dp)
             .onFocusChanged {
                 isFocused = it.isFocused
-                if (it.isFocused  && it.hasFocus ) {
+                if (it.isFocused && it.hasFocus) {
                     onChannelFocused(channel.id)
                 }
             }

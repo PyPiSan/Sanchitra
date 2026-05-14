@@ -68,10 +68,10 @@ val CarouselSaver = Saver<CarouselState, Int>(
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun FeaturedHomeCarousel(
+    modifier: Modifier = Modifier,
     channels: List<TrendingChannel>,
     padding: Padding,
-    goToTVPlayer:  (id: Int) -> Unit,
-    modifier: Modifier = Modifier
+    goToTVPlayer: (id: Int) -> Unit,
 ) {
     val carouselState = rememberSaveable(saver = CarouselSaver) { CarouselState(0) }
     var isCarouselFocused by remember { mutableStateOf(false) }
