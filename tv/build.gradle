@@ -126,11 +126,6 @@ dependencies {
     implementation "androidx.media3:media3-ui-compose:$media3_version" // This contains the state classes
     implementation "androidx.media3:media3-common:$media3_version"
 
-    // Legacy ExoPlayer (If your code specifically requires 2.19)
-    implementation 'com.google.android.exoplayer:exoplayer:2.19.1'
-    implementation 'com.google.android.exoplayer:extension-leanback:2.19.1'
-    implementation "org.videolan.android:libvlc-all:3.5.1"
-
     // --- 7. Image Loading & UI Utilities ---
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation 'com.github.bumptech.glide:glide:5.0.5'
