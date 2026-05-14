@@ -103,6 +103,6 @@ fun VideoPlayerBuild(
         exoPlayer = exoPlayer,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
-        isError = isError.value
+        isError = isError.value,
     )
 }
