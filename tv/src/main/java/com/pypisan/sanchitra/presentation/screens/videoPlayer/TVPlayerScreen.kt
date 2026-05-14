@@ -27,6 +27,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import com.pypisan.sanchitra.data.models.AudioTrackInfo
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.pypisan.sanchitra.data.entities.SubtitleTrack
 
 object TVPlayerScreen {
     const val TVIdBundleKey = "channelId"
@@ -79,6 +80,9 @@ fun TVPlayerBuild(
     val context = LocalContext.current
     val isError = rememberSaveable { mutableStateOf(false) }
     var isBuffering by rememberSaveable { mutableStateOf(false) }
+    var showSubtitleDrawer by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     val renderersFactory = DefaultRenderersFactory(context)
         .setEnableDecoderFallback(true)
@@ -100,7 +104,7 @@ fun TVPlayerBuild(
         exoPlayer = exoPlayer,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
-        isError = isError.value
+        isError = isError.value,
     )
 }
 

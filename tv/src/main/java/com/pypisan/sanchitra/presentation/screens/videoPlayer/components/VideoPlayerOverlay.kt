@@ -30,12 +30,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.android.awaitFrame
+
 @Composable
 fun VideoPlayerOverlay(
     isPlaying: Boolean,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     isBuffering: Boolean = false,
+    isSubtitleDrawerVisible: Boolean = false,
     isControlsVisible: Boolean = true,
     focusRequester: FocusRequester = remember { FocusRequester() },
     showControls: () -> Unit = {},
@@ -45,13 +48,12 @@ fun VideoPlayerOverlay(
     controls: @Composable () -> Unit = {}
 ) {
 
-    LaunchedEffect(isControlsVisible) {
-        if (isControlsVisible) {
+    LaunchedEffect(isControlsVisible, isSubtitleDrawerVisible) {
+        if (isControlsVisible && !isSubtitleDrawerVisible) {
             try {
-                kotlinx.coroutines.android.awaitFrame()
+                awaitFrame()
                 focusRequester.requestFocus()
-            } catch (e: Exception) {
-                Log.e("TV", "Focus request failed", e)
+            } catch (_: Exception) {
             }
         }
     }
