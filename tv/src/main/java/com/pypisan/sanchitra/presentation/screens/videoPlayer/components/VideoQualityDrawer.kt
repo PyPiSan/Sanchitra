@@ -28,7 +28,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,19 +51,17 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.media3.common.util.UnstableApi
-import com.pypisan.sanchitra.data.entities.SubtitleTrack
+import androidx.tv.material3.Text
+import com.pypisan.sanchitra.data.entities.VideoQuality
 import kotlinx.coroutines.delay
 
 
-@androidx.annotation.OptIn(UnstableApi::class)
-@OptIn(ExperimentalStdlibApi::class)
 @Composable
-fun SubtitleDrawer(
+fun VideoQualityDrawer(
     visible: Boolean,
-    subtitles: List<SubtitleTrack>,
+    qualities: List<VideoQuality>,
     onDismiss: () -> Unit,
-    onSubtitleSelected: (SubtitleTrack) -> Unit
+    onQualitySelected: (VideoQuality) -> Unit
 ) {
 
     if (visible) {
@@ -98,7 +95,6 @@ fun SubtitleDrawer(
                 .background(Color.Black.copy(alpha = 0.45f))
         ) {
 
-            // RIGHT PANEL
             Column(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
@@ -124,11 +120,14 @@ fun SubtitleDrawer(
                             bottomStart = 32.dp
                         )
                     )
-                    .padding(horizontal = 28.dp, vertical = 36.dp)
+                    .padding(
+                        horizontal = 28.dp,
+                        vertical = 36.dp
+                    )
             ) {
 
                 Text(
-                    text = "Subtitles",
+                    text = "Video Quality",
                     color = Color.White,
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold
@@ -137,7 +136,7 @@ fun SubtitleDrawer(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Choose subtitle language",
+                    text = "Choose streaming quality",
                     color = Color.White.copy(alpha = 0.6f),
                     fontSize = 15.sp
                 )
@@ -148,7 +147,7 @@ fun SubtitleDrawer(
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
 
-                    itemsIndexed(subtitles) { index, item ->
+                    itemsIndexed(qualities) { index, item ->
 
                         var focused by remember {
                             mutableStateOf(false)
@@ -183,7 +182,9 @@ fun SubtitleDrawer(
                                 .scale(scale)
                                 .then(
                                     if (index == 0) {
-                                        Modifier.focusRequester(firstFocusRequester)
+                                        Modifier.focusRequester(
+                                            firstFocusRequester
+                                        )
                                     } else {
                                         Modifier
                                     }
@@ -200,11 +201,17 @@ fun SubtitleDrawer(
                                 )
                                 .background(bgColor)
                                 .onKeyEvent {
-                                    if (it.type == KeyEventType.KeyDown &&
-                                        (it.key == Key.Enter ||
-                                                it.key == Key.DirectionCenter)
+
+                                    if (
+                                        it.type == KeyEventType.KeyDown &&
+                                        (
+                                                it.key == Key.Enter ||
+                                                        it.key == Key.DirectionCenter
+                                                )
                                     ) {
-                                        onSubtitleSelected(item)
+
+                                        onQualitySelected(item)
+
                                         true
                                     } else {
                                         false
@@ -234,20 +241,9 @@ fun SubtitleDrawer(
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(4.dp))
-
-//                                Text(
-//                                    text = when (item.trackIndex) {
-//                                        -1 -> "Disable subtitles"
-//                                        else -> ""
-//                                    },
-//                                    color = if (focused) {
-//                                        Color.Black.copy(alpha = 0.7f)
-//                                    } else {
-//                                        Color.White.copy(alpha = 0.5f)
-//                                    },
-//                                    fontSize = 13.sp
-//                                )
+                                Spacer(
+                                    modifier = Modifier.height(4.dp)
+                                )
                             }
 
                             AnimatedVisibility(
@@ -268,7 +264,9 @@ fun SubtitleDrawer(
                     }
 
                     item {
-                        Spacer(modifier = Modifier.height(80.dp))
+                        Spacer(
+                            modifier = Modifier.height(80.dp)
+                        )
                     }
                 }
             }

@@ -1,20 +1,28 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 import android.content.Context
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import com.pypisan.sanchitra.data.entities.AudioTrack
+import com.pypisan.sanchitra.data.entities.SubtitleTrack
+import com.pypisan.sanchitra.data.entities.VideoQuality
 
-@androidx.annotation.OptIn(UnstableApi::class)
+@OptIn(UnstableApi::class)
 fun buildDefaultExoPlayer(
     context: Context,
     stream: String,
     onError: (PlaybackException) -> Unit,
     onBuffering: (Int) -> Unit,
+    onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
+    onAudiosChanged: (List<AudioTrack>) -> Unit,
+    onQualitiesChanged: (List<VideoQuality>) -> Unit,
     renderersFactory: DefaultRenderersFactory
 ): ExoPlayer {
 
@@ -26,6 +34,8 @@ fun buildDefaultExoPlayer(
             2000    // rebuffer
         )
         .build()
+
+    val videoMetaHelper = VideoMetaHelper()
 
     return ExoPlayer.Builder(context, renderersFactory)
         .setLoadControl(loadControl)
@@ -49,6 +59,23 @@ fun buildDefaultExoPlayer(
 
                 override fun onPlaybackStateChanged(state: Int) {
                     onBuffering(state)
+                }
+
+                override fun onTracksChanged(tracks: Tracks) {
+                    val subtitles =
+                        videoMetaHelper.getSubtitleTracks(this@apply)
+
+                    val audios =
+                        videoMetaHelper.getAudioTracks(this@apply)
+
+                    val qualities =
+                        videoMetaHelper.getVideoQualities(this@apply)
+
+                    onSubtitlesChanged(subtitles)
+
+                    onAudiosChanged(audios)
+
+                    onQualitiesChanged(qualities)
                 }
             })
 

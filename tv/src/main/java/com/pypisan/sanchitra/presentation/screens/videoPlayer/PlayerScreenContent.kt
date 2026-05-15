@@ -2,19 +2,10 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,18 +14,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.C
+import androidx.media3.common.Player
+import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.media3.ui.compose.modifiers.resizeWithContentScale
+import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleDrawer
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerControls
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerOverlay
@@ -45,12 +36,19 @@ import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.remembe
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.rememberVideoPlayerState
 import com.pypisan.sanchitra.utils.handleDPadKeyEvents
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
+import com.pypisan.sanchitra.data.entities.VideoQuality
+import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleTextOverlay
+import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoQualityDrawer
 
 @OptIn(UnstableApi::class)
 @Composable
 fun PlayerScreenContent(
     title: String,
     exoPlayer: ExoPlayer,
+    subtitles: List<SubtitleTrack>,
+    onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
+    audios: List<AudioTrack>,
+    qualities: List<VideoQuality>,
     onBackPressed: () -> Unit,
     isBuffering: Boolean,
     isError: Boolean,
@@ -58,21 +56,38 @@ fun PlayerScreenContent(
     val videoPlayerState = rememberVideoPlayerState()
     val pulseState = rememberVideoPlayerPulseState()
     val focusRequester = remember { FocusRequester() }
+    var showQualityDrawer by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var subtitleText by remember {
+        mutableStateOf("")
+    }
 
     var showSubtitleDrawer by rememberSaveable {
         mutableStateOf(false)
     }
 
-    var subtitles by remember {
-        mutableStateOf(
-            listOf(
-                SubtitleTrack("off", "Off", true),
-                SubtitleTrack("en", "English"),
-                SubtitleTrack("hi", "Hindi"),
-                SubtitleTrack("ta", "Tamil")
-            )
-        )
+    DisposableEffect(exoPlayer) {
+
+        val listener = object : Player.Listener {
+
+            override fun onCues(cues: CueGroup) {
+                subtitleText =
+                    cues.cues
+                        .joinToString("\n") { cue ->
+                            cue.text?.toString() ?: ""
+                        }
+            }
+        }
+
+        exoPlayer.addListener(listener)
+
+        onDispose {
+            exoPlayer.removeListener(listener)
+        }
     }
+
 
     LaunchedEffect(exoPlayer.isPlaying) {
         if (exoPlayer.isPlaying) {
@@ -124,11 +139,16 @@ fun PlayerScreenContent(
             isPlaying = exoPlayer.isPlaying,
             isControlsVisible = videoPlayerState.isControlsVisible,
             centerButton = { VideoPlayerPulse(pulseState) },
-            subtitles = {},
+            subtitles = {
+                SubtitleTextOverlay(
+                    subtitleText = subtitleText
+                )
+            },
             showControls = videoPlayerState::showControls,
             isError = isError,
             isBuffering = isBuffering,
-            isSubtitleDrawerVisible = showSubtitleDrawer,
+            isSubtitleDrawerVisible =
+                showSubtitleDrawer || showQualityDrawer,
             onRetry = {
                 exoPlayer.stop()
                 exoPlayer.prepare()
@@ -141,6 +161,10 @@ fun PlayerScreenContent(
                     focusRequester = focusRequester,
                     onShowSubtitles = {
                         showSubtitleDrawer = true
+                        exoPlayer.pause()
+                    },
+                    onShowQuality = {
+                        showQualityDrawer = true
                         exoPlayer.pause()
                     }
                 )
@@ -156,10 +180,82 @@ fun PlayerScreenContent(
             },
             onSubtitleSelected = { selected ->
 
-                subtitles = subtitles.map {
-                    it.copy(isSelected = it.id == selected.id)
+                if (selected.trackIndex == -1) {
+
+                    exoPlayer.trackSelectionParameters =
+                        exoPlayer.trackSelectionParameters
+                            .buildUpon()
+                            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                            .build()
+
+                } else {
+
+                    exoPlayer.trackSelectionParameters =
+                        exoPlayer.trackSelectionParameters
+                            .buildUpon()
+                            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                            .setPreferredTextLanguage(selected.language)
+                            .setSelectUndeterminedTextLanguage(true)
+                            .build()
                 }
+                onSubtitlesChanged(
+                    subtitles.map {
+                        it.copy(
+                            isSelected =
+                                it.label == selected.label
+                        )
+                    }
+                )
+
                 showSubtitleDrawer = false
+                exoPlayer.playWhenReady = true
+                exoPlayer.prepare()
+            }
+        )
+
+        VideoQualityDrawer(
+            visible = showQualityDrawer,
+            qualities = qualities,
+
+            onDismiss = {
+                showQualityDrawer = false
+                exoPlayer.play()
+            },
+
+            onQualitySelected = { selected ->
+
+                if (selected.height == -1) {
+
+                    // AUTO QUALITY
+                    exoPlayer.trackSelectionParameters =
+                        exoPlayer.trackSelectionParameters
+                            .buildUpon()
+                            .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+                            .build()
+
+                } else {
+
+                    val group = selected.group
+
+                    if (group != null) {
+
+                        exoPlayer.trackSelectionParameters =
+                            exoPlayer.trackSelectionParameters
+                                .buildUpon()
+                                .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+                                .setOverrideForType(
+                                    TrackSelectionOverride(
+                                        group.mediaTrackGroup,
+                                        listOf(selected.trackIndex)
+                                    )
+                                )
+                                .build()
+                    }
+                }
+
+                showQualityDrawer = false
+
+                exoPlayer.playWhenReady = true
             }
         )
     }

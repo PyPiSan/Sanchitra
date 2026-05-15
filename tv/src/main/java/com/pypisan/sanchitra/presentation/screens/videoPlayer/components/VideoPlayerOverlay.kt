@@ -1,8 +1,9 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer.components
 
-import android.util.Log
+
 import com.pypisan.sanchitra.presentation.theme.SanchitraTheme
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -22,6 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +49,11 @@ fun VideoPlayerOverlay(
     subtitles: @Composable () -> Unit = {},
     controls: @Composable () -> Unit = {}
 ) {
+
+    val subtitleBottomPadding by animateDpAsState(
+        targetValue = if (isControlsVisible) 140.dp else 36.dp,
+        label = ""
+    )
 
     LaunchedEffect(isControlsVisible, isSubtitleDrawerVisible) {
         if (isControlsVisible && !isSubtitleDrawerVisible) {
@@ -77,21 +84,27 @@ fun VideoPlayerOverlay(
         }
 
         // Main content
-        Column {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
 
+            // SUBTITLES
             Box(
-                Modifier.weight(1f),
-                contentAlignment = Alignment.BottomCenter
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = subtitleBottomPadding)
             ) {
                 subtitles()
             }
 
-            // Controls
+            // CONTROLS
             AnimatedVisibility(
+                modifier = Modifier.align(Alignment.BottomCenter),
                 visible = isControlsVisible && !isError && !isBuffering,
                 enter = slideInVertically { it },
                 exit = slideOutVertically { it }
             ) {
+
                 Column(
                     modifier = Modifier
                         .padding(horizontal = 56.dp)
