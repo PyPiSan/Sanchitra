@@ -19,7 +19,6 @@ import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.common.Loading
@@ -27,7 +26,9 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import com.pypisan.sanchitra.data.models.AudioTrackInfo
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
+import com.pypisan.sanchitra.data.entities.VideoQuality
 
 object TVPlayerScreen {
     const val TVIdBundleKey = "channelId"
@@ -35,8 +36,7 @@ object TVPlayerScreen {
 
 @Composable
 fun TVPlayerScreen(
-    onBackPressed: () -> Unit,
-    tvPlayerScreenViewModel: TVPlayerScreenViewModel = hiltViewModel()
+    onBackPressed: () -> Unit, tvPlayerScreenViewModel: TVPlayerScreenViewModel = hiltViewModel()
 ) {
 
     val context = LocalContext.current
@@ -63,8 +63,7 @@ fun TVPlayerScreen(
 
         is TVPlayerScreenUiState.Done -> {
             TVPlayerBuild(
-                channel = s.channel,
-                onBackPressed = onBackPressed
+                channel = s.channel, onBackPressed = onBackPressed
             )
         }
     }
@@ -74,18 +73,25 @@ fun TVPlayerScreen(
 @OptIn(UnstableApi::class)
 @Composable
 fun TVPlayerBuild(
-    channel: Channel,
-    onBackPressed: () -> Unit
+    channel: Channel, onBackPressed: () -> Unit
 ) {
     val context = LocalContext.current
     val isError = rememberSaveable { mutableStateOf(false) }
     var isBuffering by rememberSaveable { mutableStateOf(false) }
-    var showSubtitleDrawer by rememberSaveable {
-        mutableStateOf(false)
+
+    var subtitles by remember {
+        mutableStateOf<List<SubtitleTrack>>(emptyList())
     }
 
-    val renderersFactory = DefaultRenderersFactory(context)
-        .setEnableDecoderFallback(true)
+    var audios by remember {
+        mutableStateOf<List<AudioTrack>>(emptyList())
+    }
+
+    var qualities by remember {
+        mutableStateOf<List<VideoQuality>>(emptyList())
+    }
+
+    val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
         .forceEnableMediaCodecAsynchronousQueueing()
         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
 
@@ -96,16 +102,42 @@ fun TVPlayerBuild(
         onBuffering = { state ->
             isBuffering = state == Player.STATE_BUFFERING
         },
+        onSubtitlesChanged = { newTracks ->
+
+            val hasSelectedTrack = newTracks.any { it.isSelected }
+
+            subtitles = listOf(
+                SubtitleTrack(
+                    label = "Off", language = "off", group = null, trackIndex = -1,
+
+                    // OFF only selected when nothing selected
+                    isSelected = !hasSelectedTrack
+                )
+            ) + newTracks
+        },
+
+        onAudiosChanged = {
+            audios = it
+        },
+
+        onQualitiesChanged = { list ->
+            qualities = list.filter { it.height >= 720 }.sortedByDescending { it.height }
+        },
         renderersFactory = renderersFactory
     )
 
     PlayerScreenContent(
         title = channel.name,
         exoPlayer = exoPlayer,
+        subtitles = subtitles,
+        audios = audios,
+        qualities = qualities,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
         isError = isError.value,
-    )
+        onSubtitlesChanged = {
+            subtitles = it
+        })
 }
 
 @OptIn(UnstableApi::class)
@@ -115,6 +147,9 @@ fun rememberExoPlayer(
     channel: Channel,
     onError: (PlaybackException) -> Unit,
     onBuffering: (Int) -> Unit,
+    onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
+    onAudiosChanged: (List<AudioTrack>) -> Unit,
+    onQualitiesChanged: (List<VideoQuality>) -> Unit,
     renderersFactory: DefaultRenderersFactory
 ): ExoPlayer {
     return remember(channel.id) {
@@ -124,6 +159,9 @@ fun rememberExoPlayer(
                 channel.streamUrl,
                 onError,
                 onBuffering,
+                onSubtitlesChanged,
+                onAudiosChanged,
+                onQualitiesChanged,
                 renderersFactory
             )
         } else {
@@ -146,36 +184,11 @@ fun getAudioTracks(player: Player): List<AudioTrackInfo> {
 
             list.add(
                 AudioTrackInfo(
-                    language = format.language ?: "und",
-                    bitrate = format.bitrate,
-                    format = format
+                    language = format.language ?: "und", bitrate = format.bitrate, format = format
                 )
             )
         }
     }
 
     return list
-}
-
-@OptIn(UnstableApi::class)
-fun selectAudio(player: Player, language: String) {
-
-    val trackSelector = (player as ExoPlayer).trackSelector as DefaultTrackSelector
-
-    val params = trackSelector.parameters
-        .buildUpon()
-        .setPreferredAudioLanguage(language)
-        .setForceHighestSupportedBitrate(true)
-        .build()
-
-    trackSelector.parameters = params
-}
-
-fun toggleSubtitles(player: ExoPlayer, enable: Boolean) {
-    val params = player.trackSelectionParameters
-        .buildUpon()
-        .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, !enable)
-        .build()
-
-    player.trackSelectionParameters = params
 }

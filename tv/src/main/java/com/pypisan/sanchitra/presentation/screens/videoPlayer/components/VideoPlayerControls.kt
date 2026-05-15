@@ -45,6 +45,7 @@ fun VideoPlayerControls(
     onShowControls: () -> Unit = {},
     onShowAudioSettings: () -> Unit = {},
     onShowSubtitles: () -> Unit = {},
+    onShowQuality: () -> Unit = {},
     state: PlayPauseButtonState = rememberPlayPauseButtonState(player),
 ) {
 
@@ -96,14 +97,7 @@ fun VideoPlayerControls(
                         onShowControls = onShowControls,
                     )
                 }
-//                VideoPlayerControlsIcon(
-//                    icon = Icons.Default.AutoAwesomeMotion,
-//                    isPlaying = isPlaying,
-//                    contentDescription =
-//                    StringConstants.Composable.VideoPlayerControlPlaylistButton,
-//                    onShowControls = onShowControls
-//                )
-//
+
                 VideoPlayerControlsIcon(
                     icon = Icons.Default.ClosedCaption,
                     isPlaying = player.isPlaying,
@@ -118,7 +112,8 @@ fun VideoPlayerControls(
                     isPlaying = player.isPlaying,
                     contentDescription =
                         StringConstants.Composable.VideoPlayerControlSettingsButton,
-                    onShowControls = onShowAudioSettings
+                    onShowControls = onShowAudioSettings,
+                    onClick = onShowQuality
                 )
             }
         },

@@ -10,9 +10,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +28,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,13 +44,20 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.common.util.UnstableApi
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import kotlinx.coroutines.delay
 
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalStdlibApi::class)
 @Composable
 fun SubtitleDrawer(
@@ -99,7 +103,7 @@ fun SubtitleDrawer(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .fillMaxHeight()
-                    .width(420.dp)
+                    .width(400.dp)
                     .background(
                         brush = Brush.horizontalGradient(
                             listOf(
@@ -195,8 +199,16 @@ fun SubtitleDrawer(
                                     shape = RoundedCornerShape(18.dp)
                                 )
                                 .background(bgColor)
-                                .clickable {
-                                    onSubtitleSelected(item)
+                                .onKeyEvent {
+                                    if (it.type == KeyEventType.KeyDown &&
+                                        (it.key == Key.Enter ||
+                                                it.key == Key.DirectionCenter)
+                                    ) {
+                                        onSubtitleSelected(item)
+                                        true
+                                    } else {
+                                        false
+                                    }
                                 }
                                 .padding(
                                     horizontal = 22.dp,
@@ -209,31 +221,33 @@ fun SubtitleDrawer(
                                 modifier = Modifier.weight(1f)
                             ) {
 
-                                Text(
-                                    text = item.label,
-                                    color = if (focused) {
-                                        Color.Black
-                                    } else {
-                                        Color.White
-                                    },
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
+                                item.label?.let {
+                                    Text(
+                                        text = it,
+                                        color = if (focused) {
+                                            Color.Black
+                                        } else {
+                                            Color.White
+                                        },
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
 
                                 Spacer(modifier = Modifier.height(4.dp))
 
-                                Text(
-                                    text = when (item.id) {
-                                        "off" -> "Disable subtitles"
-                                        else -> "Subtitle track"
-                                    },
-                                    color = if (focused) {
-                                        Color.Black.copy(alpha = 0.7f)
-                                    } else {
-                                        Color.White.copy(alpha = 0.5f)
-                                    },
-                                    fontSize = 13.sp
-                                )
+//                                Text(
+//                                    text = when (item.trackIndex) {
+//                                        -1 -> "Disable subtitles"
+//                                        else -> ""
+//                                    },
+//                                    color = if (focused) {
+//                                        Color.Black.copy(alpha = 0.7f)
+//                                    } else {
+//                                        Color.White.copy(alpha = 0.5f)
+//                                    },
+//                                    fontSize = 13.sp
+//                                )
                             }
 
                             AnimatedVisibility(

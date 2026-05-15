@@ -17,6 +17,9 @@ import com.pypisan.sanchitra.presentation.common.Error
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
+import com.pypisan.sanchitra.data.entities.AudioTrack
+import com.pypisan.sanchitra.data.entities.SubtitleTrack
+import com.pypisan.sanchitra.data.entities.VideoQuality
 import com.pypisan.sanchitra.data.models.IPTVChannel
 import com.pypisan.sanchitra.data.models.Stream
 
@@ -77,6 +80,18 @@ fun VideoPlayerBuild(
     val isError = rememberSaveable { mutableStateOf(false) }
     var isBuffering by rememberSaveable { mutableStateOf(false) }
 
+    var subtitles by remember {
+        mutableStateOf<List<SubtitleTrack>>(emptyList())
+    }
+
+    var audios by remember {
+        mutableStateOf<List<AudioTrack>>(emptyList())
+    }
+
+    var qualities by remember {
+        mutableStateOf<List<VideoQuality>>(emptyList())
+    }
+
     var currentIndex by remember {
         mutableStateOf(streams.indexOfFirst { it.id == stream.id }.coerceAtLeast(0))
     }
@@ -96,13 +111,38 @@ fun VideoPlayerBuild(
         { state ->
             isBuffering = state == Player.STATE_BUFFERING
         },
-        renderersFactory
+        onSubtitlesChanged = {
+            subtitles = listOf(
+                SubtitleTrack(
+                    label = "Off",
+                    language = "off",
+                    group = null,
+                    trackIndex = -1,
+                    isSelected = false,
+                )
+            ) + it
+        },
+
+        onAudiosChanged = {
+            audios = it
+        },
+
+        onQualitiesChanged = {
+            qualities = it
+        },
+        renderersFactory = renderersFactory
     )
     PlayerScreenContent(
         title = iptvChannel.name,
         exoPlayer = exoPlayer,
+        subtitles = subtitles,
+        audios = audios,
+        qualities = qualities,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
         isError = isError.value,
+        onSubtitlesChanged = {
+            subtitles = it
+        }
     )
 }
