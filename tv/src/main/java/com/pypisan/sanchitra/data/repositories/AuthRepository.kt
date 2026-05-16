@@ -1,6 +1,6 @@
 package com.pypisan.sanchitra.data.repositories
 
-import android.content.Context
+
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
@@ -8,15 +8,16 @@ import com.pypisan.sanchitra.data.models.CommonResponse
 import com.pypisan.sanchitra.data.models.DeviceLoginInitResponse
 import com.pypisan.sanchitra.data.models.LoginStatusResponse
 import com.pypisan.sanchitra.data.models.UserDetailResponse
-import com.pypisan.sanchitra.utils.APIClient
-import retrofit2.Response
+import com.pypisan.sanchitra.utils.APIService
+import javax.inject.Inject
 
-class AuthRepository {
+class AuthRepository @Inject constructor(
+    private val api: APIService
+) {
 
     @OptIn(UnstableApi::class)
-    suspend fun initDeviceLogin(context: Context): DeviceLoginInitResponse? {
+    suspend fun initDeviceLogin(): DeviceLoginInitResponse? {
         return try {
-            val api = APIClient.create(context)
             val response = api.initDeviceLogin()
 
             if (response.isSuccessful) response.body() else null
@@ -28,11 +29,9 @@ class AuthRepository {
     }
 
     suspend fun checkLoginStatus(
-        deviceCode: String,
-        context: Context
+        deviceCode: String
     ): LoginStatusResponse? {
         return try {
-            val api = APIClient.create(context)
             val response = api.checkLoginStatus(deviceCode)
 
 //            Log.d("TV", "checkLoginStatus Response: ${response.body()}")
@@ -45,9 +44,8 @@ class AuthRepository {
         }
     }
 
-    suspend fun getUserDetail(context: Context): UserDetailResponse? {
+    suspend fun getUserDetail(): UserDetailResponse? {
         return try {
-            val api = APIClient.create(context)
 
             val response = api.getUserDetail()
 
@@ -65,9 +63,8 @@ class AuthRepository {
     }
 
 
-    suspend fun userProfileLogout(context: Context): CommonResponse? {
+    suspend fun userProfileLogout(): CommonResponse? {
         return try {
-            val api = APIClient.create(context)
 
             val response = api.userLogout()
 
@@ -84,9 +81,8 @@ class AuthRepository {
         }
     }
 
-    suspend fun userAccountDelete(context: Context): CommonResponse? {
+    suspend fun userAccountDelete(): CommonResponse? {
         return try {
-            val api = APIClient.create(context)
 
             val response = api.deleteUserAccount()
 

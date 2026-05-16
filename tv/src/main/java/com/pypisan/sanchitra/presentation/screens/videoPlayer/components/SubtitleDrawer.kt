@@ -235,19 +235,6 @@ fun SubtitleDrawer(
                                 }
 
                                 Spacer(modifier = Modifier.height(4.dp))
-
-//                                Text(
-//                                    text = when (item.trackIndex) {
-//                                        -1 -> "Disable subtitles"
-//                                        else -> ""
-//                                    },
-//                                    color = if (focused) {
-//                                        Color.Black.copy(alpha = 0.7f)
-//                                    } else {
-//                                        Color.White.copy(alpha = 0.5f)
-//                                    },
-//                                    fontSize = 13.sp
-//                                )
                             }
 
                             AnimatedVisibility(
