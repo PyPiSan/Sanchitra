@@ -134,6 +134,8 @@ fun VideoPlayerBuild(
     )
     PlayerScreenContent(
         title = iptvChannel.name,
+        "",
+        "",
         exoPlayer = exoPlayer,
         subtitles = subtitles,
         audios = audios,

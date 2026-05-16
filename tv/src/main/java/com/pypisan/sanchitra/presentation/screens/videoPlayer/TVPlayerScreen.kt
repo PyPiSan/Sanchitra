@@ -2,8 +2,10 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 import android.app.Activity
 import android.content.Context
+import android.os.Build
 import android.view.WindowManager
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -29,11 +31,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
+import com.pypisan.sanchitra.data.models.EPGItem
+import com.pypisan.sanchitra.data.models.EPGResponse
+import java.time.Duration
+import java.time.LocalTime
 
 object TVPlayerScreen {
     const val TVIdBundleKey = "channelId"
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TVPlayerScreen(
     onBackPressed: () -> Unit, tvPlayerScreenViewModel: TVPlayerScreenViewModel = hiltViewModel()
@@ -51,6 +58,7 @@ fun TVPlayerScreen(
     }
 
     val uiState by tvPlayerScreenViewModel.uiState.collectAsStateWithLifecycle()
+    val epg by tvPlayerScreenViewModel.epgState.collectAsStateWithLifecycle()
 
     when (val s = uiState) {
         is TVPlayerScreenUiState.Loading -> {
@@ -63,17 +71,18 @@ fun TVPlayerScreen(
 
         is TVPlayerScreenUiState.Done -> {
             TVPlayerBuild(
-                channel = s.channel, onBackPressed = onBackPressed
+                channel = s.channel, epg = epg, onBackPressed = onBackPressed
             )
         }
     }
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(UnstableApi::class)
 @Composable
 fun TVPlayerBuild(
-    channel: Channel, onBackPressed: () -> Unit
+    channel: Channel, epg: EPGResponse, onBackPressed: () -> Unit
 ) {
     val context = LocalContext.current
     val isError = rememberSaveable { mutableStateOf(false) }
@@ -90,6 +99,9 @@ fun TVPlayerBuild(
     var qualities by remember {
         mutableStateOf<List<VideoQuality>>(emptyList())
     }
+
+    val currentProgram = epg.getCurrentProgram()
+    val nextProgram = epg.getNextProgram()
 
     val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
         .forceEnableMediaCodecAsynchronousQueueing()
@@ -128,6 +140,8 @@ fun TVPlayerBuild(
 
     PlayerScreenContent(
         title = channel.name,
+        currentProgram?.name ?: "",
+        nextProgram?.name ?: "",
         exoPlayer = exoPlayer,
         subtitles = subtitles,
         audios = audios,
@@ -191,4 +205,54 @@ fun getAudioTracks(player: Player): List<AudioTrackInfo> {
     }
 
     return list
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun EPGResponse.getNextProgram(): EPGItem? {
+
+    val current = getCurrentProgram() ?: return epg.firstOrNull()
+
+    val currentIndex = epg.indexOf(current)
+
+    return epg.getOrNull(currentIndex + 1)
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun EPGResponse.getCurrentProgram(): EPGItem? {
+
+    val now = LocalTime.now()
+
+    return epg.firstOrNull { item ->
+
+        try {
+
+            val start = LocalTime.parse(item.start)
+            val end = LocalTime.parse(item.end)
+
+            now in start..<end
+
+        } catch (e: Exception) {
+            false
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun EPGItem.getProgress(): Float {
+    return try {
+
+        val now = LocalTime.now()
+
+        val start = LocalTime.parse(start)
+        val end = LocalTime.parse(end)
+
+        val total = Duration.between(start, end).toMillis()
+
+        val current = Duration.between(start, now).toMillis()
+
+        (current.toFloat() / total.toFloat()).coerceIn(0f, 1f)
+
+    } catch (e: Exception) {
+        0f
+    }
 }

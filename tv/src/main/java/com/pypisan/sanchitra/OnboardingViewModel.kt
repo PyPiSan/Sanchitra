@@ -13,13 +13,17 @@ import com.pypisan.sanchitra.data.util.getToken
 import com.pypisan.sanchitra.data.util.saveRefreshToken
 import com.pypisan.sanchitra.data.util.saveToken
 import com.pypisan.sanchitra.utils.AuthState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import javax.inject.Inject
 
-class OnboardingViewModel : ViewModel() {
+@HiltViewModel
+class OnboardingViewModel @Inject constructor(
+    private val repo: AuthRepository
+) : ViewModel() {
 
-    private val repo = AuthRepository()
     var profiles by mutableStateOf<List<UserProfileMap>>(emptyList())
         private set
 
@@ -36,37 +40,52 @@ class OnboardingViewModel : ViewModel() {
                 return@launch
             }
 
-            val result = repo.initDeviceLogin(context)
+            val result = repo.initDeviceLogin()
 
             if (result != null && result.success) {
+
                 authState = AuthState.QRLogin(
                     loginURL = result.loginURL,
                     deviceCode = result.deviceCode,
                     backgroundUrl = result.banner
                 )
-//                Log.d("API_DEBUG", "Auth State is: $authState")
 
                 startPolling(result.deviceCode, context)
+
             } else {
+
                 authState = AuthState.Error
+
             }
         }
     }
 
-    private fun startPolling(deviceCode: String, context: Context) {
+    private fun startPolling(
+        deviceCode: String, context: Context
+    ) {
+
         viewModelScope.launch {
 
             val result = withTimeoutOrNull(5 * 60 * 1000) {
 
                 while (true) {
+
                     delay(3000)
 
-                    val status = repo.checkLoginStatus(deviceCode, context)
+                    val status = repo.checkLoginStatus(deviceCode)
 
                     if (status?.success == true) {
-                        saveToken(context, status.data.access_token)
-                        saveRefreshToken(context, status.data.refresh_token)
+
+                        saveToken(
+                            context, status.data.access_token
+                        )
+
+                        saveRefreshToken(
+                            context, status.data.refresh_token
+                        )
+
                         loadProfiles(context)
+
                         return@withTimeoutOrNull true
                     }
                 }
@@ -79,13 +98,17 @@ class OnboardingViewModel : ViewModel() {
     }
 
     fun loadProfiles(context: Context) {
+
         viewModelScope.launch {
-            val result = repo.getUserDetail(context)
+
+            val result = repo.getUserDetail()
 
             if (result != null) {
-                StringConstants.Profile.accountsEmail = result.email;
+
+                StringConstants.Profile.accountsEmail = result.email
 
                 val apiProfiles = result.profiles.map {
+
                     UserProfileMap(
                         id = it.id,
                         name = it.profile_name,
@@ -95,12 +118,14 @@ class OnboardingViewModel : ViewModel() {
                 }
 
                 val extraProfiles = listOf(
+
                     UserProfileMap(
                         id = "guest",
                         name = "Guest",
                         imageUrl = null,
                         icon = R.drawable.baseline_account
                     ),
+
                     UserProfileMap(
                         id = "add",
                         name = "Add Profile",
@@ -114,7 +139,9 @@ class OnboardingViewModel : ViewModel() {
                 authState = AuthState.ProfileSelection
 
             } else {
+
                 val token = getToken(context)
+
                 if (token.isNullOrEmpty()) {
                     start(context)
                 } else {
@@ -124,11 +151,13 @@ class OnboardingViewModel : ViewModel() {
         }
     }
 
-    fun onProfileSelected(profile: UserProfileMap) {
+    fun onProfileSelected(
+        profile: UserProfileMap
+    ) {
         authState = AuthState.ProfileSelected
     }
 
-    fun handlePollingTimeout(){
+    fun handlePollingTimeout() {
         authState = AuthState.Error
     }
 }

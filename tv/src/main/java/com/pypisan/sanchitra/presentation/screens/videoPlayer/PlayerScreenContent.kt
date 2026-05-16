@@ -44,6 +44,8 @@ import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoQu
 @Composable
 fun PlayerScreenContent(
     title: String,
+    currentEpisode: String,
+    nextEpisode: String,
     exoPlayer: ExoPlayer,
     subtitles: List<SubtitleTrack>,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
@@ -158,6 +160,8 @@ fun PlayerScreenContent(
                 VideoPlayerControls(
                     player = exoPlayer,
                     title = title,
+                    currentEpisode = currentEpisode,
+                    nextEpisode = nextEpisode,
                     focusRequester = focusRequester,
                     onShowSubtitles = {
                         showSubtitleDrawer = true

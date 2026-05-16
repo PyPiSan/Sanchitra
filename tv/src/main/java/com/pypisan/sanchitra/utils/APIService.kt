@@ -5,6 +5,7 @@ import com.pypisan.sanchitra.data.entities.IPTVCategoryDto
 import com.pypisan.sanchitra.data.models.ChannelDto
 import com.pypisan.sanchitra.data.models.CommonResponse
 import com.pypisan.sanchitra.data.models.DeviceLoginInitResponse
+import com.pypisan.sanchitra.data.models.EPGResponseDto
 import com.pypisan.sanchitra.data.models.IPTVResponseDto
 import com.pypisan.sanchitra.data.models.LoginStatusResponse
 import com.pypisan.sanchitra.data.models.MovieListResponseDTO
@@ -98,4 +99,11 @@ interface RefreshAPIService{
     suspend fun refreshToken(
         @Body request: RefreshTokenRequest
     ): Response<LoginStatusResponse>
+}
+
+interface MediaAPIService{
+    @GET("home/channels/epg/")
+    suspend fun getChannelEPG(
+        @Query("id") channelID: Int,
+    ): Response<EPGResponseDto>
 }

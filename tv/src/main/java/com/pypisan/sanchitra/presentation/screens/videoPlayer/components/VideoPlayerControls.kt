@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
@@ -34,6 +35,7 @@ import androidx.media3.ui.compose.state.PlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.data.util.StringConstants
 
 @OptIn(UnstableApi::class)
@@ -41,6 +43,8 @@ import com.pypisan.sanchitra.data.util.StringConstants
 fun VideoPlayerControls(
     player: Player,
     title: String,
+    currentEpisode: String,
+    nextEpisode: String,
     focusRequester: FocusRequester,
     onShowControls: () -> Unit = {},
     onShowAudioSettings: () -> Unit = {},
@@ -61,9 +65,9 @@ fun VideoPlayerControls(
             Column {
                 VideoPlayerMediaTitle(
                     title = title,
-                    secondaryText = "",
-                    tertiaryText = "",
-                    type = VideoPlayerMediaTitleType.DEFAULT
+                    secondaryText = currentEpisode,
+                    tertiaryText = nextEpisode,
+                    type = VideoPlayerMediaTitleType.LIVE
                 )
 
                 VideoPlayerControlsIcon(
@@ -189,7 +193,6 @@ fun LiveBadge() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .background(Color.Black.copy(alpha = 0.5f), shape = RoundedCornerShape(4.dp))
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Box(
@@ -199,10 +202,13 @@ fun LiveBadge() {
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = "LIVE",
-            color = Color.White,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold
+            text = stringResource(R.string.live),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.inverseSurface,
+            modifier = Modifier
+                .background(Color(0xFFCC0000), shape = RoundedCornerShape(12.dp))
+                .padding(horizontal = 8.dp, vertical = 2.dp)
+                .alignByBaseline()
         )
     }
 }

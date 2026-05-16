@@ -1,8 +1,8 @@
 package com.pypisan.sanchitra.presentation.screens.profile
 
+
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,13 +20,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.pypisan.sanchitra.MainActivity
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.pypisan.sanchitra.OnboardingActivity
-import com.pypisan.sanchitra.data.repositories.AuthRepository
 import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.data.util.clear
-import com.pypisan.sanchitra.data.util.saveRefreshToken
-import com.pypisan.sanchitra.data.util.saveToken
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -42,7 +38,9 @@ data class AccountsSectionData(
 )
 
 @Composable
-fun AccountsSection() {
+fun AccountsSection(
+    accountSectionViewModel: AccountSectionViewModel = hiltViewModel()
+) {
 
     val context = LocalContext.current
     val childPadding = rememberChildPadding()
@@ -118,27 +116,33 @@ fun AccountsSection() {
             isDeleting = true
 
             scope.launch {
-                val repo = AuthRepository()
 
-                val result = withContext(Dispatchers.IO) {
-                    repo.userAccountDelete(context)
+                val success = withContext(Dispatchers.IO) {
+                    accountSectionViewModel.deleteAccount()
                 }
 
                 isDeleting = false
 
-                if (result != null && result.success) {
+                if (success) {
+
                     deleteMessage = "Account Deletion Successful"
 
                     delay(1200)
 
                     clear(context)
-                    context.startActivity(Intent(context, OnboardingActivity::class.java))
+
+                    context.startActivity(
+                        Intent(context, OnboardingActivity::class.java)
+                    )
+
                     (context as Activity).finish()
 
                 } else {
+
                     deleteMessage = "Account Deletion Failed"
 
                     delay(1200)
+
                     deleteMessage = null
                     showDeleteDialog = false
                 }
@@ -159,30 +163,35 @@ fun AccountsSection() {
             isLoggingOut = true
 
             scope.launch {
-                val repo = AuthRepository()
 
-                val result = withContext(Dispatchers.IO) {
-                    repo.userProfileLogout(context)
+                val success = withContext(Dispatchers.IO) {
+                    accountSectionViewModel.userProfileLogout()
                 }
 
                 isLoggingOut = false
 
-                if (result != null && result.success) {
-                    logoutMessage = "Logout Successful"
+                if (success) {
+
+                    deleteMessage = "Logout Successful"
 
                     delay(1200)
 
                     clear(context)
-                    context.startActivity(Intent(context, OnboardingActivity::class.java))
+
+                    context.startActivity(
+                        Intent(context, OnboardingActivity::class.java)
+                    )
+
                     (context as Activity).finish()
 
-
                 } else {
-                    logoutMessage = "Logout Failed"
+
+                    deleteMessage = "Logout Failed"
 
                     delay(1200)
-                    logoutMessage = null
-                    showLogoutDialog = false
+
+                    deleteMessage = null
+                    showDeleteDialog = false
                 }
             }
         }

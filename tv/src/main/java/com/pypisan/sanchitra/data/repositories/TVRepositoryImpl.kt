@@ -20,7 +20,7 @@ import kotlin.collections.orEmpty
 
 
 class TVRepositoryImpl @Inject constructor(
-    private val api: APIService
+    private val api: APIService,
 ) : TVRepository {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
