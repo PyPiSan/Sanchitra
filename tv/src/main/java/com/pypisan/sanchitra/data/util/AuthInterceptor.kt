@@ -10,21 +10,16 @@ class AuthInterceptor(
 
     override fun intercept(chain: Interceptor.Chain): Response {
 
-        val request = chain.request()
-
-        // Skip auth if No-Auth header present
-        if (request.header("No-Auth") != null) {
-            return chain.proceed(request)
-        }
-
         val token = getToken(context)
+        val request = chain.request().newBuilder().apply {
 
-        val newRequest = request.newBuilder().apply {
             if (!token.isNullOrEmpty()) {
-                header("Authorization", "Bearer $token")
+                addHeader(
+                    "Authorization", "Bearer $token"
+                )
             }
         }.build()
 
-        return chain.proceed(newRequest)
+        return chain.proceed(request)
     }
 }

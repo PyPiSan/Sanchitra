@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
@@ -54,7 +55,7 @@ class OnboardingActivity : ComponentActivity() {
     @Composable
     fun OnboardingScreen() {
         val context = LocalContext.current
-        val viewModel: OnboardingViewModel = viewModel()
+        val viewModel: OnboardingViewModel = hiltViewModel()
         val state = viewModel.authState
 
         LaunchedEffect(Unit) {
