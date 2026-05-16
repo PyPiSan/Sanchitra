@@ -14,7 +14,7 @@ object APIClient {
 
     private fun getClient(context: Context): OkHttpClient {
         return okHttpClient ?: OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(context))
+            .addInterceptor(AuthInterceptor(context.applicationContext))
             .authenticator(TokenAuthenticator(context))
             .build()
             .also { okHttpClient = it }

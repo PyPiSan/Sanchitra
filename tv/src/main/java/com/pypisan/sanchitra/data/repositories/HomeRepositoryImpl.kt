@@ -1,8 +1,5 @@
 package com.pypisan.sanchitra.data.repositories
 
-
-
-import android.util.Log
 import com.pypisan.sanchitra.data.models.TrendingMovieResponse
 import com.pypisan.sanchitra.data.models.TrendingResponse
 import com.pypisan.sanchitra.data.models.toTrendingMovieResponse
@@ -27,7 +24,6 @@ class HomeRepositoryImpl @Inject constructor(
 
     private val liveChannelTrendingFlow: StateFlow<TrendingResponse> = flow {
         val response = api.getTrending()
-        Log.d("TV", "response is $response")
         if (response.isSuccessful) {
             emit(
                 response.body()?.toTrendingResponse()
