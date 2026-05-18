@@ -9,5 +9,6 @@ data class Channel(
     val streamUrl: String,
     val language: String,
     val isDrm: Boolean,
-    val licenseKey: String?
+    val licenseKey: String?,
+    val licenseUrl: String?
 )

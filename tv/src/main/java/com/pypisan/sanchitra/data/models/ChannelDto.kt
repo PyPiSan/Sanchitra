@@ -22,7 +22,10 @@ data class ChannelDto(
     val isDrm: Boolean?,
 
     @SerializedName("license_key")
-    val licenseKey: String?
+    val licenseKey: String?,
+
+    @SerializedName("license_url")
+    val licenseUrl: String?
 )
 
 fun ChannelDto.toDomain(): Channel {
@@ -35,6 +38,7 @@ fun ChannelDto.toDomain(): Channel {
         streamUrl = streamUrl ?: "",
         language = language ?: "",
         isDrm = isDrm ?: false,
-        licenseKey = licenseKey
+        licenseKey = licenseKey,
+        licenseUrl = licenseUrl
     )
 }

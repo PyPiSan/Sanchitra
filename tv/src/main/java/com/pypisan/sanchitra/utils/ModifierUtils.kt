@@ -15,10 +15,6 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.onPlaced
 
-/**
- * Handles horizontal (Left & Right) D-Pad Keys and consumes the event(s) so that the focus doesn't
- * accidentally move to another element.
- * */
 fun Modifier.handleDPadKeyEvents(
     onLeft: (() -> Unit)? = null,
     onRight: (() -> Unit)? = null,

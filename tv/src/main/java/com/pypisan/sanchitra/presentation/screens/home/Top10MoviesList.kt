@@ -32,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import bringIntoViewIfChildrenAreFocused
+import com.pypisan.sanchitra.utils.bringIntoViewIfChildrenAreFocused
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.presentation.common.ItemDirection
