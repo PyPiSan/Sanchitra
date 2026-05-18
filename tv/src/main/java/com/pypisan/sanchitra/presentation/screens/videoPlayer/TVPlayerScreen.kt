@@ -3,6 +3,7 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 import android.app.Activity
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
@@ -179,7 +180,15 @@ fun rememberExoPlayer(
                 renderersFactory
             )
         } else {
-            buildDrmExoPlayer(context, channel)
+            buildDrmExoPlayer(
+                context,
+                channel,
+                onError,
+                onBuffering,
+                onSubtitlesChanged,
+                onAudiosChanged,
+                onQualitiesChanged
+            )
         }
     }
 }

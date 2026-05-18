@@ -81,6 +81,12 @@ interface APIService {
     @GET("videos/")
     suspend fun getMoviesList(): Response<MovieListResponseDTO>
 
+
+    @GET("videos/{id}")
+    suspend fun getMoviesDetail(
+        @Path("id") id: Int
+    ): Response<MovieListResponseDTO>
+
     @GET("home/video/carousel/")
     suspend fun getCarouselVideoList(): Response<MovieListResponseDTO>
 
