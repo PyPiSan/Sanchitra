@@ -44,7 +44,8 @@ object TVPlayerScreen {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TVPlayerScreen(
-    onBackPressed: () -> Unit, tvPlayerScreenViewModel: TVPlayerScreenViewModel = hiltViewModel()
+    onBackPressed: () -> Unit,
+    tvPlayerScreenViewModel: TVPlayerScreenViewModel = hiltViewModel()
 ) {
 
     val context = LocalContext.current
@@ -72,7 +73,9 @@ fun TVPlayerScreen(
 
         is TVPlayerScreenUiState.Done -> {
             TVPlayerBuild(
-                channel = s.channel, epg = epg, onBackPressed = onBackPressed
+                channel = s.channel,
+                epg = epg,
+                onBackPressed = onBackPressed
             )
         }
     }
@@ -83,7 +86,9 @@ fun TVPlayerScreen(
 @OptIn(UnstableApi::class)
 @Composable
 fun TVPlayerBuild(
-    channel: Channel, epg: EPGResponse, onBackPressed: () -> Unit
+    channel: Channel,
+    epg: EPGResponse,
+    onBackPressed: () -> Unit
 ) {
     val context = LocalContext.current
     val isError = rememberSaveable { mutableStateOf(false) }

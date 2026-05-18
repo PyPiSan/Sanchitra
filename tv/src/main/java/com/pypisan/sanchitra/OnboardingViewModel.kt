@@ -1,6 +1,10 @@
 package com.pypisan.sanchitra
 
 import android.content.Context
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.NoAccounts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -113,7 +117,7 @@ class OnboardingViewModel @Inject constructor(
                         id = it.id,
                         name = it.profile_name,
                         imageUrl = it.profile_picture,
-                        icon = R.drawable.baseline_account
+                        icon = Icons.Default.AccountCircle
                     )
                 }
 
@@ -123,14 +127,14 @@ class OnboardingViewModel @Inject constructor(
                         id = "guest",
                         name = "Guest",
                         imageUrl = null,
-                        icon = R.drawable.baseline_account
+                        icon = Icons.Default.NoAccounts
                     ),
 
                     UserProfileMap(
                         id = "add",
                         name = "Add Profile",
                         imageUrl = null,
-                        icon = R.drawable.baseline_add
+                        icon = Icons.Default.Add
                     )
                 )
 

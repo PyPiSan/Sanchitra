@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.Icon
 import coil.compose.AsyncImage
 import com.pypisan.sanchitra.data.models.UserProfileMap
 
@@ -118,14 +121,12 @@ fun ProfileIconWithRing(
                     contentScale = ContentScale.Crop
                 )
             } else {
-                Image(
-                    painter = painterResource(id = profile.icon),
+                Icon(
+                    imageVector = profile.icon ?: Icons.Default.AccountCircle,
                     contentDescription = profile.name,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(iconSize * 0.2f)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Fit
                 )
             }
         }

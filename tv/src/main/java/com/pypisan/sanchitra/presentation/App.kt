@@ -1,5 +1,7 @@
 package com.pypisan.sanchitra.presentation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,6 +18,7 @@ import com.pypisan.sanchitra.presentation.screens.movies.MovieDetailsScreen
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.TVPlayerScreen
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.VideoPlayerScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun App(
     onBackPressed: () -> Unit
@@ -56,8 +59,8 @@ fun App(
                 )
             ) {
                 MovieDetailsScreen(
-                    goToMoviePlayer = {
-                        navController.navigate(Screens.VideoPlayer())
+                    openVideoPlayer = { metaID ->
+                        navController.navigate(Screens.VideoPlayer.withArgs(metaID))
                     },
                     onBackPressed = {
                         if (navController.navigateUp()) {
@@ -78,8 +81,8 @@ fun App(
                             Screens.MovieDetails.withArgs(movieId)
                         )
                     },
-                    openVideoPlayer = { iptvChannelId ->
-                        navController.navigate(Screens.VideoPlayer())
+                    openVideoPlayer = { metaID ->
+                        navController.navigate(Screens.VideoPlayer.withArgs(metaID))
                     },
                     openTVPlayer = { channelId ->
                         navController.navigate(Screens.TVPlayer.withArgs(channelId))

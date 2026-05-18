@@ -9,7 +9,10 @@ import androidx.media3.exoplayer.ExoPlayer
 
 
 @Composable
-fun loopPlayer(videoUrl: String): ExoPlayer {
+fun loopPlayer(
+    videoUrl: String,
+    level: Float = 0f
+): ExoPlayer {
     val context = LocalContext.current
 
     return remember {
@@ -18,7 +21,7 @@ fun loopPlayer(videoUrl: String): ExoPlayer {
             setMediaItem(mediaItem)
             repeatMode = Player.REPEAT_MODE_ALL
             playWhenReady = true
-            volume = 0f
+            volume = level
             prepare()
         }
     }
