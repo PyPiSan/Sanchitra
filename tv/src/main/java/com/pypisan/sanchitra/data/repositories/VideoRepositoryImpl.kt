@@ -1,9 +1,9 @@
 package com.pypisan.sanchitra.data.repositories
 
-import android.util.Log
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.models.toDomain
 import com.pypisan.sanchitra.utils.APIService
+import com.pypisan.sanchitra.utils.MediaAPIService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -19,7 +19,8 @@ import kotlin.collections.map
 import kotlin.collections.orEmpty
 
 class VideoRepositoryImpl  @Inject constructor (
-    private val api: APIService
+    private val api: APIService,
+    private val mediaApi: MediaAPIService
 ): VideoRepository{
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -59,6 +60,27 @@ class VideoRepositoryImpl  @Inject constructor (
             started = SharingStarted.Eagerly,
             initialValue = emptyList()
         )
+
+    override fun getVideoDetails(movieId: Int): StateFlow<Videos?> =
+        flow {
+
+            val response = mediaApi.getMovieDetails(movieId)
+
+            if (response.isSuccessful) {
+                emit(response.body()?.toDomain())
+            } else {
+                emit(null)
+            }
+
+        }
+            .catch {
+                emit(null)
+            }
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.Eagerly,
+                initialValue = null
+            )
 
     override fun getVideos(): Flow<List<Videos>> = videosFlow
     override fun getCarouselVideos(): Flow<List<Videos>> = carouselVideosFlow

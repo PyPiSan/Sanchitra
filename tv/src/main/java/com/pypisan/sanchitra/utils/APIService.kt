@@ -13,6 +13,7 @@ import com.pypisan.sanchitra.data.models.TVResponse
 import com.pypisan.sanchitra.data.models.TrendingMovieResponseDTO
 import com.pypisan.sanchitra.data.models.TrendingResponseDTO
 import com.pypisan.sanchitra.data.models.UserDetailResponse
+import com.pypisan.sanchitra.data.models.VideoDTO
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -81,12 +82,6 @@ interface APIService {
     @GET("videos/")
     suspend fun getMoviesList(): Response<MovieListResponseDTO>
 
-
-    @GET("videos/{id}")
-    suspend fun getMoviesDetail(
-        @Path("id") id: Int
-    ): Response<MovieListResponseDTO>
-
     @GET("home/video/carousel/")
     suspend fun getCarouselVideoList(): Response<MovieListResponseDTO>
 
@@ -112,4 +107,9 @@ interface MediaAPIService{
     suspend fun getChannelEPG(
         @Query("id") channelID: Int,
     ): Response<EPGResponseDto>
+
+    @GET("videos/{id}")
+    suspend fun getMovieDetails(
+        @Path("id") movieId: Int
+    ): Response<VideoDTO>
 }

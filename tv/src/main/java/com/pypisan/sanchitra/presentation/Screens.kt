@@ -28,7 +28,7 @@ enum class Screens(
     Dashboard,
     TVPlayer(listOf(TVPlayerScreen.TVIdBundleKey)),
     VideoPlayer(
-        listOf(VideoPlayerScreen.IPTVStreamIdBundleKey)
+        listOf(VideoPlayerScreen.metaID)
     );
 
     operator fun invoke(): String {

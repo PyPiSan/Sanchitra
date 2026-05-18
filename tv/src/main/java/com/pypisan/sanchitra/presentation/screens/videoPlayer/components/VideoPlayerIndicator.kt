@@ -70,7 +70,7 @@ fun RowScope.VideoPlayerControllerIndicator(
         modifier = Modifier
             .weight(1f)
             .height(animatedIndicatorHeight)
-            .padding(horizontal = 4.dp)
+            .padding(horizontal = 12.dp)
             .ifElse(
                 condition = isSelected,
                 ifTrueModifier = handleSeekEventModifier,

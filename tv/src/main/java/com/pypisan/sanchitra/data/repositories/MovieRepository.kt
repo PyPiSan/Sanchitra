@@ -1,4 +1,5 @@
 package com.pypisan.sanchitra.data.repositories
+
 import com.pypisan.sanchitra.data.entities.MovieCategoryDetails
 import com.pypisan.sanchitra.data.entities.MovieCategoryList
 import com.pypisan.sanchitra.data.entities.MovieDetails

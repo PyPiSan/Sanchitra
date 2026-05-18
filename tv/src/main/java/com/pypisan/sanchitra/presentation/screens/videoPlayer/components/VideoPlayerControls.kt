@@ -87,20 +87,20 @@ fun VideoPlayerControls(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                if (!isLive) {
-                    PreviousButton(
-                        player = player,
-                        onShowControls = onShowControls
-                    )
-                    NextButton(
-                        player = player,
-                        onShowControls = onShowControls
-                    )
-                    RepeatButton(
-                        player = player,
-                        onShowControls = onShowControls,
-                    )
-                }
+//                if (!isLive) {
+//                    PreviousButton(
+//                        player = player,
+//                        onShowControls = onShowControls
+//                    )
+//                    NextButton(
+//                        player = player,
+//                        onShowControls = onShowControls
+//                    )
+//                    RepeatButton(
+//                        player = player,
+//                        onShowControls = onShowControls,
+//                    )
+//                }
 
                 VideoPlayerControlsIcon(
                     icon = Icons.Default.ClosedCaption,
@@ -147,6 +147,8 @@ fun VideoPlayerControls(
                         player = player,
                         focusRequester = focusRequester,
                         onShowControls = onShowControls,
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))

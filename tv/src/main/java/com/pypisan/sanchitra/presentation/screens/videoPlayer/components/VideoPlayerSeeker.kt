@@ -28,7 +28,6 @@ fun VideoPlayerSeeker(
     player: Player,
     focusRequester: FocusRequester,
     modifier: Modifier = Modifier,
-    state: PlayPauseButtonState = rememberPlayPauseButtonState(player),
     onSeek: (Float) -> Unit = {
         player.seekTo(player.duration.times(it).toLong())
     },
@@ -68,15 +67,6 @@ fun VideoPlayerSeeker(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        VideoPlayerControlsIcon(
-            modifier = Modifier.focusRequester(focusRequester),
-            icon = if (state.showPlay) Icons.Default.PlayArrow else Icons.Default.Pause,
-            onClick = state::onClick,
-            isPlaying = player.isPlaying,
-            contentDescription = StringConstants
-                .Composable
-                .VideoPlayerControlPlayPauseButton
-        )
         VideoPlayerControllerText(text = contentProgressString)
         VideoPlayerControllerIndicator(
             progress = (currentPosition / contentDuration).toFloat(),

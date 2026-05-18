@@ -38,7 +38,7 @@ object MovieDetailsScreen {
 
 @Composable
 fun MovieDetailsScreen(
-    goToMoviePlayer: () -> Unit,
+    openVideoPlayer: (metaId: String) -> Unit,
     onBackPressed: () -> Unit,
 ) {
 
@@ -55,7 +55,7 @@ fun MovieDetailsScreen(
         else -> {
             Details(
                 video = video!!,
-                goToMoviePlayer = goToMoviePlayer,
+                openVideoPlayer = openVideoPlayer,
                 onBackPressed = onBackPressed,
                 modifier = Modifier
                     .fillMaxSize()
@@ -68,7 +68,7 @@ fun MovieDetailsScreen(
 @Composable
 private fun Details(
     video: Videos,
-    goToMoviePlayer: () -> Unit,
+    openVideoPlayer: (metaId: String) -> Unit,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -82,7 +82,7 @@ private fun Details(
         item {
             MovieDetails(
                 video = video,
-                goToMoviePlayer = goToMoviePlayer
+                openVideoPlayer = openVideoPlayer
             )
         }
 
