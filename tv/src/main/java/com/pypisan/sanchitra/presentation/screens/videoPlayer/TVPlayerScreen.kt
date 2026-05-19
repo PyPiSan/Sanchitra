@@ -91,7 +91,9 @@ fun TVPlayerBuild(
     onBackPressed: () -> Unit
 ) {
     val context = LocalContext.current
-    val isError = rememberSaveable { mutableStateOf(false) }
+    var isError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("Something went wrong") }
+
     var isBuffering by rememberSaveable { mutableStateOf(false) }
 
     var subtitles by remember {
@@ -116,7 +118,10 @@ fun TVPlayerBuild(
     val exoPlayer = rememberExoPlayer(
         context = context,
         channel = channel,
-        onError = { isError.value = true },
+        onError = { exception ->
+            errorMessage = exception.message ?: "Playback Error"
+            isError = true
+        },
         onBuffering = { state ->
             isBuffering = state == Player.STATE_BUFFERING
         },
@@ -154,7 +159,19 @@ fun TVPlayerBuild(
         qualities = qualities,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
-        isError = isError.value,
+        // 1. Pass the actual boolean and string down
+        isErrorState = isError,
+        errorMessage = errorMessage,
+
+        // 2. Rename the callback to onError to avoid confusion
+        onError = { exception ->
+            errorMessage = exception.message ?: "Playback Error"
+            isError = true
+        },
+        // 3. Add a way to clear the error when they click Retry
+        onClearError = {
+            isError = false
+        },
         onSubtitlesChanged = {
             subtitles = it
         })

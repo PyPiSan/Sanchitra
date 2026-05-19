@@ -32,6 +32,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.PlaybackException
 import kotlinx.coroutines.android.awaitFrame
 
 @Composable
@@ -39,6 +41,7 @@ fun VideoPlayerOverlay(
     isPlaying: Boolean,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
+    errorMessage: String = "Something went wrong",
     isBuffering: Boolean = false,
     isSubtitleDrawerVisible: Boolean = false,
     isControlsVisible: Boolean = true,
@@ -132,38 +135,10 @@ fun VideoPlayerOverlay(
 
         // ERROR OVERLAY (Retry UI)
         if (isError) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.85f)),
-                contentAlignment = Alignment.Center
-            ) {
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    Text(
-                        text = "Something went wrong",
-                        color = Color.White
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Box(
-                        modifier = Modifier
-                            .focusable()
-                            .clickable { onRetry() }
-                            .background(Color.White)
-                            .padding(horizontal = 24.dp, vertical = 12.dp)
-                    ) {
-                        Text(
-                            text = "Retry",
-                            color = Color.Black
-                        )
-                    }
-                }
-            }
+            ErrorOverlay(
+                message = errorMessage,
+                onRetry = onRetry // Pass the onRetry callback down
+            )
         }
     }
 }

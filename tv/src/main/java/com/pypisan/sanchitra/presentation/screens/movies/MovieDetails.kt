@@ -25,13 +25,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -100,11 +100,6 @@ fun MovieDetails(
                             "${video.duration} min"
                         )
                     )
-//                    DirectorScreenplayMusicRow(
-//                        director = movieDetails.director,
-//                        screenplay = movieDetails.screenplay,
-//                        music = movieDetails.music
-//                    )
                 }
                 WatchMovieButton(
                     metaId = video.id.toString(),
@@ -212,11 +207,9 @@ private fun MovieImageWithGradients(
     modifier: Modifier = Modifier,
     gradientColor: Color = MaterialTheme.colorScheme.surface,
 ) {
-
     Box(modifier = modifier) {
 
         // ===== ALWAYS SHOW IMAGE =====
-
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(video.meta.banner)
@@ -231,22 +224,15 @@ private fun MovieImageWithGradients(
         )
 
         // ===== TRAILER PLAYER =====
-
         if (!video.meta.trailer.isNullOrEmpty()) {
 
             val exoPlayer = loopPlayer(video.meta.trailer, 50f)
-
-            var isVideoReady by remember {
-                mutableStateOf(false)
-            }
+            var isVideoReady by remember { mutableStateOf(false) }
 
             DisposableEffect(exoPlayer) {
-
                 val listener = object : Player.Listener {
                     override fun onPlaybackStateChanged(state: Int) {
-                        isVideoReady =
-                            state == Player.STATE_READY &&
-                                    exoPlayer.isPlaying
+                        isVideoReady = state == Player.STATE_READY && exoPlayer.isPlaying
                     }
                 }
                 exoPlayer.addListener(listener)
@@ -259,6 +245,7 @@ private fun MovieImageWithGradients(
 
             if (isVideoReady) {
 
+                // 1. Fixed the underlying Box to use 'gradientColor' instead of 'Color.Black'
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -267,7 +254,7 @@ private fun MovieImageWithGradients(
                                 colors = listOf(
                                     DeepPurple300.copy(alpha = 0.8f),
                                     BlueGray300.copy(alpha = 0.6f),
-                                    Color.Black
+                                    gradientColor // <--- CHANGED THIS
                                 )
                             )
                         )
@@ -280,52 +267,63 @@ private fun MovieImageWithGradients(
                             useController = false
                             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                             setKeepContentOnPlayerReset(true)
-                            setShutterBackgroundColor(
-                                BlueGray300.toArgb()
-                            )
+                            setShutterBackgroundColor(android.graphics.Color.TRANSPARENT)
+
+                            // 1. Tell Android exactly where the borders of this View are
+                            outlineProvider = android.view.ViewOutlineProvider.BOUNDS
+                            // 2. Force the hardware to chop off the oversized zoomed SurfaceView
+                            clipToOutline = true
                         }
                     },
                     modifier = Modifier
                         .fillMaxSize()
-                        .scale(1.08f)
+                        .clip(RectangleShape) // Keep this to enforce standard Compose bounding as well
                 )
             }
         }
 
         // ===== GRADIENT OVERLAY =====
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .drawWithContent {
                     drawContent()
+
+                    // FIX: Use relative sizes (size.height / size.width) instead of hardcoded floats (600f)
+                    // This ensures the gradient perfectly aligns with the bottom edge on ALL TV resolutions.
+
+                    // Bottom fading into the background
                     drawRect(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
                                 gradientColor
                             ),
-                            startY = 600f
+                            startY = size.height * 0.65f // Starts 65% of the way down
                         )
                     )
+
+                    // Left side fading
                     drawRect(
                         Brush.horizontalGradient(
                             colors = listOf(
                                 gradientColor,
                                 Color.Transparent
                             ),
-                            endX = 1000f,
-                            startX = 300f
+                            startX = size.width * 0.15f,
+                            endX = size.width * 0.5f
                         )
                     )
+
+                    // Corner blend
                     drawRect(
                         Brush.linearGradient(
                             colors = listOf(
                                 gradientColor,
                                 Color.Transparent
                             ),
-                            start = Offset(500f, 500f),
-                            end = Offset(1000f, 0f)
+                            start = Offset(size.width * 0.25f, size.height * 0.6f),
+                            end = Offset(size.width * 0.5f, 0f)
                         )
                     )
                 }
