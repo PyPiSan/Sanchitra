@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.media3.common.C
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.text.CueGroup
@@ -53,7 +54,10 @@ fun PlayerScreenContent(
     qualities: List<VideoQuality>,
     onBackPressed: () -> Unit,
     isBuffering: Boolean,
-    isError: Boolean,
+    isErrorState: Boolean,
+    errorMessage: String,
+    onError: (PlaybackException) -> Unit,
+    onClearError: () -> Unit
 ) {
     val videoPlayerState = rememberVideoPlayerState()
     val pulseState = rememberVideoPlayerPulseState()
@@ -147,15 +151,18 @@ fun PlayerScreenContent(
                 )
             },
             showControls = videoPlayerState::showControls,
-            isError = isError,
-            isBuffering = isBuffering,
-            isSubtitleDrawerVisible =
-                showSubtitleDrawer || showQualityDrawer,
+            // Pass the state variables you receive from TVPlayerBuild
+            isError = isErrorState,
+            errorMessage = errorMessage,
             onRetry = {
+                onClearError()
                 exoPlayer.stop()
                 exoPlayer.prepare()
                 exoPlayer.play()
             },
+            isBuffering = isBuffering,
+            isSubtitleDrawerVisible =
+                showSubtitleDrawer || showQualityDrawer,
             controls = {
                 VideoPlayerControls(
                     player = exoPlayer,

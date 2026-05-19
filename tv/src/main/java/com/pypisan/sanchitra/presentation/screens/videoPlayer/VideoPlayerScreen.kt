@@ -81,7 +81,9 @@ fun VideoPlayerBuild(
     onBackPressed: () -> Unit
 ) {
     val context = LocalContext.current
-    val isError = rememberSaveable { mutableStateOf(false) }
+    var isError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("Something went wrong") }
+
     var isBuffering by rememberSaveable { mutableStateOf(false) }
 
     var subtitles by remember {
@@ -105,7 +107,10 @@ fun VideoPlayerBuild(
         metaId?:"",
         context,
         streamUrl?:"",
-        { isError.value = true },
+        onError = { exception ->
+            errorMessage = exception.message ?: "Playback Error"
+            isError = true
+        },
         { state ->
             isBuffering = state == Player.STATE_BUFFERING
         },
@@ -140,7 +145,18 @@ fun VideoPlayerBuild(
         qualities = qualities,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
-        isError = isError.value,
+        isErrorState = isError,
+        errorMessage = errorMessage,
+
+        // 2. Rename the callback to onError to avoid confusion
+        onError = { exception ->
+            errorMessage = exception.message ?: "Playback Error"
+            isError = true
+        },
+        // 3. Add a way to clear the error when they click Retry
+        onClearError = {
+            isError = false
+        },
         onSubtitlesChanged = {
             subtitles = it
         }
