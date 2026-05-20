@@ -2,7 +2,6 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 import android.content.Context
 import android.util.Base64
-import android.util.Log
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -15,6 +14,7 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.drm.DefaultDrmSessionManager
+import androidx.media3.exoplayer.drm.ExoMediaDrm
 import androidx.media3.exoplayer.drm.FrameworkMediaDrm
 import androidx.media3.exoplayer.drm.HttpMediaDrmCallback
 import androidx.media3.exoplayer.drm.LocalMediaDrmCallback
@@ -95,9 +95,24 @@ fun buildDrmExoPlayer(
                 channel.licenseUrl, dataSourceFactory
             )
 
+            val customDrmProvider = ExoMediaDrm.Provider { uuid ->
+                val drm = FrameworkMediaDrm.newInstance(uuid)
+                try {
+                    // ONLY apply the L3 workaround if the device is a Fire TV Stick
+                    if (isFireTvDevice()) {
+                        drm.setPropertyString("securityLevel", "L3")
+                        // Log.d("DRM", "Fire TV detected: Downgrading to Widevine L3")
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                drm
+            }
+
             DefaultDrmSessionManager.Builder().setPlayClearSamplesWithoutKeys(true)
                 .setMultiSession(false).setUuidAndExoMediaDrmProvider(
-                    C.WIDEVINE_UUID, FrameworkMediaDrm.DEFAULT_PROVIDER
+                    C.WIDEVINE_UUID,
+                    customDrmProvider
                 ).build(drmCallback)
         }
 
@@ -116,7 +131,8 @@ fun buildDrmExoPlayer(
         .setSeekForwardIncrementMs(10_000L).setSeekBackIncrementMs(10_000L).build().apply {
 
             trackSelectionParameters =
-                trackSelectionParameters.buildUpon().setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
+                trackSelectionParameters.buildUpon()
+//                    .setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
                     .setForceHighestSupportedBitrate(true).setPreferredAudioLanguage("en").build()
 
             setMediaSource(
@@ -162,4 +178,12 @@ fun Channel.getDrmKeys(): Pair<String, String>? {
     val parts = licenseKey.split(":")
     if (parts.size != 2) return null
     return parts[0] to parts[1]
+}
+
+fun isFireTvDevice(): Boolean {
+    val manufacturer = android.os.Build.MANUFACTURER ?: ""
+    val model = android.os.Build.MODEL ?: ""
+    // Checks if the manufacturer is Amazon and the model name starts with "AFT"
+    return manufacturer.equals("Amazon", ignoreCase = true) &&
+            model.startsWith("AFT", ignoreCase = true)
 }

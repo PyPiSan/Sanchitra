@@ -27,12 +27,7 @@ fun buildDefaultExoPlayer(
 ): ExoPlayer {
 
     val loadControl = DefaultLoadControl.Builder()
-        .setBufferDurationsMs(
-            3000,   // min buffer
-            10000,  // max buffer
-            1500,   // playback buffer
-            2000    // rebuffer
-        )
+        .setBufferDurationsMs(3000, 10000, 1500, 2000)
         .build()
 
     val videoMetaHelper = VideoMetaHelper()
@@ -44,7 +39,7 @@ fun buildDefaultExoPlayer(
 
             trackSelectionParameters = trackSelectionParameters
                 .buildUpon()
-                .setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
+//                .setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
                 .setForceHighestSupportedBitrate(true)
                 .setPreferredAudioLanguage("en")
                 .setPreferredTextLanguage("en")
