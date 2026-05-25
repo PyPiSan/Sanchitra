@@ -56,7 +56,7 @@ fun TVScreenChannelList (
     val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
 
         LazyRow(
-            modifier = Modifier
+            modifier = modifier
                 .focusRequester(lazyRow)
                 .focusRestorer()
             ,

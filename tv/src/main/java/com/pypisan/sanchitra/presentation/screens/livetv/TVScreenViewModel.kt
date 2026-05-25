@@ -18,6 +18,10 @@ class TVScreenViewModel @Inject constructor(
     tvRepository: TVRepository
 ) : ViewModel() {
 
+    // 1. Create cache variables
+    private var cachedCategories: Map<String, List<Channel>>? = null
+    private var cachedCarousel: List<Channel>? = null
+
     val uiState: StateFlow<TVScreenUiState> =
         combine<List<Channel>, List<Channel>, TVScreenUiState>(
             tvRepository.getChannels(),
@@ -25,12 +29,24 @@ class TVScreenViewModel @Inject constructor(
         ) { channels, carousel ->
 
             if (channels.isEmpty() && carousel.isEmpty()) {
+                // If lists are empty, check if we have a cache!
+                // Only show loading if cache is totally empty.
+                if (cachedCategories != null && cachedCarousel != null) {
+                    return@combine TVScreenUiState.Ready(
+                        categories = cachedCategories!!,
+                        carousel = cachedCarousel!!
+                    )
+                }
                 return@combine TVScreenUiState.Loading
             }
 
             val channelGrouped = channels
                 .filter { it.isValid() }
                 .groupBy { it.category.ifBlank { "Others" } }
+
+            // 2. Save the newly fetched data into the cache
+            cachedCategories = channelGrouped
+            cachedCarousel = carousel
 
 
             TVScreenUiState.Ready(
@@ -43,7 +59,7 @@ class TVScreenViewModel @Inject constructor(
             }
             .stateIn(
                 viewModelScope,
-                SharingStarted.WhileSubscribed(5000),
+                SharingStarted.Lazily,
                 TVScreenUiState.Loading
             )
 

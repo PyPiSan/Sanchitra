@@ -1,6 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.livetv
 
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -67,6 +66,10 @@ fun TVCatalog(
 
     var lastFocusedChannelId by rememberSaveable { mutableStateOf<Int?>(null) }
 
+    var restoreFocusKey by rememberSaveable { mutableStateOf<String?>(null) }
+    var isRestoring by remember { mutableStateOf(false) }
+
+
     val childPadding = rememberChildPadding()
     val lazyListState = rememberLazyListState()
 
@@ -86,7 +89,8 @@ fun TVCatalog(
     }
 
     LaunchedEffect(isTopBarVisible) {
-        if (isTopBarVisible) {
+        // 2. BLOCK scrolling if we are actively restoring focus!
+        if (isTopBarVisible && !isRestoring) {
             lazyListState.animateScrollToItem(0)
         }
     }
@@ -99,7 +103,11 @@ fun TVCatalog(
         item{
             TVScreenChannelList(
                 channelList = carouselList,
-                goToTVPlayer = goToTVPlayer,
+                goToTVPlayer = { id ->
+                    restoreFocusKey = "carousel_$id"
+                    isRestoring = true
+                    goToTVPlayer(id)
+                },
                 lastFocusedChannelId = lastFocusedChannelId,
                 onChannelFocused = { lastFocusedChannelId = it }
             )
@@ -108,13 +116,24 @@ fun TVCatalog(
             items = categoryList,
             key = { it.key }
         ) { entry ->
+            val rowKey = "category_${entry.key}"
 
             TVRow(
                 modifier = Modifier.padding(top = childPadding.top),
                 title = entry.key,
                 channels = entry.value,
-                goToTVPlayer = goToTVPlayer,
-                onChannelFocused = { lastFocusedChannelId = it }
+                rowKey = rowKey, // Pass the row prefix
+                restoreFocusKey = restoreFocusKey,
+                onFocusRestored = {
+                    restoreFocusKey = null
+                    isRestoring = false // Unblock native scrolling
+                },
+                goToTVPlayer = { id ->
+                    // Combine Row name + ID so it is 100% unique
+                    restoreFocusKey = "${rowKey}_$id"
+                    isRestoring = true
+                    goToTVPlayer(id)
+                }
             )
         }
     }
