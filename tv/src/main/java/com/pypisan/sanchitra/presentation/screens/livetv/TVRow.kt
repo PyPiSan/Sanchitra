@@ -1,9 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.livetv
 
-import android.util.Log
-import androidx.compose.animation.AnimatedContent
+
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,19 +10,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -53,8 +48,7 @@ import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.presentation.common.ChannelCard
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.presentation.common.PosterImageChannel
-import kotlinx.coroutines.android.awaitFrame
-import kotlinx.coroutines.cancel
+
 
 enum class ItemDirection(val aspectRatio: Float) {
     Horizontal(16f / 9f);
@@ -77,13 +71,17 @@ fun TVRow(
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
     goToTVPlayer:  (id: Int) -> Unit,
-    onChannelFocused: (Int) -> Unit,
-) {
-    val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
-    Column(
-        modifier = modifier.focusGroup()
-    ) {
 
+    rowKey: String,
+    restoreFocusKey: String?,
+    onFocusRestored: () -> Unit,
+) {
+    val (lazyRow) = remember { FocusRequester.createRefs() }
+
+    Column(
+        modifier = modifier
+//            .focusGroup()
+    ) {
         if (title != null) {
             Text(
                 text = title,
@@ -93,43 +91,35 @@ fun TVRow(
                     .padding(start = startPadding, top = 16.dp, bottom = 16.dp)
             )
         }
-            LazyRow(
-                contentPadding = PaddingValues(
-                    start = startPadding,
-                    end = endPadding,
-                ),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                modifier = Modifier
-                    .focusRequester(lazyRow)
-                    .focusRestorer()
-            ) {
-                itemsIndexed(channels, key = { _, channels -> channels.id }) { index, channel ->
-
-                    val itemModifier = when {
-                        index == 0 -> Modifier.focusRequester(firstItem)
-                        else -> Modifier
-                    }
-
-                    TVRowItem(
-                        channel = channel,
-                        onChannelFocused = {
-                            onChannelFocused(channel.id)
-                        },
-                        goToTVPlayer = {
-                            lazyRow.saveFocusedChild()
-                            goToTVPlayer(channel.id)
-                        },
-                        modifier = itemModifier,
-                        index = index,
-                        itemDirection = itemDirection,
-                        showItemTitle = showItemTitle,
-                        showIndexOverImage = showIndexOverImage,
-                    )
-                }
+        LazyRow(
+            contentPadding = PaddingValues(
+                start = startPadding,
+                end = endPadding,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            modifier = Modifier
+//                .focusRequester(lazyRow)
+                .focusRestorer()
+        ) {
+            itemsIndexed(channels, key = { _, channels -> channels.id }) { index, channel ->
+                val itemKey = "${rowKey}_${channel.id}"
+                TVRowItem(
+                    channel = channel,
+                    goToTVPlayer = {
+                        goToTVPlayer(channel.id)
+                    },
+                    modifier = Modifier,
+                    index = index,
+                    itemDirection = itemDirection,
+                    showItemTitle = showItemTitle,
+                    showIndexOverImage = showIndexOverImage,
+                    isReturnFocusTarget = itemKey == restoreFocusKey,
+                    onFocusRestored = onFocusRestored
+                )
             }
+        }
     }
 }
-
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -140,10 +130,24 @@ private fun TVRowItem(
     showIndexOverImage: Boolean,
     modifier: Modifier = Modifier,
     itemDirection: ItemDirection = ItemDirection.Horizontal,
-    onChannelFocused: (Int) -> Unit,
     goToTVPlayer:  (id: Int) -> Unit,
+    isReturnFocusTarget: Boolean,
+    onFocusRestored: () -> Unit,
 ) {
     var isFocused by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(isReturnFocusTarget) {
+        if (isReturnFocusTarget) {
+            kotlinx.coroutines.delay(100)
+            try {
+                focusRequester.requestFocus()
+                onFocusRestored()
+            } catch (e: Exception) {
+                // Ignore gracefully
+            }
+        }
+    }
 
     ChannelCard(
         onClick = { goToTVPlayer(channel.id) },
@@ -156,18 +160,10 @@ private fun TVRowItem(
         },
         modifier = Modifier
             .width(220.dp)
-            .onFocusChanged {
-                isFocused = it.isFocused
-                if (it.isFocused  && it.hasFocus ) {
-                    onChannelFocused(channel.id)
-                }
-            }
+            .focusRequester(focusRequester)
+            .onFocusChanged { isFocused = it.isFocused }
             .focusProperties {
-                left = if (index == 0) {
-                    FocusRequester.Cancel
-                } else {
-                    FocusRequester.Default
-                }
+                left = if (index == 0) FocusRequester.Cancel else FocusRequester.Default
             }
             .then(modifier)
     ) {
