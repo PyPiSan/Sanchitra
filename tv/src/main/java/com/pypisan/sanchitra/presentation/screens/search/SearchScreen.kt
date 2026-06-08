@@ -1,13 +1,12 @@
 package com.pypisan.sanchitra.presentation.screens.search
 
-import JetStreamCardShape
+import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
 import android.view.KeyEvent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -46,7 +45,6 @@ import androidx.tv.material3.Text
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.data.entities.Movie
 import com.pypisan.sanchitra.data.entities.MovieList
-import com.pypisan.sanchitra.presentation.common.MoviesRow
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 @Composable

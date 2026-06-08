@@ -1,7 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.home
 
-import JetStreamBorderWidth
-import JetStreamButtonShape
+import com.pypisan.sanchitra.presentation.theme.JetStreamBorderWidth
+import com.pypisan.sanchitra.presentation.theme.JetStreamButtonShape
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn

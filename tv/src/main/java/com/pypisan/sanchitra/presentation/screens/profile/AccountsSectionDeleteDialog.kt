@@ -1,6 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.profile
 
-import JetStreamCardShape
+import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

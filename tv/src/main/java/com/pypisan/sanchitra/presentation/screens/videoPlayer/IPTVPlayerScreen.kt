@@ -2,19 +2,24 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 import android.app.Activity
 import android.content.Context
+import android.os.Build
 import android.view.WindowManager
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
-import com.pypisan.sanchitra.presentation.common.Error
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
@@ -22,16 +27,27 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
+import com.pypisan.sanchitra.data.models.AudioTrackInfo
+import com.pypisan.sanchitra.data.models.Channel
+import com.pypisan.sanchitra.data.models.EPGItem
+import com.pypisan.sanchitra.data.models.EPGResponse
+import com.pypisan.sanchitra.data.models.IPTVChannelDetail
+import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.common.Loading
+import java.time.Duration
+import java.time.LocalTime
 
-object VideoPlayerScreen {
-    const val metaID = "metaID"
+
+object IPTVPlayerScreen {
+    const val IPTVIdBundleKey = "channelId"
 }
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun VideoPlayerScreen(
+fun IPTVPlayerScreen(
     onBackPressed: () -> Unit,
-    videoPlayerScreenViewModel: VideoPlayerScreenViewModel = hiltViewModel()
+    iptvPlayerScreenViewModel: IPTVPlayerScreenViewModel = hiltViewModel()
 ) {
 
     val context = LocalContext.current
@@ -45,38 +61,34 @@ fun VideoPlayerScreen(
         }
     }
 
-    val uiState by videoPlayerScreenViewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by iptvPlayerScreenViewModel.uiState.collectAsStateWithLifecycle()
+    val epg by iptvPlayerScreenViewModel.epgState.collectAsStateWithLifecycle()
 
     when (val s = uiState) {
-
-        VideoPlayerScreenUiState.Loading -> {
+        is IPTVPlayerScreenUiState.Loading -> {
             Loading(modifier = Modifier.fillMaxSize())
         }
 
-        VideoPlayerScreenUiState.Error -> {
+        is IPTVPlayerScreenUiState.Error -> {
             Error(modifier = Modifier.fillMaxSize())
         }
 
-        is VideoPlayerScreenUiState.Done -> {
-            VideoPlayerBuild(
-                metaId = s.videoDetail?.id.toString(),
-                title = s.videoDetail?.title,
-                streamUrl = s.videoDetail?.url,
-                subTitleUrl = s.videoDetail?.meta?.subtitleUrl,
+        is IPTVPlayerScreenUiState.Done -> {
+            IPTVPlayerBuild(
+                iptvChannel = s.iptvChannel,
+                epg = epg,
                 onBackPressed = onBackPressed
             )
         }
     }
 }
 
-
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(UnstableApi::class)
 @Composable
-fun VideoPlayerBuild(
-    metaId: String?= "",
-    title: String?,
-    streamUrl: String? = "",
-    subTitleUrl: String? = "",
+fun IPTVPlayerBuild(
+    iptvChannel: IPTVChannelDetail,
+    epg: EPGResponse,
     onBackPressed: () -> Unit
 ) {
     val context = LocalContext.current
@@ -97,53 +109,58 @@ fun VideoPlayerBuild(
         mutableStateOf<List<VideoQuality>>(emptyList())
     }
 
-    val renderersFactory = DefaultRenderersFactory(context)
-        .setEnableDecoderFallback(true)
+    val currentProgram = epg.getCurrentProgram()
+    val nextProgram = epg.getNextProgram()
+
+    val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
         .forceEnableMediaCodecAsynchronousQueueing()
         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
 
-    val exoPlayer = rememberPlayer(
-        metaId?:"",
-        context,
-        streamUrl?:"",
+    val exoPlayer = rememberExoPlayer(
+        context = context,
+        iptvChannel = iptvChannel,
         onError = { exception ->
             errorMessage = exception.message ?: "Playback Error"
             isError = true
         },
-        { state ->
+        onBuffering = { state ->
             isBuffering = state == Player.STATE_BUFFERING
         },
-        onSubtitlesChanged = {
+        onSubtitlesChanged = { newTracks ->
+
+            val hasSelectedTrack = newTracks.any { it.isSelected }
+
             subtitles = listOf(
                 SubtitleTrack(
-                    label = "Off",
-                    language = "off",
-                    group = null,
-                    trackIndex = -1,
-                    isSelected = false,
+                    label = "Off", language = "off", group = null, trackIndex = -1,
+
+                    // OFF only selected when nothing selected
+                    isSelected = !hasSelectedTrack
                 )
-            ) + it
+            ) + newTracks
         },
 
         onAudiosChanged = {
             audios = it
         },
 
-        onQualitiesChanged = {
-            qualities = it
+        onQualitiesChanged = { list ->
+            qualities = list.filter { it.height >= 720 }.sortedByDescending { it.height }
         },
         renderersFactory = renderersFactory
     )
+
     PlayerScreenContent(
-        title = title?:"",
-        "",
-        "",
+        title = iptvChannel.name,
+        currentProgram?.name ?: "",
+        nextProgram?.name ?: "",
         exoPlayer = exoPlayer,
         subtitles = subtitles,
         audios = audios,
         qualities = qualities,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
+        // 1. Pass the actual boolean and string down
         isErrorState = isError,
         errorMessage = errorMessage,
 
@@ -158,16 +175,14 @@ fun VideoPlayerBuild(
         },
         onSubtitlesChanged = {
             subtitles = it
-        }
-    )
+        })
 }
 
 @OptIn(UnstableApi::class)
 @Composable
-fun rememberPlayer(
-    metaId: String,
+fun rememberExoPlayer(
     context: Context,
-    streamUrl: String,
+    iptvChannel: IPTVChannelDetail,
     onError: (PlaybackException) -> Unit,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
@@ -175,10 +190,11 @@ fun rememberPlayer(
     onQualitiesChanged: (List<VideoQuality>) -> Unit,
     renderersFactory: DefaultRenderersFactory
 ): ExoPlayer {
-    return remember(metaId) {
+    return remember(iptvChannel.id) {
+//        if (!iptvChannel.isDrm) {
             buildDefaultExoPlayer(
                 context,
-                streamUrl,
+                iptvChannel.streamUrl,
                 onError,
                 onBuffering,
                 onSubtitlesChanged,
@@ -186,5 +202,17 @@ fun rememberPlayer(
                 onQualitiesChanged,
                 renderersFactory
             )
+//        }
+        //        else {
+//            buildDrmExoPlayer(
+//                context,
+//                channel,
+//                onError,
+//                onBuffering,
+//                onSubtitlesChanged,
+//                onAudiosChanged,
+//                onQualitiesChanged
+//            )
+//        }
     }
 }

@@ -1,9 +1,13 @@
 package com.pypisan.sanchitra.data.repositories
 
 
+import android.util.Log
 import com.pypisan.sanchitra.data.entities.IPTVCategoryDto
+import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.data.models.IPTVChannel
+import com.pypisan.sanchitra.data.models.IPTVChannelDetail
 import com.pypisan.sanchitra.data.models.toDomain
+import com.pypisan.sanchitra.data.repositories.TVRepositoryImpl.ApiResult
 import com.pypisan.sanchitra.utils.APIService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,4 +80,35 @@ class IPTVRepositoryImpl @Inject constructor(
         )
 
     override fun getIPTVCategories(): Flow<List<IPTVCategoryDto>> = categoriesFlow
+
+    override suspend fun getIPTVChannelDetail(id: String): ApiResult<IPTVChannelDetail> {
+        return try {
+            val response = api.getIPTVChannelDetail(id)
+            Log.d("IPTV", "Response is: $response")
+            if (response.isSuccessful) {
+
+                val dto = response.body()
+
+                if (dto != null) {
+                    ApiResult.Success(dto.toDomain())
+                } else {
+                    ApiResult.Error("Empty response body", response.code())
+                }
+            } else {
+                ApiResult.Error(
+                    message = response.errorBody()?.string() ?: "Unknown error",
+                    code = response.code()
+                )
+            }
+
+        } catch (e: Exception) {
+            ApiResult.Error(e.localizedMessage ?: "Exception occurred")
+        }
+    }
+
+    sealed class ApiResult<out T> {
+        data class Success<T>(val data: T) : ApiResult<T>()
+        data class Error(val message: String, val code: Int? = null) : ApiResult<Nothing>()
+    }
+
 }

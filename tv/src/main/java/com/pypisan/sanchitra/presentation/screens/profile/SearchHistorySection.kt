@@ -1,5 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.profile
-import JetStreamCardShape
+import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth

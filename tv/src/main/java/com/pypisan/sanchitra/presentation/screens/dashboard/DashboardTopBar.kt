@@ -1,7 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.dashboard
 
-import IconSize
-import JetStreamCardShape
+import com.pypisan.sanchitra.presentation.theme.IconSize
+import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
 import LexendExa
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
