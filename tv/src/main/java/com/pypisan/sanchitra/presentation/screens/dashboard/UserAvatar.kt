@@ -1,5 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.dashboard
-import JetStreamBorderWidth
+import com.pypisan.sanchitra.presentation.theme.JetStreamBorderWidth
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.CircleShape

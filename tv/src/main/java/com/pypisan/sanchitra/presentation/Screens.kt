@@ -5,6 +5,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.pypisan.sanchitra.presentation.screens.categories.CategoryIPTVListScreen
 import com.pypisan.sanchitra.presentation.screens.movies.MovieDetailsScreen
+import com.pypisan.sanchitra.presentation.screens.videoPlayer.IPTVPlayerScreen
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.TVPlayerScreen
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.VideoPlayerScreen
 
@@ -27,6 +28,8 @@ enum class Screens(
     ),
     Dashboard,
     TVPlayer(listOf(TVPlayerScreen.TVIdBundleKey)),
+
+    IPTVPlayer(listOf(IPTVPlayerScreen.IPTVIdBundleKey)),
     VideoPlayer(
         listOf(VideoPlayerScreen.metaID)
     );

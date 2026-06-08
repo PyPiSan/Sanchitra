@@ -1,5 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.profile
-import JetStreamCardShape
+import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons

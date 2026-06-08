@@ -1,7 +1,7 @@
 package com.pypisan.sanchitra.presentation.common
 
-import JetStreamBorderWidth
-import JetStreamCardShape
+import com.pypisan.sanchitra.presentation.theme.JetStreamBorderWidth
+import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable

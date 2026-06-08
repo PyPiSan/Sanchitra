@@ -11,7 +11,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.pypisan.sanchitra.data.entities.Movie
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.data.models.IPTVChannel
@@ -109,7 +108,7 @@ fun PosterImageIPTVChannel(
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(iptvChannel.logo.url)
+                .data(iptvChannel.logo)
                 .crossfade(true)
                 .build(),
             contentDescription = iptvChannel.name,

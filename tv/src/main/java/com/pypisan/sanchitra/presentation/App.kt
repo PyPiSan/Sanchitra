@@ -15,6 +15,7 @@ import androidx.navigation.navArgument
 import com.pypisan.sanchitra.presentation.screens.categories.CategoryIPTVListScreen
 import com.pypisan.sanchitra.presentation.screens.dashboard.DashboardScreen
 import com.pypisan.sanchitra.presentation.screens.movies.MovieDetailsScreen
+import com.pypisan.sanchitra.presentation.screens.videoPlayer.IPTVPlayerScreen
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.TVPlayerScreen
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.VideoPlayerScreen
 
@@ -45,8 +46,8 @@ fun App(
                             isComingBackFromDifferentScreen = true
                         }
                     },
-                    onChannelSelected = {
-                        navController.navigate(Screens.VideoPlayer())
+                    onChannelSelected = { iptvChannelId ->
+                        navController.navigate(Screens.IPTVPlayer.withArgs(iptvChannelId))
                     }
                 )
             }
@@ -105,6 +106,15 @@ fun App(
             }
             composable(route = Screens.TVPlayer()) {
                 TVPlayerScreen(
+                    onBackPressed = {
+                        if (navController.navigateUp()) {
+                            isComingBackFromDifferentScreen = true
+                        }
+                    }
+                )
+            }
+            composable(route = Screens.IPTVPlayer()) {
+                IPTVPlayerScreen(
                     onBackPressed = {
                         if (navController.navigateUp()) {
                             isComingBackFromDifferentScreen = true

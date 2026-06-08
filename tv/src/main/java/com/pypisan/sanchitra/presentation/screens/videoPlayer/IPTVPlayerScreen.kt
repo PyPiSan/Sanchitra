@@ -1,0 +1,218 @@
+package com.pypisan.sanchitra.presentation.screens.videoPlayer
+
+import android.app.Activity
+import android.content.Context
+import android.os.Build
+import android.view.WindowManager
+import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.C
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultRenderersFactory
+import androidx.media3.exoplayer.ExoPlayer
+import com.pypisan.sanchitra.data.entities.AudioTrack
+import com.pypisan.sanchitra.data.entities.SubtitleTrack
+import com.pypisan.sanchitra.data.entities.VideoQuality
+import com.pypisan.sanchitra.data.models.AudioTrackInfo
+import com.pypisan.sanchitra.data.models.Channel
+import com.pypisan.sanchitra.data.models.EPGItem
+import com.pypisan.sanchitra.data.models.EPGResponse
+import com.pypisan.sanchitra.data.models.IPTVChannelDetail
+import com.pypisan.sanchitra.presentation.common.Error
+import com.pypisan.sanchitra.presentation.common.Loading
+import java.time.Duration
+import java.time.LocalTime
+
+
+object IPTVPlayerScreen {
+    const val IPTVIdBundleKey = "channelId"
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun IPTVPlayerScreen(
+    onBackPressed: () -> Unit,
+    iptvPlayerScreenViewModel: IPTVPlayerScreenViewModel = hiltViewModel()
+) {
+
+    val context = LocalContext.current
+    val activity = context as Activity
+
+    DisposableEffect(Unit) {
+        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        onDispose {
+            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
+    val uiState by iptvPlayerScreenViewModel.uiState.collectAsStateWithLifecycle()
+    val epg by iptvPlayerScreenViewModel.epgState.collectAsStateWithLifecycle()
+
+    when (val s = uiState) {
+        is IPTVPlayerScreenUiState.Loading -> {
+            Loading(modifier = Modifier.fillMaxSize())
+        }
+
+        is IPTVPlayerScreenUiState.Error -> {
+            Error(modifier = Modifier.fillMaxSize())
+        }
+
+        is IPTVPlayerScreenUiState.Done -> {
+            IPTVPlayerBuild(
+                iptvChannel = s.iptvChannel,
+                epg = epg,
+                onBackPressed = onBackPressed
+            )
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(UnstableApi::class)
+@Composable
+fun IPTVPlayerBuild(
+    iptvChannel: IPTVChannelDetail,
+    epg: EPGResponse,
+    onBackPressed: () -> Unit
+) {
+    val context = LocalContext.current
+    var isError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("Something went wrong") }
+
+    var isBuffering by rememberSaveable { mutableStateOf(false) }
+
+    var subtitles by remember {
+        mutableStateOf<List<SubtitleTrack>>(emptyList())
+    }
+
+    var audios by remember {
+        mutableStateOf<List<AudioTrack>>(emptyList())
+    }
+
+    var qualities by remember {
+        mutableStateOf<List<VideoQuality>>(emptyList())
+    }
+
+    val currentProgram = epg.getCurrentProgram()
+    val nextProgram = epg.getNextProgram()
+
+    val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
+        .forceEnableMediaCodecAsynchronousQueueing()
+        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+
+    val exoPlayer = rememberExoPlayer(
+        context = context,
+        iptvChannel = iptvChannel,
+        onError = { exception ->
+            errorMessage = exception.message ?: "Playback Error"
+            isError = true
+        },
+        onBuffering = { state ->
+            isBuffering = state == Player.STATE_BUFFERING
+        },
+        onSubtitlesChanged = { newTracks ->
+
+            val hasSelectedTrack = newTracks.any { it.isSelected }
+
+            subtitles = listOf(
+                SubtitleTrack(
+                    label = "Off", language = "off", group = null, trackIndex = -1,
+
+                    // OFF only selected when nothing selected
+                    isSelected = !hasSelectedTrack
+                )
+            ) + newTracks
+        },
+
+        onAudiosChanged = {
+            audios = it
+        },
+
+        onQualitiesChanged = { list ->
+            qualities = list.filter { it.height >= 720 }.sortedByDescending { it.height }
+        },
+        renderersFactory = renderersFactory
+    )
+
+    PlayerScreenContent(
+        title = iptvChannel.name,
+        currentProgram?.name ?: "",
+        nextProgram?.name ?: "",
+        exoPlayer = exoPlayer,
+        subtitles = subtitles,
+        audios = audios,
+        qualities = qualities,
+        onBackPressed = onBackPressed,
+        isBuffering = isBuffering,
+        // 1. Pass the actual boolean and string down
+        isErrorState = isError,
+        errorMessage = errorMessage,
+
+        // 2. Rename the callback to onError to avoid confusion
+        onError = { exception ->
+            errorMessage = exception.message ?: "Playback Error"
+            isError = true
+        },
+        // 3. Add a way to clear the error when they click Retry
+        onClearError = {
+            isError = false
+        },
+        onSubtitlesChanged = {
+            subtitles = it
+        })
+}
+
+@OptIn(UnstableApi::class)
+@Composable
+fun rememberExoPlayer(
+    context: Context,
+    iptvChannel: IPTVChannelDetail,
+    onError: (PlaybackException) -> Unit,
+    onBuffering: (Int) -> Unit,
+    onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
+    onAudiosChanged: (List<AudioTrack>) -> Unit,
+    onQualitiesChanged: (List<VideoQuality>) -> Unit,
+    renderersFactory: DefaultRenderersFactory
+): ExoPlayer {
+    return remember(iptvChannel.id) {
+//        if (!iptvChannel.isDrm) {
+            buildDefaultExoPlayer(
+                context,
+                iptvChannel.streamUrl,
+                onError,
+                onBuffering,
+                onSubtitlesChanged,
+                onAudiosChanged,
+                onQualitiesChanged,
+                renderersFactory
+            )
+//        }
+        //        else {
+//            buildDrmExoPlayer(
+//                context,
+//                channel,
+//                onError,
+//                onBuffering,
+//                onSubtitlesChanged,
+//                onAudiosChanged,
+//                onQualitiesChanged
+//            )
+//        }
+    }
+}

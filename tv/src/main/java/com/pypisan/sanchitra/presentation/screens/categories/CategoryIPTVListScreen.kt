@@ -1,7 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.categories
 
-import JetStreamBottomListPadding
-import androidx.activity.ComponentActivity
+import com.pypisan.sanchitra.presentation.theme.JetStreamBottomListPadding
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,7 +36,6 @@ import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.presentation.common.MovieCard
 import com.pypisan.sanchitra.presentation.common.PosterImageIPTVChannel
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
-import com.pypisan.sanchitra.presentation.screens.videoPlayer.PlayerSharedViewModel
 
 object CategoryIPTVListScreen {
     const val CategoryNameKey = "categoryName"
@@ -47,7 +44,7 @@ object CategoryIPTVListScreen {
 @Composable
 fun CategoryIPTVListScreen(
     onBackPressed: () -> Unit,
-    onChannelSelected: () -> Unit,
+    onChannelSelected: (iptvChannelId: String) -> Unit,
     categoryIPTVListScreenViewModel: CategoryIPTVListScreenViewModel = hiltViewModel()
 ) {
     val uiState by categoryIPTVListScreenViewModel.uiState.collectAsStateWithLifecycle()
@@ -77,14 +74,13 @@ private fun CategoryDetails(
     categoryChannels: List<IPTVChannel>,
     categoryName: String,
     onBackPressed: () -> Unit,
-    onChannelSelected: () -> Unit,
+    onChannelSelected: (iptvChannelId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val childPadding = rememberChildPadding()
     val isFirstItemVisible = remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
 
-    val sharedVM: PlayerSharedViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
     var lastFocusedIndex by rememberSaveable(categoryName) { mutableIntStateOf(0) }
 
     val focusRequesters = remember(categoryChannels) {
@@ -92,9 +88,7 @@ private fun CategoryDetails(
     }
 
     LaunchedEffect(categoryChannels) {
-        focusRequesters
-            .getOrNull(lastFocusedIndex)
-            ?.requestFocus()
+        focusRequesters.getOrNull(lastFocusedIndex)?.requestFocus()
     }
 
     LaunchedEffect(categoryChannels) {
@@ -108,11 +102,9 @@ private fun CategoryDetails(
         modifier = modifier,
     ) {
         Text(
-            text = categoryName,
-            style = MaterialTheme.typography.displaySmall.copy(
+            text = categoryName, style = MaterialTheme.typography.displaySmall.copy(
                 fontWeight = FontWeight.SemiBold
-            ),
-            modifier = Modifier.padding(
+            ), modifier = Modifier.padding(
                 vertical = childPadding.top.times(3.5f)
             )
         )
@@ -123,13 +115,11 @@ private fun CategoryDetails(
             contentPadding = PaddingValues(JetStreamBottomListPadding)
         ) {
             itemsIndexed(
-                categoryChannels,
-                key = { _, channel -> channel.id }
-            ) { index, iptvChannel ->
+                categoryChannels, key = { _, channel -> channel.id }) { index, iptvChannel ->
                 MovieCard(
                     onClick = {
-                        sharedVM.setChannel(iptvChannel)
-                        onChannelSelected() },
+                        onChannelSelected(iptvChannel.id)
+                    },
                     modifier = Modifier
                         .aspectRatio(16 / 9f)
                         .padding(8.dp)
@@ -140,7 +130,9 @@ private fun CategoryDetails(
                             }
                         },
                 ) {
-                    PosterImageIPTVChannel(iptvChannel = iptvChannel, modifier = Modifier.fillMaxSize())
+                    PosterImageIPTVChannel(
+                        iptvChannel = iptvChannel, modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
         }

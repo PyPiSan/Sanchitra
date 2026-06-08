@@ -1,7 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.livetv
 
-import JetStreamBorderWidth
-import androidx.compose.animation.AnimatedContent
+import com.pypisan.sanchitra.presentation.theme.JetStreamBorderWidth
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

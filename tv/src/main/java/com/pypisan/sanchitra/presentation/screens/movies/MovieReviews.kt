@@ -1,5 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.movies
-import JetStreamCardShape
+import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

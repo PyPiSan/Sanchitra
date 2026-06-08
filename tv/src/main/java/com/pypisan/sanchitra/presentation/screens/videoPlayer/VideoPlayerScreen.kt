@@ -22,7 +22,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
-import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.presentation.common.Loading
 
 object VideoPlayerScreen {
