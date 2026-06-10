@@ -1,4 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.profile
+
 import com.pypisan.sanchitra.presentation.theme.SanchitraTheme
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.background
@@ -51,6 +52,7 @@ import androidx.tv.material3.ListItemDefaults
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.pypisan.sanchitra.R
+import com.pypisan.sanchitra.data.util.StringConstants.Profile.userSelectedLanguage
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -177,8 +179,7 @@ fun ProfileScreen(
                 }
                 composable(ProfileScreens.Language()) {
                     LanguageSection(
-                        selectedIndex = selectedLanguageIndex,
-                        onSelectedIndexChange = { selectedLanguageIndex = it }
+                        onLanguageToggle = ::onLanguageToggle
                     )
                 }
                 composable(ProfileScreens.SearchHistory()) {
@@ -200,4 +201,13 @@ fun ProfileScreenPreview() {
             ProfileScreen()
         }
     }
+}
+
+fun onLanguageToggle(language: String) {
+    userSelectedLanguage =
+        if (language in userSelectedLanguage) {
+            userSelectedLanguage - language
+        } else {
+            userSelectedLanguage + language
+        }
 }

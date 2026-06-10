@@ -8,6 +8,7 @@ import com.pypisan.sanchitra.data.models.DeviceLoginInitResponse
 import com.pypisan.sanchitra.data.models.EPGResponseDto
 import com.pypisan.sanchitra.data.models.IPTVChannelDetailDto
 import com.pypisan.sanchitra.data.models.IPTVResponseDto
+import com.pypisan.sanchitra.data.models.LanguageResponse
 import com.pypisan.sanchitra.data.models.LoginStatusResponse
 import com.pypisan.sanchitra.data.models.MovieListResponseDTO
 import com.pypisan.sanchitra.data.models.TVResponse
@@ -41,6 +42,10 @@ interface APIService {
     //    get user details
     @GET("users/detail/")
     suspend fun getUserDetail(): Response<UserDetailResponse>
+
+    // languages
+    @GET("utility/languages/")
+    suspend fun getLanguages(): Response<LanguageResponse>
 
     //    logout
     @POST("users/logout/")

@@ -6,6 +6,7 @@ import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import com.pypisan.sanchitra.data.models.CommonResponse
 import com.pypisan.sanchitra.data.models.DeviceLoginInitResponse
+import com.pypisan.sanchitra.data.models.LanguageResponse
 import com.pypisan.sanchitra.data.models.LoginStatusResponse
 import com.pypisan.sanchitra.data.models.UserDetailResponse
 import com.pypisan.sanchitra.utils.APIService
@@ -95,6 +96,24 @@ class AuthRepository @Inject constructor(
 
         } catch (e: Exception) {
             Log.e("TV", "deleteUserAccount API Error: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun languagesList(): LanguageResponse? {
+        return try {
+
+            val response = api.getLanguages()
+
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                Log.e("TV", "languagesList error Code: ${response.code()}")
+                null
+            }
+
+        } catch (e: Exception) {
+            Log.e("TV", "languagesList API Error: ${e.message}")
             null
         }
     }
