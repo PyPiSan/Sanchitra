@@ -41,6 +41,7 @@ class OnboardingViewModel @Inject constructor(
 
             if (!token.isNullOrEmpty()) {
                 loadProfiles(context)
+                loadLanguages()
                 return@launch
             }
 
@@ -89,6 +90,7 @@ class OnboardingViewModel @Inject constructor(
                         )
 
                         loadProfiles(context)
+                        loadLanguages()
 
                         return@withTimeoutOrNull true
                     }
@@ -110,6 +112,8 @@ class OnboardingViewModel @Inject constructor(
             if (result != null) {
 
                 StringConstants.Profile.accountsEmail = result.email
+                StringConstants.Profile.userSelectedLanguage =
+                    result.details.preferences["languages"]!!
 
                 val apiProfiles = result.profiles.map {
 
@@ -131,10 +135,7 @@ class OnboardingViewModel @Inject constructor(
                     ),
 
                     UserProfileMap(
-                        id = "add",
-                        name = "Add Profile",
-                        imageUrl = null,
-                        icon = Icons.Default.Add
+                        id = "add", name = "Add Profile", imageUrl = null, icon = Icons.Default.Add
                     )
                 )
 
@@ -155,10 +156,31 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
+    fun loadLanguages() {
+        viewModelScope.launch {
+            val result = repo.languagesList()
+            if (result != null) {
+                StringConstants.Utils.LanguageSectionItems = result.data
+            } else {
+                StringConstants.Utils.LanguageSectionItems = listOf(
+                    "Hindi",
+                    "English",
+                    "Tamil",
+                    "Telugu",
+                    "Bengali",
+                    "Gujarati",
+                    "Punjabi",
+                )
+            }
+        }
+    }
+
     fun onProfileSelected(
         profile: UserProfileMap
     ) {
         authState = AuthState.ProfileSelected
+        StringConstants.Profile.userProfileName = profile.name
+        StringConstants.Profile.userProfilePicture = profile.imageUrl
     }
 
     fun handlePollingTimeout() {

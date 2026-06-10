@@ -1,4 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.profile
+
+import androidx.compose.foundation.layout.PaddingValues
 import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,47 +18,59 @@ import androidx.tv.material3.Text
 import androidx.tv.material3.surfaceColorAtElevation
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.data.util.StringConstants
+import com.pypisan.sanchitra.data.util.StringConstants.Profile.userSelectedLanguage
+import com.pypisan.sanchitra.data.util.StringConstants.Utils.LanguageSectionItems
 
 @Composable
 fun LanguageSection(
-    selectedIndex: Int,
-    onSelectedIndexChange: (currentIndex: Int) -> Unit
+    onLanguageToggle: (String) -> Unit
 ) {
     with(StringConstants.Composable.Placeholders) {
-        LazyColumn(modifier = Modifier.padding(horizontal = 72.dp)) {
+        LazyColumn(
+            modifier = Modifier.padding(horizontal = 72.dp),
+            contentPadding = PaddingValues(bottom = 80.dp)
+        ) {
             item {
                 Text(
                     text = LanguageSectionTitle,
                     style = MaterialTheme.typography.headlineSmall
                 )
             }
+
             items(LanguageSectionItems.size) { index ->
+                val language = LanguageSectionItems[index]
+                val isSelected = language in userSelectedLanguage
+
                 ListItem(
                     modifier = Modifier.padding(top = 16.dp),
-                    selected = false,
-                    onClick = { onSelectedIndexChange(index) },
-                    trailingContent = if (selectedIndex == index) {
+                    selected = isSelected,
+                    onClick = {
+                        onLanguageToggle(language)
+                    },
+                    trailingContent = if (isSelected) {
                         {
                             Icon(
                                 Icons.Default.Check,
                                 contentDescription = stringResource(
-                                    id =
                                     R.string.language_section_listItem_icon_content_description,
-                                    LanguageSectionItems[index]
+                                    language
                                 )
                             )
                         }
                     } else null,
                     headlineContent = {
                         Text(
-                            text = LanguageSectionItems[index],
+                            text = language,
                             style = MaterialTheme.typography.titleMedium
                         )
                     },
                     colors = ListItemDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+                        containerColor = MaterialTheme.colorScheme
+                            .surfaceColorAtElevation(4.dp)
                     ),
-                    shape = ListItemDefaults.shape(shape = JetStreamCardShape)
+                    shape = ListItemDefaults.shape(
+                        shape = JetStreamCardShape
+                    )
                 )
             }
         }

@@ -61,7 +61,7 @@ fun AccountsSection(
             AccountsSectionData(
                 title = StringConstants.Composable.Placeholders
                     .AccountsSelectionSwitchAccountsTitle,
-                value = StringConstants.Profile.accountsEmail
+                value = StringConstants.Profile.userProfileName
             ),
             AccountsSectionData(
                 title = StringConstants.Composable.Placeholders.AccountsSelectionLogOut,
@@ -74,7 +74,7 @@ fun AccountsSection(
                 value = StringConstants.Composable.Placeholders.AccountsSelectionChangePasswordValue
             ),
             AccountsSectionData(
-                title = StringConstants.Composable.Placeholders.AccountsSelectionAddNewAccountTitle,
+                title = StringConstants.Composable.Placeholders.AccountsSelectionAddNewProfile,
             ),
             AccountsSectionData(
                 title = StringConstants.Composable.Placeholders

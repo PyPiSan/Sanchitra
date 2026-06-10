@@ -12,6 +12,13 @@ object StringConstants {
     object Profile {
         var accountsEmail: String? = null
         var userName: String? = null
+        var userProfileName: String? = null
+        var userProfilePicture: String? = null
+        var userSelectedLanguage: List<String> = emptyList()
+    }
+
+    object Utils {
+        var LanguageSectionItems: List<String> = emptyList()
     }
 
     object Movie {
@@ -81,13 +88,6 @@ object StringConstants {
                     " needs. We hope you have a great time streaming!"
             const val AboutSectionAppVersionTitle = "Application Version"
             const val LanguageSectionTitle = "Language"
-            val LanguageSectionItems = listOf(
-                "English (US)",
-                "English (UK)",
-                "Français",
-                "Española",
-                "हिंदी"
-            )
             const val SearchHistorySectionTitle = "Search history"
             const val SearchHistoryClearAll = "Clear All"
             val SampleSearchHistory = listOf(
@@ -106,7 +106,7 @@ object StringConstants {
             const val AccountsSelectionLogOut = "Log out"
             const val AccountsSelectionChangePasswordTitle = "Change password"
             const val AccountsSelectionChangePasswordValue = "••••••••••••••"
-            const val AccountsSelectionAddNewAccountTitle = "Add new account"
+            const val AccountsSelectionAddNewProfile = "Add new profile"
             const val AccountsSelectionViewSubscriptionsTitle = "View subscriptions"
             const val AccountsSelectionDeleteAccountTitle = "Delete account"
             const val HelpAndSupportSectionTitle = "Help and Support"

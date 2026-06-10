@@ -83,7 +83,8 @@ fun DashboardTopBar(
                 selected = selectedTabIndex == PROFILE_SCREEN_INDEX,
                 onClick = {
                     onScreenSelection(Screens.Profile)
-                }
+                },
+                imageUrl = StringConstants.Profile.userProfilePicture
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically
