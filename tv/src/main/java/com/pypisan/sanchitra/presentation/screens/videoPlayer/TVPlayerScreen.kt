@@ -75,7 +75,10 @@ fun TVPlayerScreen(
             TVPlayerBuild(
                 channel = s.channel,
                 epg = epg,
-                onBackPressed = onBackPressed
+                onBackPressed = onBackPressed,
+                onVideoStarted = {
+                    tvPlayerScreenViewModel.updateViewCount(s.channel.id)
+                }
             )
         }
     }
@@ -88,7 +91,8 @@ fun TVPlayerScreen(
 fun TVPlayerBuild(
     channel: Channel,
     epg: EPGResponse,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    onVideoStarted: () -> Unit
 ) {
     val context = LocalContext.current
     var isError by remember { mutableStateOf(false) }
@@ -148,6 +152,26 @@ fun TVPlayerBuild(
         },
         renderersFactory = renderersFactory
     )
+
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            var hasCountedView = false // Ensures we only hit the API once per video
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying && !hasCountedView) {
+                    hasCountedView = true
+                    onVideoStarted()
+                }
+            }
+        }
+
+        exoPlayer.addListener(listener)
+
+        onDispose {
+            exoPlayer.removeListener(listener)
+        }
+    }
+
 
     PlayerScreenContent(
         title = channel.name,
@@ -222,11 +246,8 @@ fun getAudioTracks(player: Player): List<AudioTrackInfo> {
     val list = mutableListOf<AudioTrackInfo>()
 
     player.currentTracks.groups.forEach { group ->
-
         if (group.type == C.TRACK_TYPE_AUDIO) {
-
             val format = group.getTrackFormat(0)
-
             list.add(
                 AudioTrackInfo(
                     language = format.language ?: "und", bitrate = format.bitrate, format = format
@@ -242,7 +263,6 @@ fun getAudioTracks(player: Player): List<AudioTrackInfo> {
 fun EPGResponse.getNextProgram(): EPGItem? {
 
     val current = getCurrentProgram() ?: return epg.firstOrNull()
-
     val currentIndex = epg.indexOf(current)
 
     return epg.getOrNull(currentIndex + 1)
@@ -252,16 +272,11 @@ fun EPGResponse.getNextProgram(): EPGItem? {
 fun EPGResponse.getCurrentProgram(): EPGItem? {
 
     val now = LocalTime.now()
-
     return epg.firstOrNull { item ->
-
         try {
-
             val start = LocalTime.parse(item.start)
             val end = LocalTime.parse(item.end)
-
             now in start..<end
-
         } catch (e: Exception) {
             false
         }
@@ -271,16 +286,12 @@ fun EPGResponse.getCurrentProgram(): EPGItem? {
 @RequiresApi(Build.VERSION_CODES.O)
 fun EPGItem.getProgress(): Float {
     return try {
-
         val now = LocalTime.now()
-
         val start = LocalTime.parse(start)
         val end = LocalTime.parse(end)
 
         val total = Duration.between(start, end).toMillis()
-
         val current = Duration.between(start, now).toMillis()
-
         (current.toFloat() / total.toFloat()).coerceIn(0f, 1f)
 
     } catch (e: Exception) {

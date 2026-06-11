@@ -91,4 +91,8 @@ class TVRepositoryImpl @Inject constructor(
         data class Success<T>(val data: T) : ApiResult<T>()
         data class Error(val message: String, val code: Int? = null) : ApiResult<Nothing>()
     }
+
+    override suspend fun updateViewCount(channelId: Int) {
+        api.updateViewCount(channelId)
+    }
 }
