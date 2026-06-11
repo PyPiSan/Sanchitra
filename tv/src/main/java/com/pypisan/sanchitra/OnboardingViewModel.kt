@@ -113,7 +113,7 @@ class OnboardingViewModel @Inject constructor(
 
                 StringConstants.Profile.accountsEmail = result.email
                 StringConstants.Profile.userSelectedLanguage =
-                    result.details.preferences["languages"]!!
+                    result.details.preferences?.get("languages") ?: listOf("English", "Hindi")
 
                 val apiProfiles = result.profiles.map {
 
@@ -127,19 +127,23 @@ class OnboardingViewModel @Inject constructor(
 
                 val extraProfiles = listOf(
 
-                    UserProfileMap(
-                        id = "guest",
-                        name = "Guest",
-                        imageUrl = null,
-                        icon = Icons.Default.NoAccounts
-                    ),
+//                    UserProfileMap(
+//                        id = "guest",
+//                        name = "Guest",
+//                        imageUrl = null,
+//                        icon = Icons.Default.NoAccounts
+//                    ),
 
                     UserProfileMap(
                         id = "add", name = "Add Profile", imageUrl = null, icon = Icons.Default.Add
                     )
                 )
 
-                profiles = apiProfiles + extraProfiles
+                profiles = if (apiProfiles.size < 4) {
+                    apiProfiles + extraProfiles
+                } else {
+                    apiProfiles
+                }
 
                 authState = AuthState.ProfileSelection
 

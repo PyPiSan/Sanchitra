@@ -32,7 +32,7 @@ fun ProfileText(name: String, isFocused: Boolean) {
         color = Color.White.copy(alpha = textAlpha),
         style = MaterialTheme.typography.headlineSmall,
         modifier = Modifier
-            .padding(end = 20.dp)
+            .padding(top = 10.dp)
             .graphicsLayer {
                 scaleX = textScale
                 scaleY = textScale

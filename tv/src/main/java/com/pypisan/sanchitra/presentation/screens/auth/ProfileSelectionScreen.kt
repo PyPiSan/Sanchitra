@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -21,12 +22,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,37 +59,39 @@ fun ProfileSelectionScreen(
         return
     }
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val screenHeight = configuration.screenHeightDp.dp
+    val density = LocalDensity.current
+    val containerSize = LocalWindowInfo.current.containerSize
 
-    val arcRadius = screenWidth * 0.22f
-    val iconSize = screenHeight * 0.12f
+    val screenWidth = with(density) { containerSize.width.toDp() }
+    val screenHeight = with(density) { containerSize.height.toDp() }
+
+    // Dynamic icon sizing (shrinks if more than 4 profiles)
+    val baseIconSize = screenHeight * 0.20f
+    val dynamicIconSize = remember(profiles.size) {
+        if (profiles.size > 4) {
+            // Scales down proportionally, preventing it from getting smaller than 50%
+            val scale = (5f / profiles.size.toFloat()).coerceAtLeast(0.5f)
+            baseIconSize * scale
+        } else {
+            baseIconSize
+        }
+    }
 
     var focusedIndex by remember { mutableIntStateOf(0) }
-
-    // ✅ FIX 1: single clean selection lock
     var isSelecting by remember { mutableStateOf(false) }
 
     val progressAnim = remember { Animatable(1f) }
     val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
     val primaryIndex = remember(profiles) {
         profiles.indexOfFirst { it.id != "guest" && it.id != "add" }
     }
 
-    // Reset selection state when focus changes
-    LaunchedEffect(focusedIndex) {
-        isSelecting = false
-    }
+    LaunchedEffect(focusedIndex) { isSelecting = false }
 
-    // TIMER LOGIC (clean)
     LaunchedEffect(focusedIndex) {
-
         val isPrimary = focusedIndex == primaryIndex
 
         if (!isPrimary || isSelecting) {
@@ -102,55 +109,113 @@ fun ProfileSelectionScreen(
             animationSpec = tween(5000, easing = LinearEasing)
         )
 
-        // ✅ FIX 2: proper auto-select trigger
         if (!isSelecting && focusedIndex == primaryIndex) {
             isSelecting = true
             onProfileSelected(profiles[focusedIndex])
         }
     }
 
-    val density = LocalDensity.current
+    val maxHorizontalSpread = screenWidth.value * 0.6f // Spreads across 70% of screen width
+    val arcCurveHeight = screenHeight.value * 0.08f     // How deep the curve is. Increase this to make the arc sharper!
 
-    val adjustedRadius = remember(profiles.size, arcRadius) {
-        arcRadius * (1f + (profiles.size - 3) * 0.08f)
-    }
-
-    val arcOffsets = remember(profiles.size) {
-        val angleRange = 160f
+    val arcOffsets = remember(profiles.size, maxHorizontalSpread, arcCurveHeight) {
         val itemCount = profiles.size
 
         List(itemCount) { index ->
-            val fraction = if (itemCount == 1) 0.5f
-            else index.toFloat() / (itemCount - 1)
+            val normalizedX = if (itemCount == 1) 0f else (index.toFloat() / (itemCount - 1)) * 2f - 1f
 
-            val angle = (-angleRange / 2f) + (fraction * angleRange)
-            val rad = Math.toRadians(angle.toDouble())
+            // X spreads evenly horizontally
+            val x = (maxHorizontalSpread / 2f) * normalizedX
 
-            Pair(
-                -(adjustedRadius.value * cos(rad)).toFloat(),
-                (arcRadius.value * sin(rad)).toFloat()
-            )
+            // Y forms a parabola
+            val y = -(arcCurveHeight * (normalizedX * normalizedX))
+
+            Pair(x, y)
         }
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.radialGradient(
-                    colors = listOf(Color(0xFF0f172a), Color(0xFF020617)),
-                    center = Offset(3000f, 1000f),
-                    radius = 2500f
+            .drawBehind {
+                // 1. Deep Cinematic Base Gradient (Dark Slate to Pure Black)
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF0F172A), // Dark Slate
+                            Color(0xFF020617), // Deep Space Black
+                            Color(0xFF000000)  // Pure TV Black
+                        )
+                    )
                 )
-            )
+
+                // 2. Soft Red Spotlight (Highlights the "Who's watching?" text)
+                drawRect(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            // ✅ CHANGED: 0x25 = 15% opacity, E50914 = Rich Red
+                            Color(0x25E50914),
+                            Color.Transparent
+                        ),
+                        center = Offset(size.width / 2, size.height * 0.15f),
+                        radius = size.width * 0.5f
+                    )
+                )
+
+                // 3. First Glowing Background Arc (Simulating a Live TV / Broadcast wave)
+                val wavePath1 = Path().apply {
+                    moveTo(-size.width * 0.1f, size.height * 0.45f)
+                    // Creates a smooth U-shape matching your profile layout
+                    quadraticTo(
+                        x1 = size.width / 2f,
+                        y1 = size.height * 0.85f, // Lowest point of arc
+                        x2 = size.width * 1.1f,
+                        y2 = size.height * 0.45f // End point
+                    )
+                }
+
+                drawPath(
+                    path = wavePath1,
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            // ✅ CHANGED: 0x33 = 20% opacity, E50914 = Rich Red
+                            Color(0x33E50914),
+                            Color.Transparent
+                        )
+                    ),
+                    style = Stroke(width = 4.dp.toPx())
+                )
+
+                // 4. Second Subtle Arc (Echo effect for the "Broadcast" vibe)
+                val wavePath2 = Path().apply {
+                    moveTo(-size.width * 0.1f, size.height * 0.50f)
+                    quadraticBezierTo(
+                        x1 = size.width / 2f, y1 = size.height * 0.95f,
+                        x2 = size.width * 1.1f, y2 = size.height * 0.50f
+                    )
+                }
+
+                drawPath(
+                    path = wavePath2,
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color(0x1AFFFFFF), // Faint white glow left here as a nice accent
+                            Color.Transparent
+                        )
+                    ),
+                    style = Stroke(width = 2.dp.toPx())
+                )
+            }
     ) {
 
         Text(
             text = "Who's Watching?",
             color = Color.White,
             modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = screenWidth * 0.08f),
+                .align(Alignment.TopCenter)
+                .padding(top = screenHeight * 0.15f),
             style = MaterialTheme.typography.displayMedium.copy(
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = (screenWidth.value * 0.04f).sp
@@ -159,16 +224,14 @@ fun ProfileSelectionScreen(
 
         Box(
             modifier = Modifier
-                .fillMaxHeight()
-                .width(screenWidth / 2)
-                .align(Alignment.CenterEnd),
-            contentAlignment = Alignment.CenterEnd
+                .fillMaxWidth()
+                .align(Alignment.Center)
+                .padding(top = screenHeight * 0.45f),
+            contentAlignment = Alignment.Center
         ) {
 
             profiles.forEachIndexed { index, profile ->
-
                 key(profile.id) {
-
                     val offset = arcOffsets[index]
 
                     ProfileArcItem(
@@ -176,22 +239,16 @@ fun ProfileSelectionScreen(
                         isFocusedByParent = (index == focusedIndex),
                         timerProgress = if (index == focusedIndex) progressAnim.value else 1f,
                         modifier = Modifier
-                            .padding(end = 60.dp)
                             .offset(
-                                x = with(density) { offset.first.toDp() },
-                                y = with(density) { offset.second.toDp() }
+                                x = offset.first.dp,
+                                y = offset.second.dp
                             ),
-                        iconSize = iconSize,
+                        iconSize = dynamicIconSize, // Passes the smaller size if > 4
                         focusRequester = if (index == 0) focusRequester else null,
-
-                        onFocusGained = {
-                            focusedIndex = index
-                        },
-
+                        onFocusGained = { focusedIndex = index },
                         onSelected = {
                             if (isSelecting) return@ProfileArcItem
                             isSelecting = true
-
                             when (profile.id) {
                                 "guest" -> onGuestSelected()
                                 "add" -> onAddProfile()
