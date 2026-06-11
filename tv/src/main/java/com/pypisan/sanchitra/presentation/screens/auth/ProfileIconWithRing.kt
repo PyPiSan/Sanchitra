@@ -116,7 +116,7 @@ fun ProfileIconWithRing(
                     contentDescription = profile.name,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(iconSize * 0.2f)
+                        .padding(iconSize * 0.1f)
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
@@ -124,9 +124,10 @@ fun ProfileIconWithRing(
                 Icon(
                     imageVector = profile.icon ?: Icons.Default.AccountCircle,
                     contentDescription = profile.name,
+                    tint = Color.White,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(iconSize * 0.2f)
+                        .padding(iconSize * 0.1f)
                 )
             }
         }
