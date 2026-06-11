@@ -234,7 +234,6 @@ fun PlayerScreenContent(
             },
 
             onQualitySelected = { selected ->
-
                 if (selected.height == -1) {
 
                     // AUTO QUALITY
@@ -247,7 +246,6 @@ fun PlayerScreenContent(
                 } else {
 
                     val group = selected.group
-
                     if (group != null) {
 
                         exoPlayer.trackSelectionParameters =

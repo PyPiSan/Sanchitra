@@ -7,4 +7,5 @@ interface TVRepository {
     fun getChannels(): Flow<List<Channel>>
     fun getCarouselTV(): Flow<List<Channel>>
     suspend fun getChannelData(id: String, type: String): TVRepositoryImpl.ApiResult<Channel>
+    suspend fun updateViewCount(channelId: Int)
 }
