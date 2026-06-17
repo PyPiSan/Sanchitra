@@ -2,6 +2,7 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 import android.content.Context
 import android.util.Base64
+import android.util.Log
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -33,7 +34,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 @androidx.annotation.OptIn(UnstableApi::class)
 fun buildDrmExoPlayer(
     context: Context,
-    channel: Channel, // Make sure Channel has authToken, hdneaToken, etc.
+    channel: Channel,
     onError: (PlaybackException) -> Unit,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
@@ -79,7 +80,6 @@ fun buildDrmExoPlayer(
                   "type":"temporary"
                 }
             """.trimIndent()
-
             val drmCallback = LocalMediaDrmCallback(drmBody.toByteArray())
 
             DefaultDrmSessionManager.Builder()
@@ -174,7 +174,6 @@ fun buildDrmExoPlayer(
     }
 
     // 2. Feed our updated dataSourceFactory into the MediaSourceFactory
-    // NOTE: In your old code this was DefaultMediaSourceFactory(context) which ignores custom cookies!
     val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory).also { factory ->
         drmSessionManager?.let { manager ->
             factory.setDrmSessionManagerProvider { manager }
@@ -200,11 +199,6 @@ fun buildDrmExoPlayer(
                 override fun onPlayerError(error: PlaybackException) {
                     onError(error)
                 }
-
-                override fun onPlaybackStateChanged(state: Int) {
-                    onBuffering(state)
-                }
-
                 override fun onTracksChanged(tracks: Tracks) {
                     onSubtitlesChanged(videoMetaHelper.getSubtitleTracks(this@apply))
                     onAudiosChanged(videoMetaHelper.getAudioTracks(this@apply))

@@ -1,5 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.livetv
 
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,14 +11,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
@@ -58,18 +62,11 @@ fun TVScreen(
 fun TVCatalog(
     channelCategories: Map<String, List<Channel>>,
     carouselList: List<Channel>,
-    goToTVPlayer:  (id: Int) -> Unit,
+    goToTVPlayer: (id: Int) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
     modifier: Modifier = Modifier
 ) {
-
-    var lastFocusedChannelId by rememberSaveable { mutableStateOf<Int?>(null) }
-
-    var restoreFocusKey by rememberSaveable { mutableStateOf<String?>(null) }
-    var isRestoring by remember { mutableStateOf(false) }
-
-
     val childPadding = rememberChildPadding()
     val lazyListState = rememberLazyListState()
 
@@ -89,51 +86,48 @@ fun TVCatalog(
     }
 
     LaunchedEffect(isTopBarVisible) {
-        // 2. BLOCK scrolling if we are actively restoring focus!
-        if (isTopBarVisible && !isRestoring) {
+        if (isTopBarVisible) {
             lazyListState.animateScrollToItem(0)
+        }
+    }
+
+    // 1. Grab focus back from Jetpack Navigation when screen resumes
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val screenFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            kotlinx.coroutines.delay(300)
+//            kotlinx.coroutines.yield()
+            try { screenFocusRequester.requestFocus() } catch (e: Exception) {}
         }
     }
 
     LazyColumn(
         state = lazyListState,
-        modifier = modifier,
         contentPadding = PaddingValues(top = childPadding.top, bottom = 104.dp),
+        modifier = modifier
+            .focusRequester(screenFocusRequester)
+            .focusGroup()
+            .focusRestorer(),
     ) {
-        item{
+
+        item(key = "Carousel") {
             TVScreenChannelList(
                 channelList = carouselList,
-                goToTVPlayer = { id ->
-                    restoreFocusKey = "carousel_$id"
-                    isRestoring = true
-                    goToTVPlayer(id)
-                },
-                lastFocusedChannelId = lastFocusedChannelId,
-                onChannelFocused = { lastFocusedChannelId = it }
+                goToTVPlayer = goToTVPlayer
             )
         }
+
         items(
             items = categoryList,
             key = { it.key }
         ) { entry ->
-            val rowKey = "category_${entry.key}"
-
             TVRow(
                 modifier = Modifier.padding(top = childPadding.top),
                 title = entry.key,
                 channels = entry.value,
-                rowKey = rowKey, // Pass the row prefix
-                restoreFocusKey = restoreFocusKey,
-                onFocusRestored = {
-                    restoreFocusKey = null
-                    isRestoring = false // Unblock native scrolling
-                },
-                goToTVPlayer = { id ->
-                    // Combine Row name + ID so it is 100% unique
-                    restoreFocusKey = "${rowKey}_$id"
-                    isRestoring = true
-                    goToTVPlayer(id)
-                }
+                goToTVPlayer = goToTVPlayer
             )
         }
     }

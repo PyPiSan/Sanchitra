@@ -2,7 +2,6 @@ package com.pypisan.sanchitra.presentation.screens.livetv
 
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +25,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component2
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
@@ -72,15 +69,14 @@ fun TVRow(
     showIndexOverImage: Boolean = false,
     goToTVPlayer:  (id: Int) -> Unit,
 
-    rowKey: String,
-    restoreFocusKey: String?,
-    onFocusRestored: () -> Unit,
+//    rowKey: String,
+//    restoreFocusKey: String?,
+//    onFocusRestored: () -> Unit,
 ) {
     val (lazyRow) = remember { FocusRequester.createRefs() }
 
     Column(
         modifier = modifier
-//            .focusGroup()
     ) {
         if (title != null) {
             Text(
@@ -98,11 +94,10 @@ fun TVRow(
             ),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
-//                .focusRequester(lazyRow)
                 .focusRestorer()
         ) {
             itemsIndexed(channels, key = { _, channels -> channels.id }) { index, channel ->
-                val itemKey = "${rowKey}_${channel.id}"
+//                val itemKey = "${rowKey}_${channel.id}"
                 TVRowItem(
                     channel = channel,
                     goToTVPlayer = {
@@ -113,8 +108,8 @@ fun TVRow(
                     itemDirection = itemDirection,
                     showItemTitle = showItemTitle,
                     showIndexOverImage = showIndexOverImage,
-                    isReturnFocusTarget = itemKey == restoreFocusKey,
-                    onFocusRestored = onFocusRestored
+//                    isReturnFocusTarget = itemKey == restoreFocusKey,
+//                    onFocusRestored = onFocusRestored
                 )
             }
         }
@@ -131,23 +126,23 @@ private fun TVRowItem(
     modifier: Modifier = Modifier,
     itemDirection: ItemDirection = ItemDirection.Horizontal,
     goToTVPlayer:  (id: Int) -> Unit,
-    isReturnFocusTarget: Boolean,
-    onFocusRestored: () -> Unit,
+//    isReturnFocusTarget: Boolean,
+//    onFocusRestored: () -> Unit,
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(isReturnFocusTarget) {
-        if (isReturnFocusTarget) {
-            kotlinx.coroutines.delay(100)
-            try {
-                focusRequester.requestFocus()
-                onFocusRestored()
-            } catch (e: Exception) {
-                // Ignore gracefully
-            }
-        }
-    }
+//    LaunchedEffect(isReturnFocusTarget) {
+//        if (isReturnFocusTarget) {
+//            kotlinx.coroutines.delay(100)
+//            try {
+//                focusRequester.requestFocus()
+//                onFocusRestored()
+//            } catch (e: Exception) {
+//                // Ignore gracefully
+//            }
+//        }
+//    }
 
     ChannelCard(
         onClick = { goToTVPlayer(channel.id) },

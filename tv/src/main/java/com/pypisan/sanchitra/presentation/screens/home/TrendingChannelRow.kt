@@ -13,10 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,7 +27,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -76,15 +72,10 @@ fun TrendingChannelRow(
     lastFocusedChannelId: Int?,
 ) {
 
-    val bringIntoViewRequester = remember {
-        BringIntoViewRequester()
-    }
-
     val (lazyRow) = remember { FocusRequester.createRefs() }
     Column(
         modifier = modifier
             .focusGroup()
-            .bringIntoViewRequester(bringIntoViewRequester)
     ) {
 
         if (title != null) {
@@ -103,28 +94,10 @@ fun TrendingChannelRow(
             ),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
+                .focusGroup()
                 .focusRequester(lazyRow)
-                .focusRestorer()
         ) {
             itemsIndexed(channels, key = { _, channels -> channels.id }) { index, channel ->
-
-                val focusRequester = remember {
-                    FocusRequester()
-                }
-
-                LaunchedEffect(
-                    lastFocusedChannelId,
-                    isActive
-                ) {
-
-                    if (
-                        isActive &&
-                        channel.id == lastFocusedChannelId
-                    ) {
-                        bringIntoViewRequester.bringIntoView()
-                        focusRequester.requestFocus()
-                    }
-                }
 
                 TrendingChannelRowItem(
                     channel = channel,
@@ -134,8 +107,7 @@ fun TrendingChannelRow(
                     goToTVPlayer = {
                         goToTVPlayer(channel.id)
                     },
-                    modifier = Modifier
-                        .focusRequester(focusRequester),
+                    modifier = Modifier,
                     index = index,
                     itemDirection = itemDirection,
                     showItemTitle = showItemTitle,
@@ -178,13 +150,13 @@ private fun TrendingChannelRowItem(
                     onChannelFocused(channel.id)
                 }
             }
-            .focusProperties {
-                left = if (index == 0) {
-                    FocusRequester.Cancel
-                } else {
-                    FocusRequester.Default
-                }
-            }
+//            .focusProperties {
+//                left = if (index == 0) {
+//                    FocusRequester.Cancel
+//                } else {
+//                    FocusRequester.Default
+//                }
+//            }
             .then(modifier)
     ) {
         ChannelRowItemImage(

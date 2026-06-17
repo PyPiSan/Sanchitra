@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,15 +47,14 @@ fun TVScreenChannelList (
     endPadding: Dp = rememberChildPadding().end,
     goToTVPlayer:  (id: Int) -> Unit,
 
-    lastFocusedChannelId: Int?,
-    onChannelFocused: (Int) -> Unit,
+//    lastFocusedChannelId: Int?,
+//    onChannelFocused: (Int) -> Unit,
 ){
     val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
 
         LazyRow(
             modifier = modifier
                 .focusRequester(lazyRow)
-                .focusRestorer()
             ,
             contentPadding = PaddingValues(start = startPadding, end = endPadding)
         ) {
@@ -65,17 +63,17 @@ fun TVScreenChannelList (
                 val focusRequester = remember { FocusRequester() }
 
                 // Restore focus when coming back
-                LaunchedEffect(lastFocusedChannelId) {
-                    if (channel.id == lastFocusedChannelId) {
-                        focusRequester.requestFocus()
-                    }
-                }
+//                LaunchedEffect(lastFocusedChannelId) {
+//                    if (channel.id == lastFocusedChannelId) {
+//                        focusRequester.requestFocus()
+//                    }
+//                }
 
-                val itemModifier = when {
-                    channel.id == lastFocusedChannelId -> Modifier.focusRequester(focusRequester)
-                    index == 0 -> Modifier.focusRequester(firstItem)
-                    else -> Modifier
-                }
+//                val itemModifier = when {
+//                    channel.id == lastFocusedChannelId -> Modifier.focusRequester(focusRequester)
+//                    index == 0 -> Modifier.focusRequester(firstItem)
+//                    else -> Modifier
+//                }
 
                 ChannelListItem(
                     itemWidth = 432.dp,
@@ -84,12 +82,12 @@ fun TVScreenChannelList (
                         goToTVPlayer(channel.id)
                     },
                     channel = channel,
-                    modifier = itemModifier
-                        .onFocusChanged {
-                            if (it.isFocused) {
-                                onChannelFocused(channel.id)
-                            }
-                        }
+                    modifier = Modifier
+//                        .onFocusChanged {
+//                            if (it.isFocused) {
+//                                onChannelFocused(channel.id)
+//                            }
+//                        }
                 )
             }
         }

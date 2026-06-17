@@ -147,7 +147,7 @@ fun ProfileSelectionScreen(
                 drawRect(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            // ✅ CHANGED: 0x25 = 15% opacity, E50914 = Rich Red
+
                             Color(0x25E50914),
                             Color.Transparent
                         ),

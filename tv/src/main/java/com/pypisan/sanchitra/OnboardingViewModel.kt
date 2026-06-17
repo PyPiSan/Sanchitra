@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.NoAccounts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -126,19 +127,19 @@ class OnboardingViewModel @Inject constructor(
 
                 val extraProfiles = listOf(
 
-//                    UserProfileMap(
-//                        id = "guest",
-//                        name = "Guest",
-//                        imageUrl = null,
-//                        icon = Icons.Default.NoAccounts
-//                    ),
+                    UserProfileMap(
+                        id = "guest",
+                        name = "Guest",
+                        imageUrl = null,
+                        icon = Icons.Default.NoAccounts
+                    ),
 
                     UserProfileMap(
                         id = "add", name = "Add Profile", imageUrl = null, icon = Icons.Default.Add
                     )
                 )
 
-                profiles = if (apiProfiles.size < 4) {
+                profiles = if (apiProfiles.size < 3) {
                     apiProfiles + extraProfiles
                 } else {
                     apiProfiles

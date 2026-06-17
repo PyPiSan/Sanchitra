@@ -2,6 +2,7 @@ package com.pypisan.sanchitra.presentation.screens.home
 
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.focusGroup
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.common.Loading
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -119,30 +121,23 @@ private fun Catalog(
     LazyColumn(
         state = lazyListState,
         contentPadding = PaddingValues(bottom = 108.dp),
-        // Setting overscan margin to bottom to ensure the last row's visibility
-        modifier = modifier,
+        modifier = modifier
+            .focusGroup()
+            .focusRestorer(),
     ) {
 
-        item(contentType = "FeaturedHomeCarousel") {
+        item(key = "FeaturedHomeCarousel", contentType = "FeaturedHomeCarousel") {
             FeaturedHomeCarousel(
                 channels = featuredHome,
                 padding = childPadding,
                 goToTVPlayer = goToTVPlayer,
-
-//                isActive = focusedSection == "carousel",
-//
-//                onFocused = {
-//                    focusedSection = "carousel"
-//                    focusedRowIndex = 0
-//                },
-
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(324.dp)
             )
         }
 
-        item(contentType = "MoviesRow") {
+        item(key = "MoviesRow", contentType = "MoviesRow") {
 
             MoviesRow(
                 modifier = Modifier.padding(top = 16.dp),
@@ -162,7 +157,7 @@ private fun Catalog(
                 }
             )
         }
-        item(contentType = "Top10MoviesList") {
+        item(key = "Top10Movies", contentType = "Top10MoviesList") {
 
             Top10MoviesList(
                 movieList = top10Movies,
@@ -190,7 +185,7 @@ private fun Catalog(
             val category = entry.key
             val channels = entry.value
 
-            item(contentType = "TrendingChannelRow") {
+            item(key = "Trending_$category", contentType = "TrendingChannelRow") {
 
                 TrendingChannelRow(
                     modifier = Modifier.padding(top = 16.dp),
