@@ -115,7 +115,8 @@ fun TVPlayerBuild(
     val currentProgram = epg.getCurrentProgram()
     val nextProgram = epg.getNextProgram()
 
-    val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
+    val renderersFactory = DefaultRenderersFactory(context)
+        .setEnableDecoderFallback(true)
         .forceEnableMediaCodecAsynchronousQueueing()
         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
 

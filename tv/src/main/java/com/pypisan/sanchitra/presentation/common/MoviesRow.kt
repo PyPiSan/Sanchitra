@@ -113,28 +113,8 @@ fun MoviesRow(
                     key = { _, movie -> movie.id }
                 ) { index, movie ->
 
-                    val focusRequester = remember {
-                        FocusRequester()
-                    }
-
-                    LaunchedEffect(focusedItem, isActive) {
-
-                        if (!isActive) return@LaunchedEffect
-
-                        val saved = focusedItem
-
-                        if (
-                            saved != null &&
-                            saved.first == index &&
-                            saved.second == movie.id
-                        ) {
-                            focusRequester.requestFocus()
-                        }
-                    }
-
                     MoviesRowItem(
                         modifier = Modifier
-                            .focusRequester(focusRequester)
                             .onFocusChanged {
                                 if (it.isFocused) {
                                     focusedItem = index to movie.id
