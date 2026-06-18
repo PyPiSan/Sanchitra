@@ -11,10 +11,11 @@ data class SubtitleTrack(
 )
 
 data class AudioTrack(
-    val groupIndex: Int,
+    val group: Tracks.Group?,
     val trackIndex: Int,
     val language: String?,
-    val label: String?
+    val label: String?,
+    val isSelected: Boolean = false
 )
 
 data class VideoQuality(

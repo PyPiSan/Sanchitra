@@ -27,7 +27,6 @@ import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.common.Loading
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.DefaultRenderersFactory
-import com.pypisan.sanchitra.data.models.AudioTrackInfo
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
@@ -36,6 +35,7 @@ import com.pypisan.sanchitra.data.models.EPGItem
 import com.pypisan.sanchitra.data.models.EPGResponse
 import java.time.Duration
 import java.time.LocalTime
+import java.util.Locale
 
 object TVPlayerScreen {
     const val TVIdBundleKey = "channelId"
@@ -238,26 +238,6 @@ fun rememberExoPlayer(
             )
         }
     }
-}
-
-
-@OptIn(UnstableApi::class)
-fun getAudioTracks(player: Player): List<AudioTrackInfo> {
-
-    val list = mutableListOf<AudioTrackInfo>()
-
-    player.currentTracks.groups.forEach { group ->
-        if (group.type == C.TRACK_TYPE_AUDIO) {
-            val format = group.getTrackFormat(0)
-            list.add(
-                AudioTrackInfo(
-                    language = format.language ?: "und", bitrate = format.bitrate, format = format
-                )
-            )
-        }
-    }
-
-    return list
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
