@@ -38,6 +38,7 @@ import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.remembe
 import com.pypisan.sanchitra.utils.handleDPadKeyEvents
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
+import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.AudioTrackDrawer
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleTextOverlay
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoQualityDrawer
 
@@ -63,6 +64,10 @@ fun PlayerScreenContent(
     val pulseState = rememberVideoPlayerPulseState()
     val focusRequester = remember { FocusRequester() }
     var showQualityDrawer by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var showAudioQualityDrawer by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -162,7 +167,7 @@ fun PlayerScreenContent(
             },
             isBuffering = isBuffering,
             isSubtitleDrawerVisible =
-                showSubtitleDrawer || showQualityDrawer,
+                showSubtitleDrawer || showQualityDrawer || showAudioQualityDrawer,
             controls = {
                 VideoPlayerControls(
                     player = exoPlayer,
@@ -170,6 +175,10 @@ fun PlayerScreenContent(
                     currentEpisode = currentEpisode,
                     nextEpisode = nextEpisode,
                     focusRequester = focusRequester,
+                    onShowAudioSettings = {
+                        showAudioQualityDrawer = true
+                        exoPlayer.pause()
+                    },
                     onShowSubtitles = {
                         showSubtitleDrawer = true
                         exoPlayer.pause()
@@ -221,6 +230,46 @@ fun PlayerScreenContent(
                 showSubtitleDrawer = false
                 exoPlayer.playWhenReady = true
                 exoPlayer.prepare()
+            }
+        )
+
+        AudioTrackDrawer(
+            visible = showAudioQualityDrawer,
+            audioTracks = audios,
+            onDismiss = {
+                showAudioQualityDrawer = false
+                exoPlayer.play()
+            },
+            onTrackSelected = { selected ->
+
+                // If you have an "Auto" or "Default" option (assuming trackIndex == -1 means Auto)
+                if (selected.trackIndex == -1) {
+                    exoPlayer.trackSelectionParameters =
+                        exoPlayer.trackSelectionParameters
+                            .buildUpon()
+                            .clearOverridesOfType(C.TRACK_TYPE_AUDIO)
+                            .build()
+                } else {
+                    // Assuming your AudioTrack data class has a reference to the Tracks.Group and trackIndex
+                    val group = selected.group
+
+                    exoPlayer.trackSelectionParameters =
+                        group?.mediaTrackGroup?.let {
+                            exoPlayer.trackSelectionParameters
+                                .buildUpon()
+                                .clearOverridesOfType(C.TRACK_TYPE_AUDIO)
+                                .setOverrideForType(
+                                    TrackSelectionOverride(
+                                        it,
+                                        listOf(selected.trackIndex)
+                                    )
+                                )
+                        }
+                            ?.build()!!
+                }
+
+                showAudioQualityDrawer = false
+                exoPlayer.playWhenReady = true
             }
         )
 

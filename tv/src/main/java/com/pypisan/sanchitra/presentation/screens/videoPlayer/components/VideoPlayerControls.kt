@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -112,11 +113,19 @@ fun VideoPlayerControls(
                 )
 
                 VideoPlayerControlsIcon(
+                    icon = Icons.Default.Audiotrack,
+                    isPlaying = player.isPlaying,
+                    contentDescription = StringConstants.Composable.VideoPlayerControlAudioSelectionButton,
+                    onShowControls = onShowControls,
+                    onClick = onShowAudioSettings
+                )
+
+                VideoPlayerControlsIcon(
                     icon = Icons.Default.Settings,
                     isPlaying = player.isPlaying,
                     contentDescription =
                         StringConstants.Composable.VideoPlayerControlSettingsButton,
-                    onShowControls = onShowAudioSettings,
+                    onShowControls = onShowControls,
                     onClick = onShowQuality
                 )
             }
@@ -152,13 +161,6 @@ fun VideoPlayerControls(
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
-
-//                AudioSettings(
-//                    player = player,
-//                    onLanguageSelected = { language ->
-//                        selectAudio(player, language)
-//                    }
-//                )
             }
         },
         more = null

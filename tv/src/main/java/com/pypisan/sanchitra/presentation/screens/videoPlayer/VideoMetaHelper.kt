@@ -3,6 +3,7 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.Format
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.pypisan.sanchitra.data.entities.AudioTrack
@@ -43,31 +44,60 @@ class VideoMetaHelper {
         return subtitles
     }
 
-    fun getAudioTracks(player: ExoPlayer): List<AudioTrack> {
+    fun getAudioTracks(player: Player): List<AudioTrack> {
 
-        val audios = mutableListOf<AudioTrack>()
+        val list = mutableListOf<AudioTrack>()
 
-        player.currentTracks.groups.forEachIndexed { groupIndex, group ->
+        // Loop through all track groups currently loaded in the player
+        player.currentTracks.groups.forEach { group ->
 
+            // We only care about AUDIO tracks here
             if (group.type == C.TRACK_TYPE_AUDIO) {
 
-                for (i in 0 until group.length) {
+                // Loop through every track inside this specific group
+                for (trackIndex in 0 until group.length) {
 
-                    val format = group.getTrackFormat(i)
+                    val format = group.getTrackFormat(trackIndex)
 
-                    audios.add(
+                    // Create a readable label (e.g. "English" instead of "en", or fallback to "Unknown")
+                    val displayLanguage = format.language?.let { Locale(it).displayLanguage }
+                    val readableLabel = format.label ?: displayLanguage ?: "Unknown Audio"
+
+                    // Optional: Append channel count (e.g., "English (5.1)" vs "English (Stereo)")
+                    val channelString = when (format.channelCount) {
+                        2 -> " (Stereo)"
+                        6 -> " (5.1)"
+                        8 -> " (7.1)"
+                        else -> ""
+                    }
+
+                    list.add(
                         AudioTrack(
-                            groupIndex = groupIndex,
-                            trackIndex = i,
-                            language = format.language,
-                            label = format.label
+                            group = group,
+                            trackIndex = trackIndex,
+                            language = format.language ?: "und",
+                            label = readableLabel + channelString,
+                            isSelected = group.isTrackSelected(trackIndex)
                         )
                     )
                 }
             }
         }
 
-        return audios
+        // Optional: Add an "Auto / Default" option at the top
+        val autoSelected = list.none { it.isSelected }
+        list.add(
+            0,
+            AudioTrack(
+                group = null,
+                trackIndex = -1,
+                language = null,
+                label = "Auto",
+                isSelected = autoSelected
+            )
+        )
+
+        return list
     }
 
     @OptIn(UnstableApi::class)
