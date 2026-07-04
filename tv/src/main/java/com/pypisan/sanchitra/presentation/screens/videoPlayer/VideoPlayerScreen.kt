@@ -2,8 +2,10 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 import android.app.Activity
 import android.content.Context
+import android.os.Build
 import android.view.WindowManager
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -28,6 +30,7 @@ object VideoPlayerScreen {
     const val metaID = "metaID"
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VideoPlayerScreen(
     onBackPressed: () -> Unit,
@@ -70,6 +73,7 @@ fun VideoPlayerScreen(
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerBuild(
@@ -138,6 +142,7 @@ fun VideoPlayerBuild(
         title = title?:"",
         "",
         "",
+        epgResponse = null,
         exoPlayer = exoPlayer,
         subtitles = subtitles,
         audios = audios,
@@ -146,13 +151,6 @@ fun VideoPlayerBuild(
         isBuffering = isBuffering,
         isErrorState = isError,
         errorMessage = errorMessage,
-
-        // 2. Rename the callback to onError to avoid confusion
-        onError = { exception ->
-            errorMessage = exception.message ?: "Playback Error"
-            isError = true
-        },
-        // 3. Add a way to clear the error when they click Retry
         onClearError = {
             isError = false
         },

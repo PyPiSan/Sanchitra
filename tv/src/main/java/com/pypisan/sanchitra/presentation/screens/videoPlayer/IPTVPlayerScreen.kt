@@ -153,22 +153,15 @@ fun IPTVPlayerBuild(
         title = iptvChannel.name,
         currentProgram?.name ?: "",
         nextProgram?.name ?: "",
+        epg,
         exoPlayer = exoPlayer,
         subtitles = subtitles,
         audios = audios,
         qualities = qualities,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
-        // 1. Pass the actual boolean and string down
         isErrorState = isError,
         errorMessage = errorMessage,
-
-        // 2. Rename the callback to onError to avoid confusion
-        onError = { exception ->
-            errorMessage = exception.message ?: "Playback Error"
-            isError = true
-        },
-        // 3. Add a way to clear the error when they click Retry
         onClearError = {
             isError = false
         },

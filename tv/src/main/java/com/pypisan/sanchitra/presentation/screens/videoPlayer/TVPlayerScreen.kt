@@ -34,12 +34,17 @@ import com.pypisan.sanchitra.data.entities.VideoQuality
 import com.pypisan.sanchitra.data.models.EPGItem
 import com.pypisan.sanchitra.data.models.EPGResponse
 import java.time.Duration
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 object TVPlayerScreen {
     const val TVIdBundleKey = "channelId"
 }
+
+@RequiresApi(Build.VERSION_CODES.O)
+private val epgTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -178,22 +183,15 @@ fun TVPlayerBuild(
         title = channel.name,
         currentProgram?.name ?: "",
         nextProgram?.name ?: "",
+        epg,
         exoPlayer = exoPlayer,
         subtitles = subtitles,
         audios = audios,
         qualities = qualities,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
-        // 1. Pass the actual boolean and string down
         isErrorState = isError,
         errorMessage = errorMessage,
-
-        // 2. Rename the callback to onError to avoid confusion
-        onError = { exception ->
-            errorMessage = exception.message ?: "Playback Error"
-            isError = true
-        },
-        // 3. Add a way to clear the error when they click Retry
         onClearError = {
             isError = false
         },
@@ -241,41 +239,42 @@ fun rememberExoPlayer(
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun EPGResponse.getNextProgram(): EPGItem? {
-
-    val current = getCurrentProgram() ?: return epg.firstOrNull()
-    val currentIndex = epg.indexOf(current)
-
-    return epg.getOrNull(currentIndex + 1)
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
 fun EPGResponse.getCurrentProgram(): EPGItem? {
-
-    val now = LocalTime.now()
+    val now = LocalDateTime.now()
     return epg.firstOrNull { item ->
         try {
-            val start = LocalTime.parse(item.start)
-            val end = LocalTime.parse(item.end)
-            now in start..<end
+
+            val start = LocalDateTime.parse(item.start, epgTimeFormatter)
+            val end = LocalDateTime.parse(item.end, epgTimeFormatter)
+
+            !now.isBefore(start) && !now.isAfter(end)
         } catch (e: Exception) {
             false
         }
     }
 }
 
+
 @RequiresApi(Build.VERSION_CODES.O)
-fun EPGItem.getProgress(): Float {
-    return try {
-        val now = LocalTime.now()
-        val start = LocalTime.parse(start)
-        val end = LocalTime.parse(end)
+fun EPGResponse.getNextProgram(): EPGItem? {
+    val now = LocalDateTime.now()
+    val current = getCurrentProgram()
 
-        val total = Duration.between(start, end).toMillis()
-        val current = Duration.between(start, now).toMillis()
-        (current.toFloat() / total.toFloat()).coerceIn(0f, 1f)
-
-    } catch (e: Exception) {
-        0f
+    return if (current != null) {
+        val currentIndex = epg.indexOf(current)
+        if (currentIndex != -1 && currentIndex < epg.size - 1) {
+            epg[currentIndex + 1]
+        } else {
+            null
+        }
+    } else {
+        epg.firstOrNull { item ->
+            try {
+                val start = LocalDateTime.parse(item.start, epgTimeFormatter)
+                start.isAfter(now)
+            } catch (e: Exception) {
+                false
+            }
+        }
     }
 }

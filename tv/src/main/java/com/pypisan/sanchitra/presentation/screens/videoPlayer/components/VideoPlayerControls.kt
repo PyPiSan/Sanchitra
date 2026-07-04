@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.ClosedCaption
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
@@ -48,6 +49,7 @@ fun VideoPlayerControls(
     nextEpisode: String,
     focusRequester: FocusRequester,
     onShowControls: () -> Unit = {},
+    onShowInfo: () -> Unit = {},
     onShowAudioSettings: () -> Unit = {},
     onShowSubtitles: () -> Unit = {},
     onShowQuality: () -> Unit = {},
@@ -102,7 +104,16 @@ fun VideoPlayerControls(
 //                        onShowControls = onShowControls,
 //                    )
 //                }
-
+                if (currentEpisode.isNotEmpty()) {
+                    VideoPlayerControlsIcon(
+                        icon = Icons.Default.Info,
+                        isPlaying = player.isPlaying,
+                        contentDescription =
+                            StringConstants.Composable.VideoPlayerControlInfoButton,
+                        onShowControls = onShowControls,
+                        onClick = onShowInfo
+                    )
+                }
                 VideoPlayerControlsIcon(
                     icon = Icons.Default.ClosedCaption,
                     isPlaying = player.isPlaying,

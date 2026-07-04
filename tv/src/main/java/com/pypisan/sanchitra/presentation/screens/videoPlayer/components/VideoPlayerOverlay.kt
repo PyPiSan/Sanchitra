@@ -9,8 +9,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,8 +29,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.media3.common.PlaybackException
 import kotlinx.coroutines.android.awaitFrame
 
 @Composable
@@ -59,10 +54,11 @@ fun VideoPlayerOverlay(
     )
 
     LaunchedEffect(isControlsVisible, isSubtitleDrawerVisible) {
+        // Only request focus on underlying controls IF controls are visible AND NO overlay is open
         if (isControlsVisible && !isSubtitleDrawerVisible) {
             try {
                 awaitFrame()
-                focusRequester.requestFocus()
+                focusRequester.requestFocus() // Focus underlying controls (e.g., play button)
             } catch (_: Exception) {
             }
         }
@@ -79,7 +75,7 @@ fun VideoPlayerOverlay(
 
         // Background overlay when controls visible
         AnimatedVisibility(
-            visible = isControlsVisible && !isError && !isBuffering ,
+            visible = isControlsVisible && !isError && !isBuffering && !isSubtitleDrawerVisible,
             enter = fadeIn(),
             exit = fadeOut()
         ) {
@@ -103,10 +99,10 @@ fun VideoPlayerOverlay(
             // CONTROLS
             AnimatedVisibility(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                visible = isControlsVisible && !isError && !isBuffering,
+                visible = isControlsVisible && !isError && !isBuffering && !isSubtitleDrawerVisible,
                 enter = slideInVertically { it },
                 exit = slideOutVertically { it }
-            ) {
+            )  {
 
                 Column(
                     modifier = Modifier
@@ -133,7 +129,6 @@ fun VideoPlayerOverlay(
             }
         }
 
-        // ERROR OVERLAY (Retry UI)
         if (isError) {
             ErrorOverlay(
                 message = errorMessage,

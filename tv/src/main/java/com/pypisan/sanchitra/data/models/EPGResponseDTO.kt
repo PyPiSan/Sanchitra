@@ -14,6 +14,9 @@ data class EPGItemDto(
     @SerializedName("name")
     val name: String = "",
 
+    @SerializedName("image_url")
+    val image: String = "",
+
     @SerializedName("description")
     val description: String = "",
 
@@ -34,6 +37,7 @@ fun EPGItemDto.toDomain(): EPGItem {
     return EPGItem(
         channelName = channelName,
         name = name,
+        image = image,
         description = description,
         start = start,
         end = end

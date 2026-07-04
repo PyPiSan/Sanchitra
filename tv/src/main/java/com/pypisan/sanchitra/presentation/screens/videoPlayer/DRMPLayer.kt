@@ -51,7 +51,9 @@ fun buildDrmExoPlayer(
         .build()
 
     val trackSelector = DefaultTrackSelector(context)
-    val loadControl = DefaultLoadControl()
+    val loadControl = DefaultLoadControl.Builder()
+        .setBufferDurationsMs(30000, 60000, 3000, 2000)
+        .build()
     val videoMetaHelper = VideoMetaHelper()
 
     // 1. Declare dataSourceFactory OUTSIDE the 'when' block so we can modify it and use it later
@@ -198,6 +200,9 @@ fun buildDrmExoPlayer(
             addListener(object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
                     onError(error)
+                }
+                override fun onPlaybackStateChanged(state: Int) {
+                    onBuffering(state)
                 }
                 override fun onTracksChanged(tracks: Tracks) {
                     onSubtitlesChanged(videoMetaHelper.getSubtitleTracks(this@apply))
