@@ -27,7 +27,7 @@ fun buildDefaultExoPlayer(
 ): ExoPlayer {
 
     val loadControl = DefaultLoadControl.Builder()
-        .setBufferDurationsMs(3000, 10000, 1500, 2000)
+        .setBufferDurationsMs(30000, 60000, 3000, 2000)
         .build()
 
     val videoMetaHelper = VideoMetaHelper()
@@ -48,7 +48,6 @@ fun buildDefaultExoPlayer(
 
             addListener(object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
-//                    Log.e("TV", "Error: ${error.message}", error)
                     onError(error)
                 }
 

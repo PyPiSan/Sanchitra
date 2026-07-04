@@ -1,7 +1,9 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -38,16 +40,23 @@ import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.remembe
 import com.pypisan.sanchitra.utils.handleDPadKeyEvents
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
+import com.pypisan.sanchitra.data.models.EPGResponse
+import com.pypisan.sanchitra.data.util.prepareEPGProgramData
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.AudioTrackDrawer
+import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.NowAiringDialog
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleTextOverlay
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoQualityDrawer
+import java.time.LocalDateTime
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(UnstableApi::class)
 @Composable
 fun PlayerScreenContent(
     title: String,
     currentEpisode: String,
     nextEpisode: String,
+    epgResponse: EPGResponse?,
     exoPlayer: ExoPlayer,
     subtitles: List<SubtitleTrack>,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
@@ -57,14 +66,28 @@ fun PlayerScreenContent(
     isBuffering: Boolean,
     isErrorState: Boolean,
     errorMessage: String,
-    onError: (PlaybackException) -> Unit,
     onClearError: () -> Unit
 ) {
     val videoPlayerState = rememberVideoPlayerState()
+
     val pulseState = rememberVideoPlayerPulseState()
+
     val focusRequester = remember { FocusRequester() }
+
     var showQualityDrawer by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    var showNowAiring by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    val (epgPrograms, initialAiringIndex) = remember(epgResponse, showNowAiring) {
+        if (showNowAiring && epgResponse != null) {
+            prepareEPGProgramData(epgResponse)
+        } else {
+            Pair(emptyList(), 0)
+        }
     }
 
     var showAudioQualityDrawer by rememberSaveable {
@@ -84,11 +107,9 @@ fun PlayerScreenContent(
         val listener = object : Player.Listener {
 
             override fun onCues(cues: CueGroup) {
-                subtitleText =
-                    cues.cues
-                        .joinToString("\n") { cue ->
-                            cue.text?.toString() ?: ""
-                        }
+                subtitleText = cues.cues.joinToString("\n") { cue ->
+                    cue.text?.toString() ?: ""
+                }
             }
         }
 
@@ -109,8 +130,7 @@ fun PlayerScreenContent(
     }
 
     RememberPlaybackWatchdog(
-        exoPlayer = exoPlayer,
-        onFreeze = {
+        exoPlayer = exoPlayer, onFreeze = {
 
             val mediaItem = exoPlayer.currentMediaItem
 
@@ -121,8 +141,7 @@ fun PlayerScreenContent(
                 exoPlayer.seekToDefaultPosition()
                 exoPlayer.play()
             }
-        }
-    )
+        })
 
     BackHandler {
         exoPlayer.release()
@@ -166,8 +185,7 @@ fun PlayerScreenContent(
                 exoPlayer.play()
             },
             isBuffering = isBuffering,
-            isSubtitleDrawerVisible =
-                showSubtitleDrawer || showQualityDrawer || showAudioQualityDrawer,
+            isSubtitleDrawerVisible = showSubtitleDrawer || showQualityDrawer || showAudioQualityDrawer || showNowAiring,
             controls = {
                 VideoPlayerControls(
                     player = exoPlayer,
@@ -175,6 +193,10 @@ fun PlayerScreenContent(
                     currentEpisode = currentEpisode,
                     nextEpisode = nextEpisode,
                     focusRequester = focusRequester,
+                    onShowInfo = {
+                        showNowAiring = true
+                        exoPlayer.pause()
+                    },
                     onShowAudioSettings = {
                         showAudioQualityDrawer = true
                         exoPlayer.pause()
@@ -186,97 +208,71 @@ fun PlayerScreenContent(
                     onShowQuality = {
                         showQualityDrawer = true
                         exoPlayer.pause()
-                    }
-                )
-            }
-        )
+                    })
+            })
 
         SubtitleDrawer(
             visible = showSubtitleDrawer,
             subtitles = subtitles,
             onDismiss = {
-                showSubtitleDrawer = false
-                exoPlayer.play()
-            },
-            onSubtitleSelected = { selected ->
+            showSubtitleDrawer = false
+            exoPlayer.play()
+        }, onSubtitleSelected = { selected ->
 
-                if (selected.trackIndex == -1) {
+            if (selected.trackIndex == -1) {
 
-                    exoPlayer.trackSelectionParameters =
-                        exoPlayer.trackSelectionParameters
-                            .buildUpon()
-                            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
-                            .build()
+                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters.buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true).build()
 
-                } else {
+            } else {
 
-                    exoPlayer.trackSelectionParameters =
-                        exoPlayer.trackSelectionParameters
-                            .buildUpon()
-                            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
-                            .setPreferredTextLanguage(selected.language)
-                            .setSelectUndeterminedTextLanguage(true)
-                            .build()
-                }
-                onSubtitlesChanged(
-                    subtitles.map {
-                        it.copy(
-                            isSelected =
-                                it.label == selected.label
-                        )
-                    }
-                )
-
-                showSubtitleDrawer = false
-                exoPlayer.playWhenReady = true
-                exoPlayer.prepare()
+                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters.buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                    .setPreferredTextLanguage(selected.language)
+                    .setSelectUndeterminedTextLanguage(true).build()
             }
-        )
+            onSubtitlesChanged(
+                subtitles.map {
+                    it.copy(
+                        isSelected = it.label == selected.label
+                    )
+                })
+
+            showSubtitleDrawer = false
+            exoPlayer.playWhenReady = true
+            exoPlayer.prepare()
+        })
 
         AudioTrackDrawer(
             visible = showAudioQualityDrawer,
             audioTracks = audios,
             onDismiss = {
-                showAudioQualityDrawer = false
-                exoPlayer.play()
-            },
-            onTrackSelected = { selected ->
+            showAudioQualityDrawer = false
+            exoPlayer.play()
+        }, onTrackSelected = { selected ->
 
-                // If you have an "Auto" or "Default" option (assuming trackIndex == -1 means Auto)
-                if (selected.trackIndex == -1) {
-                    exoPlayer.trackSelectionParameters =
-                        exoPlayer.trackSelectionParameters
-                            .buildUpon()
-                            .clearOverridesOfType(C.TRACK_TYPE_AUDIO)
-                            .build()
-                } else {
-                    // Assuming your AudioTrack data class has a reference to the Tracks.Group and trackIndex
-                    val group = selected.group
-
-                    exoPlayer.trackSelectionParameters =
-                        group?.mediaTrackGroup?.let {
-                            exoPlayer.trackSelectionParameters
-                                .buildUpon()
-                                .clearOverridesOfType(C.TRACK_TYPE_AUDIO)
-                                .setOverrideForType(
-                                    TrackSelectionOverride(
-                                        it,
-                                        listOf(selected.trackIndex)
-                                    )
-                                )
-                        }
-                            ?.build()!!
-                }
-
-                showAudioQualityDrawer = false
-                exoPlayer.playWhenReady = true
+            if (selected.trackIndex == -1) {
+                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters.buildUpon()
+                    .clearOverridesOfType(C.TRACK_TYPE_AUDIO).build()
+            } else {
+                val group = selected.group
+                exoPlayer.trackSelectionParameters = group?.mediaTrackGroup?.let {
+                    exoPlayer.trackSelectionParameters.buildUpon()
+                        .clearOverridesOfType(C.TRACK_TYPE_AUDIO).setOverrideForType(
+                            TrackSelectionOverride(
+                                it, listOf(selected.trackIndex)
+                            )
+                        )
+                }?.build()!!
             }
-        )
+
+            showAudioQualityDrawer = false
+            exoPlayer.playWhenReady = true
+        })
 
         VideoQualityDrawer(
             visible = showQualityDrawer,
             qualities = qualities,
-
             onDismiss = {
                 showQualityDrawer = false
                 exoPlayer.play()
@@ -287,10 +283,8 @@ fun PlayerScreenContent(
 
                     // AUTO QUALITY
                     exoPlayer.trackSelectionParameters =
-                        exoPlayer.trackSelectionParameters
-                            .buildUpon()
-                            .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
-                            .build()
+                        exoPlayer.trackSelectionParameters.buildUpon()
+                            .clearOverridesOfType(C.TRACK_TYPE_VIDEO).build()
 
                 } else {
 
@@ -298,24 +292,31 @@ fun PlayerScreenContent(
                     if (group != null) {
 
                         exoPlayer.trackSelectionParameters =
-                            exoPlayer.trackSelectionParameters
-                                .buildUpon()
-                                .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
-                                .setOverrideForType(
+                            exoPlayer.trackSelectionParameters.buildUpon()
+                                .clearOverridesOfType(C.TRACK_TYPE_VIDEO).setOverrideForType(
                                     TrackSelectionOverride(
-                                        group.mediaTrackGroup,
-                                        listOf(selected.trackIndex)
+                                        group.mediaTrackGroup, listOf(selected.trackIndex)
                                     )
-                                )
-                                .build()
+                                ).build()
                     }
                 }
 
                 showQualityDrawer = false
 
                 exoPlayer.playWhenReady = true
-            }
-        )
+            })
+
+        if (showNowAiring && epgPrograms.isNotEmpty()) {
+            NowAiringDialog(
+                visible = showNowAiring,
+                programs = epgPrograms, // Pass the single sorted list
+                initialIndex = initialAiringIndex, // Pass the calculated current index
+                onDismiss = {
+                    showNowAiring = false
+                    exoPlayer.play()
+                }
+            )
+        }
     }
 }
 
@@ -323,11 +324,11 @@ private fun Modifier.dPadEvents(
     exoPlayer: ExoPlayer, videoPlayerState: VideoPlayerState, pulseState: VideoPlayerPulseState
 ): Modifier = this.handleDPadKeyEvents(
     onLeft = {
-        if (!videoPlayerState.isControlsVisible) {
-            exoPlayer.seekBack()
-            pulseState.setType(VideoPlayerPulse.Type.BACK)
-        }
-    },
+    if (!videoPlayerState.isControlsVisible) {
+        exoPlayer.seekBack()
+        pulseState.setType(VideoPlayerPulse.Type.BACK)
+    }
+},
     onRight = {
         if (!videoPlayerState.isControlsVisible) {
             exoPlayer.seekForward()
