@@ -2,8 +2,8 @@ package com.pypisan.sanchitra.presentation.screens.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pypisan.sanchitra.data.entities.MovieList
-import com.pypisan.sanchitra.data.repositories.MovieRepository
+import com.pypisan.sanchitra.data.models.IPTVChannel
+import com.pypisan.sanchitra.data.repositories.IPTVRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,7 +14,7 @@ import kotlin.collections.emptyList
 
 @HiltViewModel
 class SearchScreenViewModel @Inject constructor(
-    private val movieRepository: MovieRepository
+    private val iptvRepository: IPTVRepository
 ) : ViewModel() {
 
     private val internalSearchState = MutableSharedFlow<SearchState>()
@@ -25,7 +25,8 @@ class SearchScreenViewModel @Inject constructor(
 
     private suspend fun postQuery(queryString: String) {
         internalSearchState.emit(SearchState.Searching)
-        val result = movieRepository.searchMovies(query = queryString)
+//        val result = iptvRepository.searchChannel(query = queryString)
+        val result = emptyList<IPTVChannel>()
         internalSearchState.emit(SearchState.Done(result))
     }
 
@@ -38,5 +39,5 @@ class SearchScreenViewModel @Inject constructor(
 
 sealed interface SearchState {
     data object Searching : SearchState
-    data class Done(val movieList: MovieList) : SearchState
+    data class Done(val iptvChannelList: List<IPTVChannel>) : SearchState
 }

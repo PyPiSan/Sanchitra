@@ -97,6 +97,11 @@ interface APIService {
     @GET("home/video/carousel/")
     suspend fun getCarouselVideoList(): Response<MovieListResponseDTO>
 
+    @POST("home/featured/trends/view/")
+    suspend fun updateMovieViewCount(
+        @Query("movie_id") movieID: Int,
+    ): Response<CommonResponse>
+
 
     //    Home
     @GET("home/trending/live/channels/")

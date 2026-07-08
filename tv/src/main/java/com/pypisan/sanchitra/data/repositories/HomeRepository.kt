@@ -6,6 +6,5 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface HomeRepository {
     fun getTrendingLiveChannels(): StateFlow<TrendingResponse>
-
     fun getTrendingMovies(): StateFlow<TrendingMovieResponse>
 }

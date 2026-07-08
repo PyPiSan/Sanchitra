@@ -5,10 +5,8 @@ import android.util.Log
 import com.pypisan.sanchitra.utils.APIService
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlin.collections.emptyList
 import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.data.models.toDomain
 import kotlinx.coroutines.CoroutineScope
@@ -23,43 +21,56 @@ import kotlin.collections.orEmpty
 class TVRepositoryImpl @Inject constructor(
     private val api: APIService,
 ) : TVRepository {
-
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    private val channelsFlow: StateFlow<List<Channel>> = flow {
+    private val channelsFlow: StateFlow<Map<String, List<Channel>>> = flow {
         val response = api.getLiveTV()
 
         if (response.isSuccessful) {
-            emit(response.body()?.channels.orEmpty().map { it.toDomain() })
+            emit(
+                response.body()
+                    ?.channels
+                    ?.mapValues { (_, channels) ->
+                        channels.map { it.toDomain() }
+                    }
+                    .orEmpty()
+            )
         } else {
-            emit(emptyList())
+            emit(emptyMap())
         }
     }.catch {
-        emit(emptyList())
+        emit(emptyMap())
     }.stateIn(
         scope = scope,
         started = SharingStarted.Eagerly,
-        initialValue = emptyList()
+        initialValue = emptyMap()
     )
 
-    private val carouselFlow: StateFlow<List<Channel>> = flow {
+    private val carouselFlow: StateFlow<Map<String, List<Channel>>> = flow {
         val response = api.getCarouselTV()
 
         if (response.isSuccessful) {
-            emit(response.body()?.channels.orEmpty().map { it.toDomain() })
+            emit(
+                response.body()
+                    ?.channels
+                    ?.mapValues { (_, channels) ->
+                        channels.map { it.toDomain() }
+                    }
+                    .orEmpty()
+            )
         } else {
-            emit(emptyList())
+            emit(emptyMap())
         }
     }.catch {
-        emit(emptyList())
+        emit(emptyMap())
     }.stateIn(
         scope = scope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
+        initialValue = emptyMap()
     )
 
-    override fun getChannels(): Flow<List<Channel>> = channelsFlow
-    override fun getCarouselTV(): Flow<List<Channel>> = carouselFlow
+    override fun getChannels(): StateFlow<Map<String, List<Channel>>> = channelsFlow
+    override fun getCarouselTV(): StateFlow<Map<String, List<Channel>>> = carouselFlow
 
 
     override suspend fun getChannelData(id: String, type: String): ApiResult<Channel> {

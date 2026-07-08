@@ -1,8 +1,8 @@
 package com.pypisan.sanchitra
 
 import android.app.Application
-import com.pypisan.sanchitra.data.repositories.MovieRepository
-import com.pypisan.sanchitra.data.repositories.MovieRepositoryImpl
+import com.pypisan.sanchitra.data.repositories.TVRepository
+import com.pypisan.sanchitra.data.repositories.TVRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,9 +14,9 @@ class SanchitraApp : Application()
 
 @InstallIn(SingletonComponent::class)
 @Module
-abstract class MovieRepositoryModule {
+abstract class TVRepositoryModule {
     @Binds
-    abstract fun bindMovieRepository(
-        movieRepositoryImpl: MovieRepositoryImpl
-    ): MovieRepository
+    abstract fun bindTVRepository(
+        impl: TVRepositoryImpl
+    ): TVRepository
 }

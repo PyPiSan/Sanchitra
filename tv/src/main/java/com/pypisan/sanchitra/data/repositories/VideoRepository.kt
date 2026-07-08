@@ -8,4 +8,5 @@ interface VideoRepository {
     fun getVideos(): Flow<List<Videos>>
     fun getCarouselVideos(): Flow<List<Videos>>
     fun getVideoDetails(movieId: Int): StateFlow<Videos?>
+    suspend fun updateMovieViewCount(movieID: Int)
 }

@@ -43,13 +43,13 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.pypisan.sanchitra.R
-import com.pypisan.sanchitra.data.entities.Movie
-import com.pypisan.sanchitra.data.entities.MovieList
+import com.pypisan.sanchitra.data.models.Channel
+import com.pypisan.sanchitra.data.models.IPTVChannel
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 @Composable
 fun SearchScreen(
-    onMovieClick: (movie: Movie) -> Unit,
+    onMovieClick: (channel: Channel) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     searchScreenViewModel: SearchScreenViewModel = hiltViewModel(),
 ) {
@@ -73,11 +73,11 @@ fun SearchScreen(
         }
 
         is SearchState.Done -> {
-            val movieList = s.movieList
+            val iptvChannelList = s.iptvChannelList
             SearchResult(
-                movieList = movieList,
-                searchMovies = searchScreenViewModel::query,
-                onMovieClick = onMovieClick
+                iptvChannelList = iptvChannelList,
+                searchChannels = searchScreenViewModel::query,
+                onChannelClick = onMovieClick
             )
         }
     }
@@ -86,9 +86,9 @@ fun SearchScreen(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchResult(
-    movieList: MovieList,
-    searchMovies: (queryString: String) -> Unit,
-    onMovieClick: (movie: Movie) -> Unit,
+    iptvChannelList: List<IPTVChannel>,
+    searchChannels: (queryString: String) -> Unit,
+    onChannelClick: (channel: Channel) -> Unit,
     modifier: Modifier = Modifier,
     lazyColumnState: LazyListState = rememberLazyListState(),
 ) {
@@ -189,7 +189,7 @@ fun SearchResult(
                     ),
                     keyboardActions = KeyboardActions(
                         onSearch = {
-                            searchMovies(searchQuery)
+                            searchChannels(searchQuery)
                         }
                     ),
                     maxLines = 1,

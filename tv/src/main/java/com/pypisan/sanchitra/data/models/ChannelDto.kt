@@ -21,6 +21,12 @@ data class ChannelDto(
     @SerializedName("is_drm")
     val isDrm: Boolean?,
 
+    @SerializedName("is_premium")
+    val isPremium: Boolean?,
+
+    @SerializedName("is_internal")
+    val isInternal: Boolean?,
+
     @SerializedName("license_key")
     val licenseKey: String?,
 
@@ -39,6 +45,8 @@ fun ChannelDto.toDomain(): Channel {
         language = language ?: "",
         isDrm = isDrm ?: false,
         licenseKey = licenseKey,
-        licenseUrl = licenseUrl
+        licenseUrl = licenseUrl,
+        isPremium = isPremium ?: false,
+        isInternal = isInternal ?: false
     )
 }

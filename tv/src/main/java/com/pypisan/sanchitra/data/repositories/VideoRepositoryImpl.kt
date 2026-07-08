@@ -84,4 +84,8 @@ class VideoRepositoryImpl  @Inject constructor (
 
     override fun getVideos(): Flow<List<Videos>> = videosFlow
     override fun getCarouselVideos(): Flow<List<Videos>> = carouselVideosFlow
+
+    override suspend fun updateMovieViewCount(movieID: Int) {
+        api.updateMovieViewCount(movieID)
+    }
 }
