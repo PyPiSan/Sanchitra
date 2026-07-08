@@ -133,8 +133,8 @@ private fun Background(
 ) {
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn(),
-        exit = fadeOut(),
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically(),
         modifier = modifier
     ) {
         Crossfade(
