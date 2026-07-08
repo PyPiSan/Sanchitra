@@ -155,7 +155,7 @@ fun NowAiringDialog(
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
-                                maxLines = 1, // Restrict to 1 line inside fixed height card
+                                maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
 
@@ -163,7 +163,7 @@ fun NowAiringDialog(
 
                             Text(
                                 text = targetProgram.description,
-                                maxLines = 3, // Restrict to 3 lines to fit the fixed 280.dp structure perfectly
+                                maxLines = 4,
                                 overflow = TextOverflow.Ellipsis,
                                 color = Color(0xFFE0E0E0),
                                 lineHeight = 18.sp,
@@ -196,13 +196,10 @@ fun NowAiringDialog(
                         icon = Icons.Default.ArrowBackIosNew,
                         focused = false,
                         onClick = {
-                            // *** EXPLICIT FOCUS MANAGEMENT ON CLICK ***
                             if (currentIndex > 1) {
                                 currentIndex--
                                 try { focusRequesterPrev.requestFocus() } catch (_: Exception) {}
                             } else {
-                                // Going to index 0, so the previous button is about to hide.
-                                // Move focus to Next before this button disappears.
                                 currentIndex--
                                 try { focusRequesterNext.requestFocus() } catch (_: Exception) {}
                             }
@@ -252,18 +249,17 @@ fun DpadKeyNavigationButton(
     val buttonHeight = 100.dp // High aesthetic height
     var hasFocus by remember { mutableStateOf(false) }
 
-    // Design Requirement Colors: The *focused* next button is rendered OPAQUE WHITE.
-    // hasFocus dynamically updates, focused forces state.
+
     val containerColor = when {
-        hasFocus -> Color.White // ACTIVE D-Pad focus makes it opaque white
-        focused -> Color.White.copy(alpha = 0.6f) // The focused button looks white but semi-opaque
-        else -> Color(0xFF64B5F6).copy(alpha = 0.3f) // Unfocused button is subtle blue
+        hasFocus -> Color.White
+        focused -> Color.White.copy(alpha = 0.6f)
+        else -> Color(0xFF64B5F6).copy(alpha = 0.3f)
     }
 
     val tintColor = when {
-        hasFocus -> Color.Black // Dark icon on white button
-        focused -> Color.Black // Dark icon on white button
-        else -> Color.White // White icon on blue button
+        hasFocus -> Color.Black
+        focused -> Color.Black
+        else -> Color.White
     }
 
     Box(
@@ -271,12 +267,11 @@ fun DpadKeyNavigationButton(
             .width(buttonWidth)
             .height(buttonHeight)
             // --- FOCUS STATE HANDLING ---
-            .onFocusChanged { hasFocus = it.isFocused } // Track D-Pad traversal
-            .focusable() // Allow focus traversal
-            // *** CRUCIAL FIX: Handle Key Events Explicitly ***
-            // Instead of .clickable(), handle the 'Center' key on D-Pad manually.
+            .onFocusChanged { hasFocus = it.isFocused }
+            .focusable()
+
             .onKeyEvent { keyEvent ->
-                // Check if the D-Pad CENTER button (or Enter) was pressed
+
                 if (keyEvent.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_CENTER &&
                     keyEvent.nativeKeyEvent.action == KeyEvent.ACTION_UP // Trigger on release
                 ) {
@@ -317,8 +312,8 @@ private fun ProgramPreview(
             model = imageUrl,
             contentDescription = null,
             modifier = Modifier
-                .size(width = 190.dp, height = 107.dp)
-                .clip(RoundedCornerShape(12.dp)),
+                .size(width = 280.dp, height = 170.dp)
+                .clip(RoundedCornerShape(14.dp)),
             contentScale = ContentScale.Crop
         )
 
@@ -326,8 +321,8 @@ private fun ProgramPreview(
 
         Box(
             modifier = Modifier
-                .size(width = 300.dp, height = 170.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .size(width = 280.dp, height = 170.dp)
+                .clip(RoundedCornerShape(14.dp))
                 .background(Color.DarkGray),
             contentAlignment = Alignment.Center
         ) {

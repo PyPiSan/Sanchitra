@@ -16,7 +16,7 @@ plugins {
 
 def versionMajor = 3
 def versionMinor = 1
-def versionPatch = 2
+def versionPatch = 3
 def buildType="alpha"
 
 def computedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"

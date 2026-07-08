@@ -40,7 +40,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.pypisan.sanchitra.data.entities.Movie
+import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.presentation.Screens
 import com.pypisan.sanchitra.presentation.screens.categories.CategoriesScreen
 import com.pypisan.sanchitra.presentation.screens.movies.MoviesScreen
@@ -68,7 +68,7 @@ fun rememberChildPadding(direction: LayoutDirection = LocalLayoutDirection.curre
 fun DashboardScreen(
     openCategoryIPTVList: (categoryName: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
-    openVideoPlayer: (Movie) -> Unit,
+    openVideoPlayer: (Videos) -> Unit,
     openTVPlayer: (channelId: Int) -> Unit,
     isComingBackFromDifferentScreen: Boolean,
     resetIsComingBackFromDifferentScreen: () -> Unit,
@@ -116,7 +116,6 @@ fun DashboardScreen(
         }
     ) {
         // We do not want to focus the TopBar everytime we come back from another screen e.g.
-        // MovieDetails, CategoryMovieList or VideoPlayer screen
         var wasTopBarFocusRequestedBefore by rememberSaveable { mutableStateOf(false) }
 
         var topBarHeightPx: Int by rememberSaveable { mutableIntStateOf(0) }
@@ -210,7 +209,7 @@ private fun BackPressHandledArea(
 private fun Body(
     openCategoryIPTVList: (categoryName: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
-    openVideoPlayer: (Movie) -> Unit,
+    openVideoPlayer: (Videos) -> Unit,
     openTVPlayer: (channelId: Int) -> Unit,
     updateTopBarVisibility: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -262,9 +261,9 @@ private fun Body(
 //            )
 //        }
         composable(Screens.Search()) {
-            SearchScreen(
-                onMovieClick = { movie -> openMovieDetailsScreen(movie.id) },
-                onScroll = updateTopBarVisibility
-            )
+//            SearchScreen(
+//                onMovieClick = { movie -> openMovieDetailsScreen(movie.id) },
+//                onScroll = updateTopBarVisibility
+//            )
         }
     }
