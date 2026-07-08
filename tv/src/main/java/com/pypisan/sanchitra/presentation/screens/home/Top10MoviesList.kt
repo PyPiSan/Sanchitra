@@ -72,9 +72,7 @@ fun Top10MoviesList(
             isListFocused = it.hasFocus
         },
 
-        modifier = modifier.bringIntoViewIfChildrenAreFocused(
-            PaddingValues(bottom = 116.dp)
-        )
+        modifier = modifier
     )
 }
 

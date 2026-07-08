@@ -78,8 +78,8 @@ fun DashboardScreen(
     val focusManager = LocalFocusManager.current
     val navController = rememberNavController()
 
-    var isTopBarVisible by remember { mutableStateOf(true) }
-    var isTopBarFocused by remember { mutableStateOf(false) }
+    var isTopBarVisible by rememberSaveable { mutableStateOf(true) }
+    var isTopBarFocused by rememberSaveable { mutableStateOf(false) }
 
     var currentDestination: String? by remember { mutableStateOf(null) }
     val currentTopBarSelectedTabIndex by remember(currentDestination) {
