@@ -5,6 +5,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -90,12 +91,12 @@ private fun ImmersiveList(
 ) {
     Box(
         contentAlignment = Alignment.BottomStart,
-        modifier = modifier
+        modifier = modifier.animateContentSize()
     ) {
         Background(
             movie = selectedMovie,
             visible = isListFocused,
-            modifier = modifier
+            modifier = Modifier
                 .height(432.dp)
                 .gradientOverlay(gradientColor)
         )
@@ -132,8 +133,8 @@ private fun Background(
 ) {
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically(),
+        enter = fadeIn(),
+        exit = fadeOut(),
         modifier = modifier
     ) {
         Crossfade(
