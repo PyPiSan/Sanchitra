@@ -50,44 +50,18 @@ fun TVScreenChannelList (
 //    lastFocusedChannelId: Int?,
 //    onChannelFocused: (Int) -> Unit,
 ){
-    val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
-
         LazyRow(
-            modifier = modifier
-                .focusRequester(lazyRow)
-            ,
+            modifier = modifier.focusRestorer(),
             contentPadding = PaddingValues(start = startPadding, end = endPadding)
         ) {
             itemsIndexed(channelList, key = { _, c -> c.id }) { index, channel ->
-
-                val focusRequester = remember { FocusRequester() }
-
-                // Restore focus when coming back
-//                LaunchedEffect(lastFocusedChannelId) {
-//                    if (channel.id == lastFocusedChannelId) {
-//                        focusRequester.requestFocus()
-//                    }
-//                }
-
-//                val itemModifier = when {
-//                    channel.id == lastFocusedChannelId -> Modifier.focusRequester(focusRequester)
-//                    index == 0 -> Modifier.focusRequester(firstItem)
-//                    else -> Modifier
-//                }
-
                 ChannelListItem(
                     itemWidth = 432.dp,
                     onChannelClick = {
-                        lazyRow.saveFocusedChild()
                         goToTVPlayer(channel.id)
                     },
                     channel = channel,
                     modifier = Modifier
-//                        .onFocusChanged {
-//                            if (it.isFocused) {
-//                                onChannelFocused(channel.id)
-//                            }
-//                        }
                 )
             }
         }
