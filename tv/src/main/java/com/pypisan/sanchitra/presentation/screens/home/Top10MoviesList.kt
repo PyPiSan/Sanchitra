@@ -98,6 +98,7 @@ private fun ImmersiveList(
             movie = selectedMovie,
             visible = isListFocused,
             modifier = Modifier
+                .fillMaxWidth()
                 .height(432.dp)
                 .gradientOverlay(gradientColor)
         )
