@@ -21,7 +21,8 @@ internal fun Modifier.bringIntoViewIfChildrenAreFocused(
     inspectorInfo = debugInspectorInfo { name = "bringIntoViewIfChildrenAreFocused" },
     factory = {
         val pxOffset = with(LocalDensity.current) {
-            val y = paddingValues.calculateBottomPadding().toPx()
+            val y = (paddingValues.calculateBottomPadding() - paddingValues.calculateTopPadding())
+                .toPx()
             Offset.Zero.copy(y = y)
         }
         var myRect: Rect = Rect.Zero

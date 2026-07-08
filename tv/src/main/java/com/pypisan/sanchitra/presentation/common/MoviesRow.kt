@@ -175,8 +175,7 @@ fun ImmersiveListMoviesRow(
             LazyRow(
                 contentPadding = PaddingValues(start = startPadding, end = endPadding),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
-                modifier = Modifier
-                    .focusRestorer()
+                modifier = Modifier.focusRestorer()
             ) {
                 itemsIndexed(
                     movieState,
