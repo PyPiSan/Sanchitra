@@ -27,6 +27,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -94,8 +95,7 @@ fun TrendingChannelRow(
             ),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
-                .focusGroup()
-                .focusRequester(lazyRow)
+                .focusRestorer()
         ) {
             itemsIndexed(channels, key = { _, channels -> channels.id }) { index, channel ->
 
@@ -150,13 +150,13 @@ private fun TrendingChannelRowItem(
                     onChannelFocused(channel.id)
                 }
             }
-//            .focusProperties {
-//                left = if (index == 0) {
-//                    FocusRequester.Cancel
-//                } else {
-//                    FocusRequester.Default
-//                }
-//            }
+            .focusProperties {
+                left = if (index == 0) {
+                    FocusRequester.Cancel
+                } else {
+                    FocusRequester.Default
+                }
+            }
             .then(modifier)
     ) {
         ChannelRowItemImage(
