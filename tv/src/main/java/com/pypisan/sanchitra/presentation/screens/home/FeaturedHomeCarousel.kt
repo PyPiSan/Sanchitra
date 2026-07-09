@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,7 +31,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -71,6 +77,8 @@ fun FeaturedHomeCarousel(
     channels: List<TrendingChannel>,
     padding: Padding,
     goToTVPlayer: (id: Int) -> Unit,
+    isActive: Boolean = false,
+    onCarouselFocused: () -> Unit = {}
 ) {
     val carouselState = rememberSaveable(saver = CarouselSaver) { CarouselState(0) }
     var isCarouselFocused by remember { mutableStateOf(false) }
@@ -78,6 +86,27 @@ fun FeaturedHomeCarousel(
         1f
     } else {
         0f
+    }
+
+    val focusRequester = remember { FocusRequester() }
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner, isActive) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && isActive) {
+                try {
+                    focusRequester.requestFocus()
+                } catch (e: Exception) {
+                    // Ignore gracefully
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     Carousel(
@@ -89,9 +118,13 @@ fun FeaturedHomeCarousel(
                 shape = ShapeDefaults.Medium,
             )
             .clip(ShapeDefaults.Medium)
+            .focusRequester(focusRequester)
             .onFocusChanged {
                 // Because the carousel itself never gets the focus
                 isCarouselFocused = it.hasFocus
+                if (it.hasFocus) {
+                    onCarouselFocused()
+                }
             }
             .semantics {
                 contentDescription =

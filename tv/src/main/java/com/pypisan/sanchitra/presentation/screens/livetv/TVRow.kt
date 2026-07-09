@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +30,9 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -68,12 +72,39 @@ fun TVRow(
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
     goToTVPlayer:  (id: Int) -> Unit,
-
-//    rowKey: String,
-//    restoreFocusKey: String?,
-//    onFocusRestored: () -> Unit,
+    isActive: Boolean,
+    lastFocusedChannelId: Int?,
+    onChannelFocused: (Int) -> Unit,
 ) {
     val (lazyRow) = remember { FocusRequester.createRefs() }
+
+    val focusRequesters = remember(channels) {
+        channels.associate { it.id to FocusRequester() }
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner, isActive, lastFocusedChannelId, channels) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && isActive) {
+                try {
+                    if (lastFocusedChannelId != null && focusRequesters.containsKey(lastFocusedChannelId)) {
+                        focusRequesters[lastFocusedChannelId]?.requestFocus()
+                    } else {
+                        focusRequesters[channels.firstOrNull()?.id]?.requestFocus()
+                    }
+                } catch (e: Exception) {
+                    // Ignore gracefully
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Column(
         modifier = modifier
@@ -94,22 +125,29 @@ fun TVRow(
             ),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
+                .focusRequester(lazyRow)
                 .focusRestorer()
         ) {
             itemsIndexed(channels, key = { _, channels -> channels.id }) { index, channel ->
-//                val itemKey = "${rowKey}_${channel.id}"
+                val focusRequester = focusRequesters[channel.id] ?: FocusRequester()
+
                 TVRowItem(
                     channel = channel,
                     goToTVPlayer = {
+                        lazyRow.saveFocusedChild()
                         goToTVPlayer(channel.id)
                     },
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .focusRequester(focusRequester)
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                onChannelFocused(channel.id)
+                            }
+                        },
                     index = index,
                     itemDirection = itemDirection,
                     showItemTitle = showItemTitle,
                     showIndexOverImage = showIndexOverImage,
-//                    isReturnFocusTarget = itemKey == restoreFocusKey,
-//                    onFocusRestored = onFocusRestored
                 )
             }
         }
@@ -126,23 +164,8 @@ private fun TVRowItem(
     modifier: Modifier = Modifier,
     itemDirection: ItemDirection = ItemDirection.Horizontal,
     goToTVPlayer:  (id: Int) -> Unit,
-//    isReturnFocusTarget: Boolean,
-//    onFocusRestored: () -> Unit,
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val focusRequester = remember { FocusRequester() }
-
-//    LaunchedEffect(isReturnFocusTarget) {
-//        if (isReturnFocusTarget) {
-//            kotlinx.coroutines.delay(100)
-//            try {
-//                focusRequester.requestFocus()
-//                onFocusRestored()
-//            } catch (e: Exception) {
-//                // Ignore gracefully
-//            }
-//        }
-//    }
 
     ChannelCard(
         onClick = { goToTVPlayer(channel.id) },
@@ -155,7 +178,6 @@ private fun TVRowItem(
         },
         modifier = Modifier
             .width(220.dp)
-            .focusRequester(focusRequester)
             .onFocusChanged { isFocused = it.isFocused }
             .focusProperties {
                 left = if (index == 0) FocusRequester.Cancel else FocusRequester.Default

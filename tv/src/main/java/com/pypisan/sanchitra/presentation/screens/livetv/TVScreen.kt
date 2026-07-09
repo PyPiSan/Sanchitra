@@ -11,10 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -85,21 +86,12 @@ fun TVCatalog(
         onScroll(shouldShowTopBar)
     }
 
+    var focusedSection by rememberSaveable { mutableStateOf("") }
+    var lastFocusedChannelId by rememberSaveable { mutableStateOf<Int?>(null) }
+
     LaunchedEffect(isTopBarVisible) {
         if (isTopBarVisible) {
             lazyListState.animateScrollToItem(0)
-        }
-    }
-
-    // 1. Grab focus back from Jetpack Navigation when screen resumes
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val screenFocusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(lifecycleOwner) {
-        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            kotlinx.coroutines.delay(300)
-//            kotlinx.coroutines.yield()
-            try { screenFocusRequester.requestFocus() } catch (e: Exception) {}
         }
     }
 
@@ -107,7 +99,6 @@ fun TVCatalog(
         state = lazyListState,
         contentPadding = PaddingValues(top = childPadding.top, bottom = 104.dp),
         modifier = modifier
-            .focusRequester(screenFocusRequester)
             .focusGroup()
             .focusRestorer(),
     ) {
@@ -115,7 +106,13 @@ fun TVCatalog(
         item(key = "Carousel") {
             TVScreenChannelList(
                 channelList = carouselList,
-                goToTVPlayer = goToTVPlayer
+                goToTVPlayer = goToTVPlayer,
+                isActive = focusedSection == "Carousel",
+                lastFocusedChannelId = lastFocusedChannelId,
+                onChannelFocused = {
+                    focusedSection = "Carousel"
+                    lastFocusedChannelId = it
+                }
             )
         }
 
@@ -127,7 +124,13 @@ fun TVCatalog(
                 modifier = Modifier.padding(top = childPadding.top),
                 title = entry.key,
                 channels = entry.value,
-                goToTVPlayer = goToTVPlayer
+                goToTVPlayer = goToTVPlayer,
+                isActive = focusedSection == entry.key,
+                lastFocusedChannelId = lastFocusedChannelId,
+                onChannelFocused = {
+                    focusedSection = entry.key
+                    lastFocusedChannelId = it
+                }
             )
         }
     }

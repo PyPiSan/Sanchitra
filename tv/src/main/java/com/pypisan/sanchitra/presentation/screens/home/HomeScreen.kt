@@ -131,6 +131,11 @@ private fun Catalog(
                 channels = featuredHome,
                 padding = childPadding,
                 goToTVPlayer = goToTVPlayer,
+                isActive = focusedSection == "carousel" || focusedSection.isEmpty(),
+                onCarouselFocused = {
+                    focusedSection = "carousel"
+                    focusedRowIndex = 0
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(324.dp)
@@ -145,10 +150,12 @@ private fun Catalog(
                 title = StringConstants.Composable.HomeScreenTrendingTitle,
 
                 isActive = focusedSection == "movies",
+                lastFocusedMovieId = lastFocusedMovieId,
 
-                onMovieFocused = {
+                onMovieFocused = { video ->
                     focusedSection = "movies"
                     focusedRowIndex = 1
+                    lastFocusedMovieId = video.id
                 },
 
                 onMovieSelected = { video ->
@@ -163,10 +170,15 @@ private fun Catalog(
                 movieList = top10Movies,
 
                 isActive = focusedSection == "top10",
+                lastFocusedMovieId = lastFocusedMovieId,
 
-                onMovieFocused = {
+                onSectionFocused = {
                     focusedSection = "top10"
                     focusedRowIndex = 2
+                },
+
+                onMovieFocused = { video ->
+                    lastFocusedMovieId = video.id
                 },
 
                 onMovieClick = { video ->

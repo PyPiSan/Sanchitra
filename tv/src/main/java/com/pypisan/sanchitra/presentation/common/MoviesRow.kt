@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +32,9 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -67,15 +71,39 @@ fun MoviesRow(
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
     isActive: Boolean = false,
-    onMovieFocused: () -> Unit = {},
+    lastFocusedMovieId: Int? = null,
+    onMovieFocused: (video: Videos) -> Unit = {},
     onMovieSelected: (video: Videos) -> Unit = {}
 ) {
+    val listState = rememberLazyListState()
 
-    var focusedItem by rememberSaveable {
-        mutableStateOf<Pair<Int, Int>?>(null)
+    val focusRequesters = remember(videoList) {
+        videoList.associate { it.id to FocusRequester() }
     }
 
-    val listState = rememberLazyListState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner, isActive, lastFocusedMovieId, videoList) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && isActive) {
+                try {
+                    if (lastFocusedMovieId != null && focusRequesters.containsKey(lastFocusedMovieId)) {
+                        focusRequesters[lastFocusedMovieId]?.requestFocus()
+                    } else {
+                        focusRequesters[videoList.firstOrNull()?.id]?.requestFocus()
+                    }
+                } catch (e: Exception) {
+                    // Ignore gracefully
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Column(
         modifier = modifier.focusGroup()
@@ -112,19 +140,21 @@ fun MoviesRow(
                     items = movieState,
                     key = { _, movie -> movie.id }
                 ) { index, movie ->
+                    val focusRequester = focusRequesters[movie.id] ?: FocusRequester()
 
                     MoviesRowItem(
                         modifier = Modifier
+                            .focusRequester(focusRequester)
                             .onFocusChanged {
                                 if (it.isFocused) {
-                                    focusedItem = index to movie.id
-                                    onMovieFocused()
+                                    onMovieFocused(movie)
                                 }
                             },
 
                         index = index,
                         itemDirection = itemDirection,
                         onMovieSelected = onMovieSelected,
+                        onMovieFocused = onMovieFocused,
                         video = movie,
                         showItemTitle = showItemTitle,
                         showIndexOverImage = showIndexOverImage
@@ -150,10 +180,40 @@ fun ImmersiveListMoviesRow(
     ),
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
+    isActive: Boolean = false,
+    lastFocusedMovieId: Int? = null,
     onMovieSelected: (Videos) -> Unit = {},
     onMovieFocused: (Videos) -> Unit = {}
 ) {
-    val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
+    val (lazyRow) = remember { FocusRequester.createRefs() }
+
+    val focusRequesters = remember(movieList) {
+        movieList.associate { it.id to FocusRequester() }
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner, isActive, lastFocusedMovieId, movieList) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && isActive) {
+                try {
+                    if (lastFocusedMovieId != null && focusRequesters.containsKey(lastFocusedMovieId)) {
+                        focusRequesters[lastFocusedMovieId]?.requestFocus()
+                    } else {
+                        focusRequesters[movieList.firstOrNull()?.id]?.requestFocus()
+                    }
+                } catch (e: Exception) {
+                    // Ignore gracefully
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Column(
         modifier = modifier.focusGroup()
@@ -177,9 +237,7 @@ fun ImmersiveListMoviesRow(
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 modifier = Modifier
                     .focusRequester(lazyRow)
-                    .focusRestorer {
-                        firstItem
-                    }
+                    .focusRestorer()
             ) {
                 itemsIndexed(
                     movieState,
@@ -187,13 +245,17 @@ fun ImmersiveListMoviesRow(
                         movie.id
                     }
                 ) { index, movie ->
-                    val itemModifier = if (index == 0) {
-                        Modifier.focusRequester(firstItem)
-                    } else {
-                        Modifier
-                    }
+                    val focusRequester = focusRequesters[movie.id] ?: FocusRequester()
+
                     MoviesRowItem(
-                        modifier = itemModifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester)
+                            .onFocusChanged {
+                                if (it.isFocused) {
+                                    onMovieFocused(movie)
+                                }
+                            },
                         index = index,
                         itemDirection = itemDirection,
                         onMovieSelected = {

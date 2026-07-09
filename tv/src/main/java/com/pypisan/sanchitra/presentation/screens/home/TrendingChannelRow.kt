@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +28,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -69,10 +74,38 @@ fun TrendingChannelRow(
     goToTVPlayer: (id: Int) -> Unit,
     onChannelFocused: (Int) -> Unit,
     isActive: Boolean = false,
-    lastFocusedChannelId: Int?,
+    lastFocusedChannelId: Int? = null,
 ) {
-
     val (lazyRow) = remember { FocusRequester.createRefs() }
+
+    val focusRequesters = remember(channels) {
+        channels.associate { it.id to FocusRequester() }
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner, isActive, lastFocusedChannelId, channels) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && isActive) {
+                try {
+                    if (lastFocusedChannelId != null && focusRequesters.containsKey(lastFocusedChannelId)) {
+                        focusRequesters[lastFocusedChannelId]?.requestFocus()
+                    } else {
+                        focusRequesters[channels.firstOrNull()?.id]?.requestFocus()
+                    }
+                } catch (e: Exception) {
+                    // Ignore gracefully
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     Column(
         modifier = modifier
             .focusGroup()
@@ -94,10 +127,11 @@ fun TrendingChannelRow(
             ),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
-                .focusGroup()
                 .focusRequester(lazyRow)
+                .focusRestorer()
         ) {
             itemsIndexed(channels, key = { _, channels -> channels.id }) { index, channel ->
+                val focusRequester = focusRequesters[channel.id] ?: FocusRequester()
 
                 TrendingChannelRowItem(
                     channel = channel,
@@ -105,9 +139,10 @@ fun TrendingChannelRow(
                         onChannelFocused(channel.id)
                     },
                     goToTVPlayer = {
+                        lazyRow.saveFocusedChild()
                         goToTVPlayer(channel.id)
                     },
-                    modifier = Modifier,
+                    modifier = Modifier.focusRequester(focusRequester),
                     index = index,
                     itemDirection = itemDirection,
                     showItemTitle = showItemTitle,
@@ -150,13 +185,6 @@ private fun TrendingChannelRowItem(
                     onChannelFocused(channel.id)
                 }
             }
-//            .focusProperties {
-//                left = if (index == 0) {
-//                    FocusRequester.Cancel
-//                } else {
-//                    FocusRequester.Default
-//                }
-//            }
             .then(modifier)
     ) {
         ChannelRowItemImage(
