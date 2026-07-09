@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -86,6 +87,7 @@ private fun CategoryDetails(
     val gridState = rememberLazyGridState()
 
     var lastFocusedIndex by rememberSaveable(categoryName) { mutableIntStateOf(0) }
+    val latestFocusedIndex by rememberUpdatedState(lastFocusedIndex)
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -93,11 +95,11 @@ private fun CategoryDetails(
         List(categoryChannels.size) { FocusRequester() }
     }
 
-    DisposableEffect(lifecycleOwner, categoryChannels) {
+    DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 try {
-                    focusRequesters.getOrNull(lastFocusedIndex)?.requestFocus()
+                    focusRequesters.getOrNull(latestFocusedIndex)?.requestFocus()
                 } catch (e: Exception) { }
             }
         }
