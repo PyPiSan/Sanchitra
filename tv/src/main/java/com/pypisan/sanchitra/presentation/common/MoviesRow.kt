@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -81,16 +82,20 @@ fun MoviesRow(
         videoList.associate { it.id to FocusRequester() }
     }
 
+    val latestIsActive by rememberUpdatedState(isActive)
+    val latestMovieId by rememberUpdatedState(lastFocusedMovieId)
+    val latestVideoList by rememberUpdatedState(videoList)
+
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    DisposableEffect(lifecycleOwner, isActive, lastFocusedMovieId, videoList) {
+    DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME && isActive) {
+            if (event == Lifecycle.Event.ON_RESUME && latestIsActive) {
                 try {
-                    if (lastFocusedMovieId != null && focusRequesters.containsKey(lastFocusedMovieId)) {
-                        focusRequesters[lastFocusedMovieId]?.requestFocus()
+                    if (latestMovieId != null && focusRequesters.containsKey(latestMovieId)) {
+                        focusRequesters[latestMovieId]?.requestFocus()
                     } else {
-                        focusRequesters[videoList.firstOrNull()?.id]?.requestFocus()
+                        focusRequesters[latestVideoList.firstOrNull()?.id]?.requestFocus()
                     }
                 } catch (e: Exception) {
                     // Ignore gracefully
@@ -191,16 +196,20 @@ fun ImmersiveListMoviesRow(
         movieList.associate { it.id to FocusRequester() }
     }
 
+    val latestIsActive by rememberUpdatedState(isActive)
+    val latestMovieId by rememberUpdatedState(lastFocusedMovieId)
+    val latestMovieList by rememberUpdatedState(movieList)
+
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    DisposableEffect(lifecycleOwner, isActive, lastFocusedMovieId, movieList) {
+    DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME && isActive) {
+            if (event == Lifecycle.Event.ON_RESUME && latestIsActive) {
                 try {
-                    if (lastFocusedMovieId != null && focusRequesters.containsKey(lastFocusedMovieId)) {
-                        focusRequesters[lastFocusedMovieId]?.requestFocus()
+                    if (latestMovieId != null && focusRequesters.containsKey(latestMovieId)) {
+                        focusRequesters[latestMovieId]?.requestFocus()
                     } else {
-                        focusRequesters[movieList.firstOrNull()?.id]?.requestFocus()
+                        focusRequesters[latestMovieList.firstOrNull()?.id]?.requestFocus()
                     }
                 } catch (e: Exception) {
                     // Ignore gracefully

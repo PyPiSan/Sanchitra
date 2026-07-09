@@ -93,6 +93,10 @@ private fun Catalog(
         mutableStateOf<Int?>(null)
     }
 
+    var lastFocusedTop10MovieId by rememberSaveable {
+        mutableStateOf<Int?>(null)
+    }
+
     var lastFocusedChannelId by rememberSaveable {
         mutableStateOf<Int?>(null)
     }
@@ -170,7 +174,7 @@ private fun Catalog(
                 movieList = top10Movies,
 
                 isActive = focusedSection == "top10",
-                lastFocusedMovieId = lastFocusedMovieId,
+                lastFocusedMovieId = lastFocusedTop10MovieId,
 
                 onSectionFocused = {
                     focusedSection = "top10"
@@ -178,7 +182,7 @@ private fun Catalog(
                 },
 
                 onMovieFocused = { video ->
-                    lastFocusedMovieId = video.id
+                    lastFocusedTop10MovieId = video.id
                 },
 
                 onMovieClick = { video ->

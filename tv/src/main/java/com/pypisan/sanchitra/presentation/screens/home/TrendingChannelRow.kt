@@ -18,6 +18,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -82,16 +83,20 @@ fun TrendingChannelRow(
         channels.associate { it.id to FocusRequester() }
     }
 
+    val latestIsActive by rememberUpdatedState(isActive)
+    val latestChannelId by rememberUpdatedState(lastFocusedChannelId)
+    val latestChannels by rememberUpdatedState(channels)
+
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    DisposableEffect(lifecycleOwner, isActive, lastFocusedChannelId, channels) {
+    DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME && isActive) {
+            if (event == Lifecycle.Event.ON_RESUME && latestIsActive) {
                 try {
-                    if (lastFocusedChannelId != null && focusRequesters.containsKey(lastFocusedChannelId)) {
-                        focusRequesters[lastFocusedChannelId]?.requestFocus()
+                    if (latestChannelId != null && focusRequesters.containsKey(latestChannelId)) {
+                        focusRequesters[latestChannelId]?.requestFocus()
                     } else {
-                        focusRequesters[channels.firstOrNull()?.id]?.requestFocus()
+                        focusRequesters[latestChannels.firstOrNull()?.id]?.requestFocus()
                     }
                 } catch (e: Exception) {
                     // Ignore gracefully
