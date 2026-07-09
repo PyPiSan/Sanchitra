@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -27,6 +28,9 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -83,12 +87,24 @@ private fun CategoryDetails(
 
     var lastFocusedIndex by rememberSaveable(categoryName) { mutableIntStateOf(0) }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     val focusRequesters = remember(categoryChannels) {
         List(categoryChannels.size) { FocusRequester() }
     }
 
-    LaunchedEffect(categoryChannels) {
-        focusRequesters.getOrNull(lastFocusedIndex)?.requestFocus()
+    DisposableEffect(lifecycleOwner, categoryChannels) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                try {
+                    focusRequesters.getOrNull(lastFocusedIndex)?.requestFocus()
+                } catch (e: Exception) { }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     LaunchedEffect(categoryChannels) {
