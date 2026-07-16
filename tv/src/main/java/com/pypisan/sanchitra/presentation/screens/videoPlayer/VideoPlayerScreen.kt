@@ -209,7 +209,7 @@ fun rememberPlayer(
     renderersFactory: DefaultRenderersFactory
 ): ExoPlayer {
     return remember(metaId) {
-        if (drm) {
+        if (!drm) {
             buildDefaultExoPlayer(
                 context,
                 streamUrl,
