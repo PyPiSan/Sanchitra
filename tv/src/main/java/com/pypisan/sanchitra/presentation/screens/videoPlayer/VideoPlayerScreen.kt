@@ -65,9 +65,14 @@ fun VideoPlayerScreen(
                 metaId = s.videoDetail?.id.toString(),
                 title = s.videoDetail?.title,
                 streamUrl = s.videoDetail?.url,
+                drm = s.videoDetail?.drm,
+                licenseKey = s.videoDetail?.licenseKey,
+                licenseUrl = s.videoDetail?.licenseUrl,
                 subTitleUrl = s.videoDetail?.meta?.subtitleUrl,
-                onBackPressed = onBackPressed
-            )
+                onBackPressed = onBackPressed,
+                onVideoStarted = {
+                    videoPlayerScreenViewModel.updateViewCount(s.videoDetail?.id)
+                })
         }
     }
 }
@@ -77,11 +82,15 @@ fun VideoPlayerScreen(
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerBuild(
-    metaId: String?= "",
+    metaId: String? = "",
     title: String?,
     streamUrl: String? = "",
+    drm: Boolean? = false,
+    licenseKey: String? = "",
+    licenseUrl: String? = "",
     subTitleUrl: String? = "",
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    onVideoStarted: () -> Unit
 ) {
     val context = LocalContext.current
     var isError by remember { mutableStateOf(false) }
@@ -101,15 +110,19 @@ fun VideoPlayerBuild(
         mutableStateOf<List<VideoQuality>>(emptyList())
     }
 
-    val renderersFactory = DefaultRenderersFactory(context)
-        .setEnableDecoderFallback(true)
+
+    val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
         .forceEnableMediaCodecAsynchronousQueueing()
         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
 
     val exoPlayer = rememberPlayer(
-        metaId?:"",
+        metaId ?: "",
+        title ?: "",
         context,
-        streamUrl?:"",
+        streamUrl ?: "",
+        drm ?: false,
+        licenseKey,
+        licenseUrl,
         onError = { exception ->
             errorMessage = exception.message ?: "Playback Error"
             isError = true
@@ -138,8 +151,27 @@ fun VideoPlayerBuild(
         },
         renderersFactory = renderersFactory
     )
+
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            var hasCountedView = false // Ensures we only hit the API once per video
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying && !hasCountedView) {
+                    hasCountedView = true
+                    onVideoStarted()
+                }
+            }
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+        }
+    }
+
+
     PlayerScreenContent(
-        title = title?:"",
+        title = title ?: "",
         "",
         "",
         epgResponse = null,
@@ -156,16 +188,19 @@ fun VideoPlayerBuild(
         },
         onSubtitlesChanged = {
             subtitles = it
-        }
-    )
+        })
 }
 
 @OptIn(UnstableApi::class)
 @Composable
 fun rememberPlayer(
     metaId: String,
+    title: String,
     context: Context,
     streamUrl: String,
+    drm: Boolean,
+    licenseKey: String? = "",
+    licenseUrl: String? = "",
     onError: (PlaybackException) -> Unit,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
@@ -174,6 +209,7 @@ fun rememberPlayer(
     renderersFactory: DefaultRenderersFactory
 ): ExoPlayer {
     return remember(metaId) {
+        if (drm) {
             buildDefaultExoPlayer(
                 context,
                 streamUrl,
@@ -184,5 +220,19 @@ fun rememberPlayer(
                 onQualitiesChanged,
                 renderersFactory
             )
+        } else {
+            buildDrmExoPlayer(
+                context,
+                title,
+                streamUrl,
+                licenseKey,
+                licenseUrl,
+                onError,
+                onBuffering,
+                onSubtitlesChanged,
+                onAudiosChanged,
+                onQualitiesChanged,
+            )
+        }
     }
 }

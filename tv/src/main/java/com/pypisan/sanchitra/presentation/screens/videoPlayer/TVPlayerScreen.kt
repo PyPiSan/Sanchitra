@@ -227,12 +227,15 @@ fun rememberExoPlayer(
         } else {
             buildDrmExoPlayer(
                 context,
-                channel,
+                channel.name,
+                channel.streamUrl,
+                channel.licenseKey,
+                channel.licenseUrl,
                 onError,
                 onBuffering,
                 onSubtitlesChanged,
                 onAudiosChanged,
-                onQualitiesChanged
+                onQualitiesChanged,
             )
         }
     }

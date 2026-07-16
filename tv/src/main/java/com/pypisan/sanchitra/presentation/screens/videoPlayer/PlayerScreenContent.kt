@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -19,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.media3.common.C
-import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.text.CueGroup
@@ -44,9 +44,9 @@ import com.pypisan.sanchitra.data.models.EPGResponse
 import com.pypisan.sanchitra.data.util.prepareEPGProgramData
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.AudioTrackDrawer
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.NowAiringDialog
+import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SeekController
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleTextOverlay
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoQualityDrawer
-import java.time.LocalDateTime
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -69,10 +69,14 @@ fun PlayerScreenContent(
     onClearError: () -> Unit
 ) {
     val videoPlayerState = rememberVideoPlayerState()
-
     val pulseState = rememberVideoPlayerPulseState()
+    val scope = rememberCoroutineScope()
 
     val focusRequester = remember { FocusRequester() }
+
+    val seekController = remember(exoPlayer) {
+        SeekController(exoPlayer, scope)
+    }
 
     var showQualityDrawer by rememberSaveable {
         mutableStateOf(false)
@@ -121,19 +125,17 @@ fun PlayerScreenContent(
     }
 
 
-    LaunchedEffect(exoPlayer.isPlaying) {
-        if (exoPlayer.isPlaying) {
-            videoPlayerState.showControls(true)
-        } else {
-            videoPlayerState.showControls(false)
-        }
-    }
+//    LaunchedEffect(exoPlayer.isPlaying) {
+//        if (exoPlayer.isPlaying) {
+//            videoPlayerState.showControls(true)
+//        } else {
+//            videoPlayerState.showControls(false)
+//        }
+//    }
 
     RememberPlaybackWatchdog(
         exoPlayer = exoPlayer, onFreeze = {
-
             val mediaItem = exoPlayer.currentMediaItem
-
             if (mediaItem != null) {
                 exoPlayer.stop()
                 exoPlayer.clearMediaItems()
@@ -151,7 +153,7 @@ fun PlayerScreenContent(
     Box(
         Modifier
             .dPadEvents(
-                exoPlayer, videoPlayerState, pulseState
+                exoPlayer, videoPlayerState, pulseState, seekController
             )
             .focusable()
     ) {
@@ -211,10 +213,7 @@ fun PlayerScreenContent(
                     })
             })
 
-        SubtitleDrawer(
-            visible = showSubtitleDrawer,
-            subtitles = subtitles,
-            onDismiss = {
+        SubtitleDrawer(visible = showSubtitleDrawer, subtitles = subtitles, onDismiss = {
             showSubtitleDrawer = false
             exoPlayer.play()
         }, onSubtitleSelected = { selected ->
@@ -243,10 +242,7 @@ fun PlayerScreenContent(
             exoPlayer.prepare()
         })
 
-        AudioTrackDrawer(
-            visible = showAudioQualityDrawer,
-            audioTracks = audios,
-            onDismiss = {
+        AudioTrackDrawer(visible = showAudioQualityDrawer, audioTracks = audios, onDismiss = {
             showAudioQualityDrawer = false
             exoPlayer.play()
         }, onTrackSelected = { selected ->
@@ -271,9 +267,7 @@ fun PlayerScreenContent(
         })
 
         VideoQualityDrawer(
-            visible = showQualityDrawer,
-            qualities = qualities,
-            onDismiss = {
+            visible = showQualityDrawer, qualities = qualities, onDismiss = {
                 showQualityDrawer = false
                 exoPlayer.play()
             },
@@ -309,29 +303,43 @@ fun PlayerScreenContent(
         if (showNowAiring && epgPrograms.isNotEmpty()) {
             NowAiringDialog(
                 visible = showNowAiring,
-                programs = epgPrograms, // Pass the single sorted list
-                initialIndex = initialAiringIndex, // Pass the calculated current index
+                programs = epgPrograms,
+                initialIndex = initialAiringIndex,
                 onDismiss = {
                     showNowAiring = false
                     exoPlayer.play()
-                }
-            )
+                })
         }
     }
 }
 
 private fun Modifier.dPadEvents(
-    exoPlayer: ExoPlayer, videoPlayerState: VideoPlayerState, pulseState: VideoPlayerPulseState
+    exoPlayer: ExoPlayer,
+    videoPlayerState: VideoPlayerState,
+    pulseState: VideoPlayerPulseState,
+    seekController: SeekController
 ): Modifier = this.handleDPadKeyEvents(
+//    onLeft = {
+//        if (!videoPlayerState.isControlsVisible) {
+//            exoPlayer.seekBack()
+//            pulseState.setType(VideoPlayerPulse.Type.BACK)
+//        }
+//    },
     onLeft = {
-    if (!videoPlayerState.isControlsVisible) {
-        exoPlayer.seekBack()
-        pulseState.setType(VideoPlayerPulse.Type.BACK)
-    }
-},
+        if (!videoPlayerState.isControlsVisible) {
+            seekController.back()
+            pulseState.setType(VideoPlayerPulse.Type.BACK)
+        }
+    },
+//    onRight = {
+//        if (!videoPlayerState.isControlsVisible) {
+//            exoPlayer.seekForward()
+//            pulseState.setType(VideoPlayerPulse.Type.FORWARD)
+//        }
+//    },
     onRight = {
         if (!videoPlayerState.isControlsVisible) {
-            exoPlayer.seekForward()
+            seekController.forward()
             pulseState.setType(VideoPlayerPulse.Type.FORWARD)
         }
     },

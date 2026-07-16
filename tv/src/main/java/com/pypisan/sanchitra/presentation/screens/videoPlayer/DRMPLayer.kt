@@ -34,7 +34,10 @@ import okhttp3.RequestBody.Companion.toRequestBody
 @androidx.annotation.OptIn(UnstableApi::class)
 fun buildDrmExoPlayer(
     context: Context,
-    channel: Channel,
+    name: String,
+    streamUrl: String,
+    licenseKey: String? = "",
+    licenseUrl: String? = "",
     onError: (PlaybackException) -> Unit,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
@@ -45,9 +48,9 @@ fun buildDrmExoPlayer(
     val isInternal = true
 
     val mediaItem = MediaItem.Builder()
-        .setUri(channel.streamUrl)
+        .setUri(streamUrl)
         .setMimeType(MimeTypes.APPLICATION_MPD)
-        .setMediaMetadata(MediaMetadata.Builder().setTitle(channel.name).build())
+        .setMediaMetadata(MediaMetadata.Builder().setTitle(name).build())
         .build()
 
     val trackSelector = DefaultTrackSelector(context)
@@ -62,9 +65,9 @@ fun buildDrmExoPlayer(
     val drmSessionManager = when {
 
         // ===== CLEARKEY SUPPORT =====
-        !channel.licenseKey.isNullOrEmpty() -> {
+        !licenseKey.isNullOrEmpty() -> {
 
-            val (keyHex, kidHex) = channel.getDrmKeys()!!
+            val (keyHex, kidHex) = getDrmKeys(licenseKey)!!
             val drmKeyBytes = kidHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
             val encodedDrmKey = Base64.encodeToString(drmKeyBytes, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
             val drmKeyIdBytes = keyHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
@@ -92,10 +95,10 @@ fun buildDrmExoPlayer(
         }
 
         // ===== STANDARD WIDEVINE LICENSE URL SUPPORT =====
-        !channel.licenseUrl.isNullOrEmpty() && !isInternal -> {
+        !licenseUrl.isNullOrEmpty() && !isInternal -> {
 
             val httpDataSourceFactory = DefaultHttpDataSource.Factory()
-            val drmCallback = HttpMediaDrmCallback(channel.licenseUrl, httpDataSourceFactory)
+            val drmCallback = HttpMediaDrmCallback(licenseUrl, httpDataSourceFactory)
 
             val customDrmProvider = ExoMediaDrm.Provider { uuid ->
                 val drm = FrameworkMediaDrm.newInstance(uuid)
@@ -113,7 +116,7 @@ fun buildDrmExoPlayer(
         }
 
         // ===== SPECIFIC INTERNAL DRM SCENARIO (JioTV Custom Headers & Cookies) =====
-        !channel.licenseUrl.isNullOrEmpty() && isInternal -> {
+        !licenseUrl.isNullOrEmpty() && isInternal -> {
 
             // Set up DataSource with custom Cookie for fetching DASH segments and Manifests
             val httpDataSourceFactory = DefaultHttpDataSource.Factory()
@@ -130,7 +133,7 @@ fun buildDrmExoPlayer(
 
                 override fun executeKeyRequest(uuid: java.util.UUID, request: ExoMediaDrm.KeyRequest): ByteArray {
                     return CustomDRMSessionManager.fetchDrmLicense(
-                        licenseUrl = channel.licenseUrl ?: request.licenseServerUrl,
+                        licenseUrl = licenseUrl ,
                         challenge = request.data, // Payload ExoPlayer generated
                         authToken =  "",
                         subscriberId = "",
@@ -217,8 +220,8 @@ fun buildDrmExoPlayer(
 }
 
 
-fun Channel.getDrmKeys(): Pair<String, String>? {
-    if (!isDrm || licenseKey.isNullOrEmpty()) return null
+fun getDrmKeys(licenseKey: String): Pair<String, String>? {
+//    if (!isDrm || licenseKey.isNullOrEmpty()) return null
     val parts = licenseKey.split(":")
     if (parts.size != 2) return null
     return parts[0] to parts[1]

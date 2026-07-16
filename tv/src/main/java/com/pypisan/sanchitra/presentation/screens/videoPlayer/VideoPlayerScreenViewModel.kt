@@ -8,6 +8,7 @@ import com.pypisan.sanchitra.data.entities.Videos
 import kotlinx.coroutines.flow.map
 import com.pypisan.sanchitra.data.repositories.VideoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 import kotlinx.coroutines.flow.catch
@@ -16,16 +17,16 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class VideoPlayerScreenViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    repository: VideoRepository,
+    private val repository: VideoRepository,
 ) : ViewModel() {
     @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState = savedStateHandle
-        .getStateFlow<String?>(VideoPlayerScreen.metaID, null)
-        .flatMapLatest { id ->
+    val uiState =
+        savedStateHandle.getStateFlow<String?>(VideoPlayerScreen.metaID, null).flatMapLatest { id ->
 
             val movieId = id?.toIntOrNull()
 
@@ -35,21 +36,28 @@ class VideoPlayerScreenViewModel @Inject constructor(
 
             } else {
 
-                repository.getVideoDetails(movieId)
-                    .filterNotNull()
+                repository.getVideoDetails(movieId).filterNotNull()
                     .map<Videos, VideoPlayerScreenUiState> { details ->
                         VideoPlayerScreenUiState.Done(details)
-                    }
-                    .catch {
+                    }.catch {
                         emit(VideoPlayerScreenUiState.Error)
                     }
             }
-        }
-        .stateIn(
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = VideoPlayerScreenUiState.Loading
         )
+
+    fun updateViewCount(movieId: Int?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                repository.updateMovieViewCount(movieId ?: 0)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 }
 
 @Immutable

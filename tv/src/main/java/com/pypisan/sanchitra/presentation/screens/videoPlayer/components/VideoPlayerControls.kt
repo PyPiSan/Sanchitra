@@ -90,20 +90,6 @@ fun VideoPlayerControls(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-//                if (!isLive) {
-//                    PreviousButton(
-//                        player = player,
-//                        onShowControls = onShowControls
-//                    )
-//                    NextButton(
-//                        player = player,
-//                        onShowControls = onShowControls
-//                    )
-//                    RepeatButton(
-//                        player = player,
-//                        onShowControls = onShowControls,
-//                    )
-//                }
                 if (currentEpisode.isNotEmpty()) {
                     VideoPlayerControlsIcon(
                         icon = Icons.Default.Info,
