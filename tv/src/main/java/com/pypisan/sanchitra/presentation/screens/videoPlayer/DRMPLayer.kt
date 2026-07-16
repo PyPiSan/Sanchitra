@@ -2,7 +2,6 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 import android.content.Context
 import android.util.Base64
-import android.util.Log
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -52,7 +51,6 @@ fun buildDrmExoPlayer(
         .setMimeType(MimeTypes.APPLICATION_MPD)
         .setMediaMetadata(MediaMetadata.Builder().setTitle(name).build())
         .build()
-
     val trackSelector = DefaultTrackSelector(context)
     val loadControl = DefaultLoadControl.Builder()
         .setBufferDurationsMs(30000, 60000, 3000, 2000)
