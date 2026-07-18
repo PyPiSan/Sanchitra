@@ -1,5 +1,5 @@
 package com.pypisan.sanchitra.presentation.theme
-import Typography
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.colorResource
 import androidx.tv.material3.MaterialTheme

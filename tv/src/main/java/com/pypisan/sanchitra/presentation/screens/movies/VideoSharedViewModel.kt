@@ -17,4 +17,8 @@ class VideoSharedViewModel @Inject constructor() : ViewModel() {
     fun setVideo(video: Videos) {
         _selectedVideo.value = video
     }
+
+    fun clearVideo() {
+        _selectedVideo.value = null
+    }
 }

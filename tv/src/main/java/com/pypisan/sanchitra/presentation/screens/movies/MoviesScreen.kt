@@ -11,11 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -65,20 +67,13 @@ private fun Catalog(
 ) {
 
     val childPadding = rememberChildPadding()
-
     val lazyListState = rememberLazyListState()
-
-    var lastFocusedMovieId by rememberSaveable {
-        mutableStateOf<Int?>(null)
-    }
-
-    var focusedSection by rememberSaveable {
-        mutableStateOf(0)
-    }
-
     var focusedRowIndex by rememberSaveable {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
+
+    var focusedSection by rememberSaveable { mutableStateOf("") }
+    var lastFocusedMovieId by rememberSaveable { mutableStateOf<Int?>(null) }
 
     val sharedVideoVM: VideoSharedViewModel =
         hiltViewModel(LocalContext.current as ComponentActivity)
@@ -105,7 +100,7 @@ private fun Catalog(
     }
 
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.focusRestorer(),
         state = lazyListState,
         contentPadding = PaddingValues(
             top = childPadding.top,
@@ -113,38 +108,30 @@ private fun Catalog(
         )
     ) {
 
-        item {
-
+        item(key = "carousel") {
             MoviesScreenMovieList(
                 videoList = carouselMovieList,
                 onMovieClick = { video ->
                     sharedVideoVM.setVideo(video)
                     onMovieClick(video)
                 },
-                lastFocusedMovieId = lastFocusedMovieId,
-                isActive = focusedSection == 0,
                 onMovieFocused = {
-                    focusedSection = 0
+                    focusedSection = "Carousel"
                     focusedRowIndex = 0
-                    lastFocusedMovieId = it
                 }
             )
         }
 
-        item {
-
+        item(key = "popular_films") {
             MoviesRow(
                 modifier = Modifier.padding(top = childPadding.top),
                 title = StringConstants.Composable.PopularFilmsTitle,
                 videoList = popularFilms,
-                isActive = focusedSection == 1,
-                onMovieFocused = {
-                    focusedSection = 1
+                onMovieFocused = { video ->
                     focusedRowIndex = 1
                 },
                 onMovieSelected = { video ->
                     focusedRowIndex = 1
-
                     sharedVideoVM.setVideo(video)
                     onMovieClick(video)
                 }

@@ -153,9 +153,6 @@ private fun Catalog(
                 videoList = trendingMovies,
                 title = StringConstants.Composable.HomeScreenTrendingTitle,
 
-                isActive = focusedSection == "movies",
-                lastFocusedMovieId = lastFocusedMovieId,
-
                 onMovieFocused = { video ->
                     focusedSection = "movies"
                     focusedRowIndex = 1

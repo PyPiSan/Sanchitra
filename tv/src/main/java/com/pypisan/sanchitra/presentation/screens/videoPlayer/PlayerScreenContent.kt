@@ -18,6 +18,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.media3.common.C
 import androidx.media3.common.Player
@@ -73,9 +75,23 @@ fun PlayerScreenContent(
     val scope = rememberCoroutineScope()
 
     val focusRequester = remember { FocusRequester() }
+    val fallbackFocusRequester = remember { FocusRequester() }
 
     val seekController = remember(exoPlayer) {
         SeekController(exoPlayer, scope)
+    }
+
+    // Watch the visibility state of the controls!
+    LaunchedEffect(videoPlayerState.isControlsVisible) {
+        if (videoPlayerState.isControlsVisible) {
+            // 1. Controls are VISIBLE: Wait a tiny bit and focus the Play Button
+            kotlinx.coroutines.delay(50)
+            try { focusRequester.requestFocus() } catch (e: Exception) {}
+        } else {
+            // 2. Controls are HIDDEN: Safely park the focus on the invisible video background
+            // so it doesn't escape to the catalog!
+            try { fallbackFocusRequester.requestFocus() } catch (e: Exception) {}
+        }
     }
 
     var showQualityDrawer by rememberSaveable {
@@ -125,13 +141,13 @@ fun PlayerScreenContent(
     }
 
 
-//    LaunchedEffect(exoPlayer.isPlaying) {
-//        if (exoPlayer.isPlaying) {
-//            videoPlayerState.showControls(true)
-//        } else {
-//            videoPlayerState.showControls(false)
-//        }
-//    }
+    LaunchedEffect(exoPlayer.isPlaying) {
+        if (exoPlayer.isPlaying) {
+            videoPlayerState.showControls(true)
+        } else {
+            videoPlayerState.showControls(false)
+        }
+    }
 
     RememberPlaybackWatchdog(
         exoPlayer = exoPlayer, onFreeze = {
@@ -155,6 +171,11 @@ fun PlayerScreenContent(
             .dPadEvents(
                 exoPlayer, videoPlayerState, pulseState, seekController
             )
+            // 1. Attach the fallback requester
+            .focusRequester(fallbackFocusRequester)
+            // 2. Lock the D-Pad so pressing arrows while controls are hidden doesn't jump to the catalog
+            .focusProperties { onExit = { FocusRequester.Cancel } }
+            // 3. Make this box focusable so it can safely catch the parked focus!
             .focusable()
     ) {
         PlayerSurface(
