@@ -15,11 +15,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -31,6 +31,9 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -50,7 +53,6 @@ enum class ItemDirection(val aspectRatio: Float) {
     Vertical(10.5f / 16f),
     Horizontal(16f / 9f);
 }
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MoviesRow(
@@ -66,15 +68,9 @@ fun MoviesRow(
     ),
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
-    isActive: Boolean = false,
-    onMovieFocused: () -> Unit = {},
+    onMovieFocused: (video: Videos) -> Unit = {},
     onMovieSelected: (video: Videos) -> Unit = {}
 ) {
-
-    var focusedItem by rememberSaveable {
-        mutableStateOf<Pair<Int, Int>?>(null)
-    }
-
     val listState = rememberLazyListState()
 
     Column(
@@ -113,18 +109,24 @@ fun MoviesRow(
                     key = { _, movie -> movie.id }
                 ) { index, movie ->
 
+                    val onCardClicked = remember(movie.id) {
+                        { onMovieSelected(movie) }
+                    }
+
                     MoviesRowItem(
                         modifier = Modifier
                             .onFocusChanged {
                                 if (it.isFocused) {
-                                    focusedItem = index to movie.id
-                                    onMovieFocused()
+                                    onMovieFocused(movie)
                                 }
+                            }
+                            .focusProperties {
+                                left = if (index == 0) FocusRequester.Cancel else FocusRequester.Default
                             },
-
                         index = index,
                         itemDirection = itemDirection,
-                        onMovieSelected = onMovieSelected,
+                        onMovieSelected = { onCardClicked() },
+                        onMovieFocused = onMovieFocused,
                         video = movie,
                         showItemTitle = showItemTitle,
                         showIndexOverImage = showIndexOverImage
@@ -150,10 +152,44 @@ fun ImmersiveListMoviesRow(
     ),
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
+    isActive: Boolean = false,
+    lastFocusedMovieId: Int? = null,
     onMovieSelected: (Videos) -> Unit = {},
     onMovieFocused: (Videos) -> Unit = {}
 ) {
-    val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
+    val (lazyRow) = remember { FocusRequester.createRefs() }
+
+    val focusRequesters = remember(movieList) {
+        movieList.associate { it.id to FocusRequester() }
+    }
+
+    val latestIsActive by rememberUpdatedState(isActive)
+    val latestMovieId by rememberUpdatedState(lastFocusedMovieId)
+    val latestMovieList by rememberUpdatedState(movieList)
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && latestIsActive) {
+                try {
+                    if (latestMovieId != null && focusRequesters.containsKey(latestMovieId)) {
+                        focusRequesters[latestMovieId]?.requestFocus()
+                    } else {
+                        focusRequesters[latestMovieList.firstOrNull()?.id]?.requestFocus()
+                    }
+                } catch (e: Exception) {
+                    // Ignore gracefully
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Column(
         modifier = modifier.focusGroup()
@@ -177,9 +213,7 @@ fun ImmersiveListMoviesRow(
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 modifier = Modifier
                     .focusRequester(lazyRow)
-                    .focusRestorer {
-                        firstItem
-                    }
+                    .focusRestorer()
             ) {
                 itemsIndexed(
                     movieState,
@@ -187,13 +221,17 @@ fun ImmersiveListMoviesRow(
                         movie.id
                     }
                 ) { index, movie ->
-                    val itemModifier = if (index == 0) {
-                        Modifier.focusRequester(firstItem)
-                    } else {
-                        Modifier
-                    }
+                    val focusRequester = focusRequesters[movie.id] ?: FocusRequester()
+
                     MoviesRowItem(
-                        modifier = itemModifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester)
+                            .onFocusChanged {
+                                if (it.isFocused) {
+                                    onMovieFocused(movie)
+                                }
+                            },
                         index = index,
                         itemDirection = itemDirection,
                         onMovieSelected = {

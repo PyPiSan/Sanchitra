@@ -2,10 +2,8 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Immutable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pypisan.sanchitra.data.models.Channel
@@ -15,63 +13,58 @@ import com.pypisan.sanchitra.data.repositories.TVRepository
 import com.pypisan.sanchitra.data.repositories.TVRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class TVPlayerScreenViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     private val repository: TVRepository,
     private val epgManager: EPGManager
 ) : ViewModel() {
 
-    private val channelIdFlow = savedStateHandle
-        .getStateFlow<String?>(
-            TVPlayerScreen.TVIdBundleKey,
-            null
-        )
-        .filterNotNull()
+    private val _uiState = MutableStateFlow<TVPlayerScreenUiState>(TVPlayerScreenUiState.Loading)
+    val uiState = _uiState.asStateFlow()
 
-    val uiState = channelIdFlow
-        .map { id ->
+    private val _epgState = MutableStateFlow(EPGResponse(emptyList()))
+    val epgState = _epgState.asStateFlow()
 
+    private var epgJob: Job? = null
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun loadChannel(id: String) {
+        // 1. INSTANTLY wipe the screen and show Loading
+        _uiState.value = TVPlayerScreenUiState.Loading
+
+        viewModelScope.launch {
             when (val result = repository.getChannelData(id, "")) {
-
                 is TVRepositoryImpl.ApiResult.Success -> {
-                    TVPlayerScreenUiState.Done(result.data)
+                    _uiState.value = TVPlayerScreenUiState.Done(result.data)
                 }
-
                 is TVRepositoryImpl.ApiResult.Error -> {
-                    TVPlayerScreenUiState.Error
+                    _uiState.value = TVPlayerScreenUiState.Error
                 }
             }
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = TVPlayerScreenUiState.Loading
-        )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @RequiresApi(Build.VERSION_CODES.O)
-    val epgState = channelIdFlow
-        .flatMapLatest { id ->
-            epgManager.observeEPG(id.toInt())
+        epgJob?.cancel()
+        epgJob = viewModelScope.launch {
+            epgManager.observeEPG(id.toInt()).collect {
+                _epgState.value = it
+            }
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = EPGResponse(emptyList())
-        )
+    }
+
+    fun reset() {
+        // 2. Safely wipe memory when the back button is pressed
+        _uiState.value = TVPlayerScreenUiState.Loading
+        _epgState.value = EPGResponse(emptyList())
+        epgJob?.cancel()
+    }
 
     fun updateViewCount(channelId: Int) {
-
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 repository.updateViewCount(channelId)

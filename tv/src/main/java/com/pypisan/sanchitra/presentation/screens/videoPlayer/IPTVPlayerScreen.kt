@@ -6,78 +6,124 @@ import android.os.Build
 import android.view.WindowManager
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.tv.material3.MaterialTheme
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
-import com.pypisan.sanchitra.data.models.Channel
-import com.pypisan.sanchitra.data.models.EPGItem
 import com.pypisan.sanchitra.data.models.EPGResponse
 import com.pypisan.sanchitra.data.models.IPTVChannelDetail
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.common.Loading
-import java.time.Duration
-import java.time.LocalTime
-
-
-object IPTVPlayerScreen {
-    const val IPTVIdBundleKey = "channelId"
-}
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun IPTVPlayerScreen(
+    channelId: String,
     onBackPressed: () -> Unit,
     iptvPlayerScreenViewModel: IPTVPlayerScreenViewModel = hiltViewModel()
 ) {
-
     val context = LocalContext.current
     val activity = context as Activity
+
+    // 1. Tell ViewModel to load data based on the ID passed from Overlay
+    LaunchedEffect(channelId) {
+        iptvPlayerScreenViewModel.loadChannel(channelId)
+    }
 
     DisposableEffect(Unit) {
         activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         onDispose {
             activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            // 2. Wipe memory so the next video starts clean
+            iptvPlayerScreenViewModel.reset()
         }
     }
 
     val uiState by iptvPlayerScreenViewModel.uiState.collectAsStateWithLifecycle()
     val epg by iptvPlayerScreenViewModel.epgState.collectAsStateWithLifecycle()
 
-    when (val s = uiState) {
-        is IPTVPlayerScreenUiState.Loading -> {
-            Loading(modifier = Modifier.fillMaxSize())
-        }
+    val focusRequester = remember { FocusRequester() }
 
-        is IPTVPlayerScreenUiState.Error -> {
-            Error(modifier = Modifier.fillMaxSize())
+    // 3. Request focus with a dynamic delay
+    // FIXED: Corrected type check to use IPTVPlayerScreenUiState.Done
+    LaunchedEffect(uiState) {
+        val delayTime = if (uiState is IPTVPlayerScreenUiState.Done) 250L else 50L
+        kotlinx.coroutines.delay(delayTime)
+        try {
+            focusRequester.requestFocus()
+        } catch (e: Exception) {
+            // Ignore silently
         }
+    }
 
-        is IPTVPlayerScreenUiState.Done -> {
-            IPTVPlayerBuild(
-                iptvChannel = s.iptvChannel,
-                epg = epg,
-                onBackPressed = onBackPressed
-            )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+            .focusRequester(focusRequester)
+            .focusProperties { onExit = { FocusRequester.Cancel } } // Traps D-Pad
+            .focusGroup()
+            // FIXED: Corrected type check to use IPTVPlayerScreenUiState.Done
+            .focusable(uiState !is IPTVPlayerScreenUiState.Done)
+            .pointerInput(Unit) { detectTapGestures { } }
+    ) {
+        when (val s = uiState) {
+            is IPTVPlayerScreenUiState.Loading -> {
+                // 4. Wrap loaders in focusable Boxes to hold focus while buffering
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .focusable()
+                ) {
+                    Loading(modifier = Modifier.fillMaxSize())
+                }
+            }
+
+            is IPTVPlayerScreenUiState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .focusable()
+                ) {
+                    Error(modifier = Modifier.fillMaxSize())
+                }
+            }
+
+            is IPTVPlayerScreenUiState.Done -> {
+                IPTVPlayerBuild(
+                    iptvChannel = s.iptvChannel,
+                    epg = epg,
+                    onBackPressed = onBackPressed
+                )
+            }
         }
     }
 }
@@ -148,6 +194,24 @@ fun IPTVPlayerBuild(
         },
         renderersFactory = renderersFactory
     )
+
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            var hasCountedView = false
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying && !hasCountedView) {
+                    hasCountedView = true
+//                    onVideoStarted()
+                }
+            }
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+        }
+    }
 
     PlayerScreenContent(
         title = iptvChannel.name,

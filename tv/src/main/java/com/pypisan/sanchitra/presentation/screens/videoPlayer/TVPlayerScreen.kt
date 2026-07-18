@@ -3,13 +3,18 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 import android.app.Activity
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -28,63 +32,89 @@ import com.pypisan.sanchitra.presentation.common.Loading
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.tv.material3.MaterialTheme
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
 import com.pypisan.sanchitra.data.models.EPGItem
 import com.pypisan.sanchitra.data.models.EPGResponse
-import java.time.Duration
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
-object TVPlayerScreen {
-    const val TVIdBundleKey = "channelId"
-}
 
 @RequiresApi(Build.VERSION_CODES.O)
 private val epgTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
+@kotlin.OptIn(ExperimentalComposeUiApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TVPlayerScreen(
+    channelId: String,
     onBackPressed: () -> Unit,
     tvPlayerScreenViewModel: TVPlayerScreenViewModel = hiltViewModel()
 ) {
-
     val context = LocalContext.current
     val activity = context as Activity
 
+    LaunchedEffect(channelId) {
+        tvPlayerScreenViewModel.loadChannel(channelId)
+    }
+
     DisposableEffect(Unit) {
         activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
         onDispose {
             activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            tvPlayerScreenViewModel.reset()
         }
     }
 
     val uiState by tvPlayerScreenViewModel.uiState.collectAsStateWithLifecycle()
     val epg by tvPlayerScreenViewModel.epgState.collectAsStateWithLifecycle()
 
-    when (val s = uiState) {
-        is TVPlayerScreenUiState.Loading -> {
-            Loading(modifier = Modifier.fillMaxSize())
-        }
+    val focusRequester = remember { FocusRequester() }
 
-        is TVPlayerScreenUiState.Error -> {
-            Error(modifier = Modifier.fillMaxSize())
+    LaunchedEffect(uiState) {
+        val delayTime = if (uiState is TVPlayerScreenUiState.Done) 250L else 50L
+        kotlinx.coroutines.delay(delayTime)
+        try {
+            focusRequester.requestFocus()
+        } catch (e: Exception) {
+            // Ignore silently
         }
+    }
 
-        is TVPlayerScreenUiState.Done -> {
-            TVPlayerBuild(
-                channel = s.channel,
-                epg = epg,
-                onBackPressed = onBackPressed,
-                onVideoStarted = {
-                    tvPlayerScreenViewModel.updateViewCount(s.channel.id)
-                }
-            )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+            .focusRequester(focusRequester)
+            .focusProperties { onExit = { FocusRequester.Cancel } }
+            .focusGroup()
+            .focusable(uiState !is TVPlayerScreenUiState.Done)
+            .pointerInput(Unit) { detectTapGestures { } }
+    ) {
+        when (val s = uiState) {
+            is TVPlayerScreenUiState.Loading -> {
+                Loading(modifier = Modifier.fillMaxSize())
+            }
+            is TVPlayerScreenUiState.Error -> {
+                Error(modifier = Modifier.fillMaxSize())
+            }
+            is TVPlayerScreenUiState.Done -> {
+                TVPlayerBuild(
+                    channel = s.channel,
+                    epg = epg,
+                    onBackPressed = onBackPressed,
+                    onVideoStarted = {
+                        tvPlayerScreenViewModel.updateViewCount(s.channel.id)
+                    }
+                )
+            }
         }
     }
 }
@@ -94,10 +124,7 @@ fun TVPlayerScreen(
 @OptIn(UnstableApi::class)
 @Composable
 fun TVPlayerBuild(
-    channel: Channel,
-    epg: EPGResponse,
-    onBackPressed: () -> Unit,
-    onVideoStarted: () -> Unit
+    channel: Channel, epg: EPGResponse, onBackPressed: () -> Unit, onVideoStarted: () -> Unit
 ) {
     val context = LocalContext.current
     var isError by remember { mutableStateOf(false) }
@@ -120,22 +147,17 @@ fun TVPlayerBuild(
     val currentProgram = epg.getCurrentProgram()
     val nextProgram = epg.getNextProgram()
 
-    val renderersFactory = DefaultRenderersFactory(context)
-        .setEnableDecoderFallback(true)
+    val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
         .forceEnableMediaCodecAsynchronousQueueing()
         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
 
     val exoPlayer = rememberExoPlayer(
-        context = context,
-        channel = channel,
-        onError = { exception ->
+        context = context, channel = channel, onError = { exception ->
             errorMessage = exception.message ?: "Playback Error"
             isError = true
-        },
-        onBuffering = { state ->
+        }, onBuffering = { state ->
             isBuffering = state == Player.STATE_BUFFERING
-        },
-        onSubtitlesChanged = { newTracks ->
+        }, onSubtitlesChanged = { newTracks ->
 
             val hasSelectedTrack = newTracks.any { it.isSelected }
 
@@ -155,13 +177,12 @@ fun TVPlayerBuild(
 
         onQualitiesChanged = { list ->
             qualities = list.filter { it.height >= 720 }.sortedByDescending { it.height }
-        },
-        renderersFactory = renderersFactory
+        }, renderersFactory = renderersFactory
     )
 
     DisposableEffect(exoPlayer) {
         val listener = object : Player.Listener {
-            var hasCountedView = false // Ensures we only hit the API once per video
+            var hasCountedView = false
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying && !hasCountedView) {
@@ -175,6 +196,7 @@ fun TVPlayerBuild(
 
         onDispose {
             exoPlayer.removeListener(listener)
+            exoPlayer.release()
         }
     }
 
@@ -227,12 +249,15 @@ fun rememberExoPlayer(
         } else {
             buildDrmExoPlayer(
                 context,
-                channel,
+                channel.name,
+                channel.streamUrl,
+                channel.licenseKey,
+                channel.licenseUrl,
                 onError,
                 onBuffering,
                 onSubtitlesChanged,
                 onAudiosChanged,
-                onQualitiesChanged
+                onQualitiesChanged,
             )
         }
     }

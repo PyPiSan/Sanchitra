@@ -24,9 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
 import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
@@ -46,13 +44,10 @@ import com.pypisan.sanchitra.presentation.common.ChannelCard
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.presentation.common.PosterImageChannel
 
-
 enum class ItemDirection(val aspectRatio: Float) {
     Horizontal(16f / 9f);
 }
 
-
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TVRow(
     modifier: Modifier = Modifier,
@@ -67,14 +62,9 @@ fun TVRow(
     channels: List<Channel>,
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
-    goToTVPlayer:  (id: Int) -> Unit,
-
-//    rowKey: String,
-//    restoreFocusKey: String?,
-//    onFocusRestored: () -> Unit,
+    goToTVPlayer: (id: Int) -> Unit,
+    onChannelFocused: (Int) -> Unit,
 ) {
-    val (lazyRow) = remember { FocusRequester.createRefs() }
-
     Column(
         modifier = modifier
     ) {
@@ -93,23 +83,29 @@ fun TVRow(
                 end = endPadding,
             ),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
-            modifier = Modifier
-                .focusRestorer()
+            modifier = Modifier.focusRestorer()
         ) {
-            itemsIndexed(channels, key = { _, channels -> channels.id }) { index, channel ->
-//                val itemKey = "${rowKey}_${channel.id}"
+            itemsIndexed(channels, key = { _, channel -> channel.id }) { index, channel ->
+
+                val onCardClicked = remember(channel.id) {
+                    {
+                        goToTVPlayer(channel.id)
+                    }
+                }
+
                 TVRowItem(
                     channel = channel,
-                    goToTVPlayer = {
-                        goToTVPlayer(channel.id)
-                    },
-                    modifier = Modifier,
+                    goToTVPlayer = { onCardClicked() },
+                    modifier = Modifier
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                onChannelFocused(channel.id)
+                            }
+                        },
                     index = index,
                     itemDirection = itemDirection,
                     showItemTitle = showItemTitle,
                     showIndexOverImage = showIndexOverImage,
-//                    isReturnFocusTarget = itemKey == restoreFocusKey,
-//                    onFocusRestored = onFocusRestored
                 )
             }
         }
@@ -125,24 +121,9 @@ private fun TVRowItem(
     showIndexOverImage: Boolean,
     modifier: Modifier = Modifier,
     itemDirection: ItemDirection = ItemDirection.Horizontal,
-    goToTVPlayer:  (id: Int) -> Unit,
-//    isReturnFocusTarget: Boolean,
-//    onFocusRestored: () -> Unit,
+    goToTVPlayer: (id: Int) -> Unit,
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val focusRequester = remember { FocusRequester() }
-
-//    LaunchedEffect(isReturnFocusTarget) {
-//        if (isReturnFocusTarget) {
-//            kotlinx.coroutines.delay(100)
-//            try {
-//                focusRequester.requestFocus()
-//                onFocusRestored()
-//            } catch (e: Exception) {
-//                // Ignore gracefully
-//            }
-//        }
-//    }
 
     ChannelCard(
         onClick = { goToTVPlayer(channel.id) },
@@ -155,8 +136,9 @@ private fun TVRowItem(
         },
         modifier = Modifier
             .width(220.dp)
-            .focusRequester(focusRequester)
-            .onFocusChanged { isFocused = it.isFocused }
+            .onFocusChanged {
+                isFocused = it.isFocused
+            }
             .focusProperties {
                 left = if (index == 0) FocusRequester.Cancel else FocusRequester.Default
             }

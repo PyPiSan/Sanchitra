@@ -2,10 +2,12 @@ package com.pypisan.sanchitra.presentation.screens.categories
 
 import com.pypisan.sanchitra.presentation.theme.JetStreamBottomListPadding
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -15,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -43,6 +44,7 @@ object CategoryIPTVListScreen {
 
 @Composable
 fun CategoryIPTVListScreen(
+    isPlayerActive: Boolean, // Receive the state here
     onBackPressed: () -> Unit,
     onChannelSelected: (iptvChannelId: String) -> Unit,
     categoryIPTVListScreenViewModel: CategoryIPTVListScreenViewModel = hiltViewModel()
@@ -62,6 +64,7 @@ fun CategoryIPTVListScreen(
             CategoryDetails(
                 categoryName = s.categoryName,
                 categoryChannels = s.channels,
+                isPlayerActive = isPlayerActive, // Pass it down
                 onBackPressed = onBackPressed,
                 onChannelSelected = onChannelSelected
             )
@@ -73,12 +76,12 @@ fun CategoryIPTVListScreen(
 private fun CategoryDetails(
     categoryChannels: List<IPTVChannel>,
     categoryName: String,
+    isPlayerActive: Boolean, // Receive the state here
     onBackPressed: () -> Unit,
     onChannelSelected: (iptvChannelId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val childPadding = rememberChildPadding()
-    val isFirstItemVisible = remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
 
     var lastFocusedIndex by rememberSaveable(categoryName) { mutableIntStateOf(0) }
@@ -87,8 +90,13 @@ private fun CategoryDetails(
         List(categoryChannels.size) { FocusRequester() }
     }
 
-    LaunchedEffect(categoryChannels) {
-        focusRequesters.getOrNull(lastFocusedIndex)?.requestFocus()
+    LaunchedEffect(isPlayerActive) {
+        if (!isPlayerActive) {
+            kotlinx.coroutines.delay(100) // Wait for player overlay to unmount
+            try {
+                focusRequesters.getOrNull(lastFocusedIndex)?.requestFocus()
+            } catch (e: Exception) { }
+        }
     }
 
     LaunchedEffect(categoryChannels) {
@@ -99,19 +107,17 @@ private fun CategoryDetails(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
+        modifier = modifier.fillMaxSize().focusGroup(),
     ) {
         Text(
-            text = categoryName, style = MaterialTheme.typography.displaySmall.copy(
-                fontWeight = FontWeight.SemiBold
-            ), modifier = Modifier.padding(
-                vertical = childPadding.top.times(3.5f)
-            )
+            text = categoryName,
+            style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.SemiBold),
+            modifier = Modifier.padding(vertical = childPadding.top.times(3.5f))
         )
         LazyVerticalGrid(
             state = gridState,
             columns = GridCells.Adaptive(minSize = 220.dp),
-            modifier = modifier,
+            modifier = Modifier.fillMaxWidth().weight(1f),
             contentPadding = PaddingValues(JetStreamBottomListPadding)
         ) {
             itemsIndexed(

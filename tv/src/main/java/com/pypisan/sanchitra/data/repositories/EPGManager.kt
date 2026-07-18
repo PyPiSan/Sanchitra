@@ -15,6 +15,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import java.time.Duration
 import java.time.LocalTime
+import kotlin.coroutines.cancellation.CancellationException
 
 
 class EPGManager @Inject constructor(
@@ -48,9 +49,11 @@ class EPGManager @Inject constructor(
 
             } catch (e: Exception) {
 
-                Log.e(
-                    "EPGManager", "EPG fetch failed", e
-                )
+                // 1. ADD THIS LINE: Let normal cancellations happen silently!
+                if (e is CancellationException) throw e
+
+                // 2. Keep your existing error logging for real errors
+                Log.e("EPG", "EPG fetch failed", e)
 
                 // retry after 1 minute on failure
                 delay(60_000)
