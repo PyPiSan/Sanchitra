@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,9 +17,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -38,29 +45,57 @@ object MovieDetailsScreen {
 
 @Composable
 fun MovieDetailsScreen(
+    isPlayerActive: Boolean,
     openVideoPlayer: (metaId: String) -> Unit,
     onBackPressed: () -> Unit,
 ) {
-
     val sharedVideoVM: VideoSharedViewModel =
         hiltViewModel(LocalContext.current as ComponentActivity)
-
     val video by sharedVideoVM.selectedVideo.collectAsStateWithLifecycle()
 
-    when {
-        video == null -> {
-            Error(modifier = Modifier.fillMaxSize())
-        }
+    // 1. Clear the memory when we press back and close the overlay
+    DisposableEffect(Unit) {
+        onDispose { sharedVideoVM.clearVideo() }
+    }
 
-        else -> {
-            Details(
-                video = video!!,
-                openVideoPlayer = openVideoPlayer,
-                onBackPressed = onBackPressed,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .animateContentSize()
-            )
+    // 2. Grab focus for the overlay
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(isPlayerActive) {
+        if (!isPlayerActive) {
+            kotlinx.coroutines.delay(100) // Wait for Player overlay to unmount
+            try {
+                focusRequester.requestFocus()
+            } catch (e: Exception) {
+                // Ignore gracefully
+            }
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+        .focusRequester(focusRequester)
+            .focusProperties { onExit = { FocusRequester.Cancel } } // Traps D-Pad
+        .focusGroup()) {
+        when {
+            video == null -> {
+                Error(modifier = Modifier.fillMaxSize())
+            }
+
+            else -> {
+                Details(
+                    video = video!!,
+                    openVideoPlayer = openVideoPlayer,
+                    onBackPressed = {
+                        onBackPressed()
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .animateContentSize()
+                )
+            }
         }
     }
 }
@@ -81,8 +116,7 @@ private fun Details(
     ) {
         item {
             MovieDetails(
-                video = video,
-                openVideoPlayer = openVideoPlayer
+                video = video, openVideoPlayer = openVideoPlayer
             )
         }
 
@@ -100,15 +134,13 @@ private fun Details(
 
         item {
             MovieReviews(
-                modifier = Modifier.padding(top = childPadding.top),
-                reviewsAndRatings = listOf(
+                modifier = Modifier.padding(top = childPadding.top), reviewsAndRatings = listOf(
                     MovieReviewsAndRatings(
                         StringConstants.Movie.Reviewer.FreshTomatoes,
                         StringConstants.Movie.Reviewer.FreshTomatoesImageUrl,
                         StringConstants.Movie.Reviewer.FreshTomatoesReviewCount,
                         StringConstants.Movie.Reviewer.FreshTomatoesScore
-                    ),
-                    MovieReviewsAndRatings(
+                    ), MovieReviewsAndRatings(
                         StringConstants.Movie.Reviewer.ReviewerName,
                         StringConstants.Movie.Reviewer.ImageUrl,
                         StringConstants.Movie.Reviewer.DefaultCount,

@@ -88,6 +88,7 @@ fun Top10MoviesList(
 
 @Composable
 private fun ImmersiveList(
+    modifier: Modifier = Modifier,
     selectedMovie: Videos,
     isListFocused: Boolean,
     gradientColor: Color,
@@ -98,17 +99,17 @@ private fun ImmersiveList(
     lastFocusedMovieId: Int? = null,
     onMovieFocused: (Videos) -> Unit,
     onMovieClick: (Videos) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     Box(
         contentAlignment = Alignment.BottomStart,
         modifier = modifier
+            .height(432.dp)
     ) {
         Background(
             movie = selectedMovie,
             visible = isListFocused,
-            modifier = modifier
-                .height(432.dp)
+            modifier = Modifier
+                .fillMaxSize()
                 .gradientOverlay(gradientColor)
         )
         Column {

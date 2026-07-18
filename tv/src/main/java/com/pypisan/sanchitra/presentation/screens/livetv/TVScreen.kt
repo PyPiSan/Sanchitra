@@ -19,10 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import com.pypisan.sanchitra.data.models.Channel
 import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
@@ -103,7 +100,7 @@ fun TVCatalog(
             .focusRestorer(),
     ) {
 
-        item(key = "Carousel") {
+        item( key = "Carousel") {
             TVScreenChannelList(
                 channelList = carouselList,
                 goToTVPlayer = goToTVPlayer,
@@ -121,12 +118,10 @@ fun TVCatalog(
             key = { it.key }
         ) { entry ->
             TVRow(
-                modifier = Modifier.padding(top = childPadding.top),
                 title = entry.key,
                 channels = entry.value,
+                modifier = Modifier.padding(top = childPadding.top),
                 goToTVPlayer = goToTVPlayer,
-                isActive = focusedSection == entry.key,
-                lastFocusedChannelId = lastFocusedChannelId,
                 onChannelFocused = {
                     focusedSection = entry.key
                     lastFocusedChannelId = it
