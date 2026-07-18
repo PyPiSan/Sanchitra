@@ -93,6 +93,10 @@ private fun Catalog(
         mutableStateOf<Int?>(null)
     }
 
+    var lastFocusedTop10MovieId by rememberSaveable {
+        mutableStateOf<Int?>(null)
+    }
+
     var lastFocusedChannelId by rememberSaveable {
         mutableStateOf<Int?>(null)
     }
@@ -131,6 +135,11 @@ private fun Catalog(
                 channels = featuredHome,
                 padding = childPadding,
                 goToTVPlayer = goToTVPlayer,
+                isActive = focusedSection == "carousel" || focusedSection.isEmpty(),
+                onCarouselFocused = {
+                    focusedSection = "carousel"
+                    focusedRowIndex = 0
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(324.dp)
@@ -144,11 +153,10 @@ private fun Catalog(
                 videoList = trendingMovies,
                 title = StringConstants.Composable.HomeScreenTrendingTitle,
 
-                isActive = focusedSection == "movies",
-
-                onMovieFocused = {
+                onMovieFocused = { video ->
                     focusedSection = "movies"
                     focusedRowIndex = 1
+                    lastFocusedMovieId = video.id
                 },
 
                 onMovieSelected = { video ->
@@ -163,10 +171,15 @@ private fun Catalog(
                 movieList = top10Movies,
 
                 isActive = focusedSection == "top10",
+                lastFocusedMovieId = lastFocusedTop10MovieId,
 
-                onMovieFocused = {
+                onSectionFocused = {
                     focusedSection = "top10"
                     focusedRowIndex = 2
+                },
+
+                onMovieFocused = { video ->
+                    lastFocusedTop10MovieId = video.id
                 },
 
                 onMovieClick = { video ->

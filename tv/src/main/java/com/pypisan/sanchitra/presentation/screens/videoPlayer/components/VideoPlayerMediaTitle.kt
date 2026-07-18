@@ -57,58 +57,51 @@ fun VideoPlayerMediaTitle(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
 
-                        if (secondaryText.isNotEmpty()) {
-
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
                                 text = "Now Showing:",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                fontWeight = FontWeight.Bold
                             )
 
-                            Spacer(Modifier.width(10.dp))
+                            Spacer(Modifier.width(8.dp))
 
                             Text(
                                 text = secondaryText,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.weight(1f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
-                        }
-
-                        if (secondaryText.isNotEmpty() && tertiaryText.isNotEmpty()) {
-
-                            Spacer(Modifier.width(12.dp))
-
-                            Text(
-                                text = "•",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-
-                            Spacer(Modifier.width(12.dp))
                         }
 
                         if (tertiaryText.isNotEmpty()) {
 
-                            Text(
-                                text = "Next:",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                            Spacer(Modifier.width(20.dp))
 
-                            Spacer(Modifier.width(10.dp))
+                            Text("•")
 
-                            Text(
-                                text = tertiaryText,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Spacer(Modifier.width(20.dp))
+
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Next:",
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                Spacer(Modifier.width(8.dp))
+
+                                Text(
+                                    text = tertiaryText,
+                                    modifier = Modifier.weight(1f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }

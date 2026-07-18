@@ -47,7 +47,9 @@ fun Top10MoviesList(
     gradientColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
     onMovieClick: (video: Videos) -> Unit,
     isActive: Boolean = false,
-    onMovieFocused: () -> Unit = {},
+    lastFocusedMovieId: Int? = null,
+    onSectionFocused: () -> Unit = {},
+    onMovieFocused: (video: Videos) -> Unit = {},
 ) {
     var isListFocused by remember { mutableStateOf(false) }
     var selectedMovie by remember(movieList) { mutableStateOf(movieList.first()) }
@@ -65,11 +67,17 @@ fun Top10MoviesList(
         movieList = movieList,
         sectionTitle = sectionTitle,
         onMovieClick = onMovieClick,
+        isActive = isActive,
+        lastFocusedMovieId = lastFocusedMovieId,
         onMovieFocused = {
             selectedMovie = it
+            onMovieFocused(it)
         },
         onFocusChanged = {
             isListFocused = it.hasFocus
+            if (it.hasFocus) {
+                onSectionFocused()
+            }
         },
 
         modifier = modifier.bringIntoViewIfChildrenAreFocused(
@@ -80,25 +88,28 @@ fun Top10MoviesList(
 
 @Composable
 private fun ImmersiveList(
+    modifier: Modifier = Modifier,
     selectedMovie: Videos,
     isListFocused: Boolean,
     gradientColor: Color,
     movieList: List<Videos>,
     sectionTitle: String?,
     onFocusChanged: (FocusState) -> Unit,
+    isActive: Boolean = false,
+    lastFocusedMovieId: Int? = null,
     onMovieFocused: (Videos) -> Unit,
     onMovieClick: (Videos) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     Box(
         contentAlignment = Alignment.BottomStart,
         modifier = modifier
+            .height(432.dp)
     ) {
         Background(
             movie = selectedMovie,
             visible = isListFocused,
-            modifier = modifier
-                .height(432.dp)
+            modifier = Modifier
+                .fillMaxSize()
                 .gradientOverlay(gradientColor)
         )
         Column {
@@ -118,6 +129,8 @@ private fun ImmersiveList(
                 title = sectionTitle,
                 showItemTitle = !isListFocused,
                 showIndexOverImage = true,
+                isActive = isActive,
+                lastFocusedMovieId = lastFocusedMovieId,
                 onMovieSelected = onMovieClick,
                 onMovieFocused = onMovieFocused,
                 modifier = Modifier.onFocusChanged(onFocusChanged)

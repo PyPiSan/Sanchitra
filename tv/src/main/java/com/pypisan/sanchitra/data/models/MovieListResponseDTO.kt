@@ -24,6 +24,12 @@ data class VideoDTO(
     @SerializedName("streaming_url")
     val streamingUrl: String,
 
+    @SerializedName("license_key")
+    val licenseKey: String,
+
+    @SerializedName("license_url")
+    val licenseUrl: String,
+
     @SerializedName("download_url")
     val downloadUrl: String?,
 
@@ -32,6 +38,9 @@ data class VideoDTO(
 
     @SerializedName("is_web")
     val isWeb: Boolean? = null,
+
+    @SerializedName("is_drm")
+    val isDrm: Boolean? = null,
 
     @SerializedName("is_app")
     val isApp: Boolean? = null,
@@ -54,6 +63,9 @@ fun VideoDTO.toDomain(): Videos {
     return Videos(
         id = id,
         url = streamingUrl,
+        drm = isDrm ?: false,
+        licenseKey = licenseKey,
+        licenseUrl = licenseUrl,
         title = title,
         image = image,
         categories = categories,

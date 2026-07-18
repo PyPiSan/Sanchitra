@@ -6,12 +6,21 @@ import android.os.Build
 import android.view.WindowManager
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -21,53 +30,97 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.tv.material3.MaterialTheme
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
 import com.pypisan.sanchitra.presentation.common.Loading
 
-object VideoPlayerScreen {
-    const val metaID = "metaID"
-}
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VideoPlayerScreen(
+    metaId: String,
     onBackPressed: () -> Unit,
     videoPlayerScreenViewModel: VideoPlayerScreenViewModel = hiltViewModel()
 ) {
-
     val context = LocalContext.current
     val activity = context as Activity
+
+    LaunchedEffect(metaId) {
+        videoPlayerScreenViewModel.loadVideo(metaId)
+    }
 
     DisposableEffect(Unit) {
         activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         onDispose {
             activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            videoPlayerScreenViewModel.reset()
         }
     }
 
     val uiState by videoPlayerScreenViewModel.uiState.collectAsStateWithLifecycle()
 
-    when (val s = uiState) {
+    val focusRequester = remember { FocusRequester() }
 
-        VideoPlayerScreenUiState.Loading -> {
-            Loading(modifier = Modifier.fillMaxSize())
+    LaunchedEffect(uiState) {
+        val delayTime = if (uiState is VideoPlayerScreenUiState.Done) 250L else 50L
+        kotlinx.coroutines.delay(delayTime)
+        try {
+            focusRequester.requestFocus()
+        } catch (e: Exception) {
+            // Ignore gracefully
         }
+    }
 
-        VideoPlayerScreenUiState.Error -> {
-            Error(modifier = Modifier.fillMaxSize())
-        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+            .focusRequester(focusRequester)
+            .focusProperties { onExit = { FocusRequester.Cancel } } // Traps D-Pad
+            .focusGroup()
+            // Holds focus during loading, then passes it to ExoPlayer controls!
+            .focusable(uiState !is VideoPlayerScreenUiState.Done)
+            .pointerInput(Unit) { detectTapGestures { } }
+    ) {
+        when (val s = uiState) {
+            VideoPlayerScreenUiState.Loading -> {
+                // 2. FOCUSABLE LOADING: Wrap in a focusable Box so we can securely
+                // hold the focus on this layer while the video compiles!
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .focusable()
+                ) {
+                    Loading(modifier = Modifier.fillMaxSize())
+                }
+            }
 
-        is VideoPlayerScreenUiState.Done -> {
-            VideoPlayerBuild(
-                metaId = s.videoDetail?.id.toString(),
-                title = s.videoDetail?.title,
-                streamUrl = s.videoDetail?.url,
-                subTitleUrl = s.videoDetail?.meta?.subtitleUrl,
-                onBackPressed = onBackPressed
-            )
+            VideoPlayerScreenUiState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .focusable()
+                ) {
+                    Error(modifier = Modifier.fillMaxSize())
+                }
+            }
+
+            is VideoPlayerScreenUiState.Done -> {
+                VideoPlayerBuild(
+                    metaId = s.videoDetail?.id.toString(),
+                    title = s.videoDetail?.title,
+                    streamUrl = s.videoDetail?.url,
+                    drm = s.videoDetail?.drm,
+                    licenseKey = s.videoDetail?.licenseKey,
+                    licenseUrl = s.videoDetail?.licenseUrl,
+                    subTitleUrl = s.videoDetail?.meta?.subtitleUrl,
+                    onBackPressed = onBackPressed,
+                    onVideoStarted = {
+                        videoPlayerScreenViewModel.updateViewCount(s.videoDetail?.id)
+                    })
+            }
         }
     }
 }
@@ -77,11 +130,15 @@ fun VideoPlayerScreen(
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerBuild(
-    metaId: String?= "",
+    metaId: String? = "",
     title: String?,
     streamUrl: String? = "",
+    drm: Boolean? = false,
+    licenseKey: String? = "",
+    licenseUrl: String? = "",
     subTitleUrl: String? = "",
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    onVideoStarted: () -> Unit
 ) {
     val context = LocalContext.current
     var isError by remember { mutableStateOf(false) }
@@ -101,15 +158,19 @@ fun VideoPlayerBuild(
         mutableStateOf<List<VideoQuality>>(emptyList())
     }
 
-    val renderersFactory = DefaultRenderersFactory(context)
-        .setEnableDecoderFallback(true)
+
+    val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
         .forceEnableMediaCodecAsynchronousQueueing()
         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
 
     val exoPlayer = rememberPlayer(
-        metaId?:"",
+        metaId ?: "",
+        title ?: "",
         context,
-        streamUrl?:"",
+        streamUrl ?: "",
+        drm ?: false,
+        licenseKey,
+        licenseUrl,
         onError = { exception ->
             errorMessage = exception.message ?: "Playback Error"
             isError = true
@@ -138,8 +199,28 @@ fun VideoPlayerBuild(
         },
         renderersFactory = renderersFactory
     )
+
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            var hasCountedView = false // Ensures we only hit the API once per video
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying && !hasCountedView) {
+                    hasCountedView = true
+                    onVideoStarted()
+                }
+            }
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+        }
+    }
+
+
     PlayerScreenContent(
-        title = title?:"",
+        title = title ?: "",
         "",
         "",
         epgResponse = null,
@@ -156,16 +237,19 @@ fun VideoPlayerBuild(
         },
         onSubtitlesChanged = {
             subtitles = it
-        }
-    )
+        })
 }
 
 @OptIn(UnstableApi::class)
 @Composable
 fun rememberPlayer(
     metaId: String,
+    title: String,
     context: Context,
     streamUrl: String,
+    drm: Boolean,
+    licenseKey: String? = "",
+    licenseUrl: String? = "",
     onError: (PlaybackException) -> Unit,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
@@ -174,6 +258,7 @@ fun rememberPlayer(
     renderersFactory: DefaultRenderersFactory
 ): ExoPlayer {
     return remember(metaId) {
+        if (!drm) {
             buildDefaultExoPlayer(
                 context,
                 streamUrl,
@@ -184,5 +269,19 @@ fun rememberPlayer(
                 onQualitiesChanged,
                 renderersFactory
             )
+        } else {
+            buildDrmExoPlayer(
+                context,
+                title,
+                streamUrl,
+                licenseKey,
+                licenseUrl,
+                onError,
+                onBuffering,
+                onSubtitlesChanged,
+                onAudiosChanged,
+                onQualitiesChanged,
+            )
+        }
     }
 }

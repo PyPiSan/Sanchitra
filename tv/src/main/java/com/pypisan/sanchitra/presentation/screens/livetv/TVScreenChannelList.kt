@@ -14,14 +14,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -46,34 +51,53 @@ fun TVScreenChannelList (
     startPadding: Dp = rememberChildPadding().start,
     endPadding: Dp = rememberChildPadding().end,
     goToTVPlayer:  (id: Int) -> Unit,
-
-//    lastFocusedChannelId: Int?,
-//    onChannelFocused: (Int) -> Unit,
+    isActive: Boolean,
+    lastFocusedChannelId: Int?,
+    onChannelFocused: (Int) -> Unit,
 ){
-    val (lazyRow, firstItem) = remember { FocusRequester.createRefs() }
+    val (lazyRow) = remember { FocusRequester.createRefs() }
+
+    val focusRequesters = remember(channelList) {
+        channelList.associate { it.id to FocusRequester() }
+    }
+
+    val latestIsActive by rememberUpdatedState(isActive)
+    val latestChannelId by rememberUpdatedState(lastFocusedChannelId)
+    val latestChannelList by rememberUpdatedState(channelList)
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && latestIsActive) {
+                try {
+                    if (latestChannelId != null && focusRequesters.containsKey(latestChannelId)) {
+                        focusRequesters[latestChannelId]?.requestFocus()
+                    } else {
+                        focusRequesters[latestChannelList.firstOrNull()?.id]?.requestFocus()
+                    }
+                } catch (e: Exception) {
+                    // Ignore gracefully
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
         LazyRow(
             modifier = modifier
                 .focusRequester(lazyRow)
-            ,
+                .focusRestorer(),
             contentPadding = PaddingValues(start = startPadding, end = endPadding)
         ) {
             itemsIndexed(channelList, key = { _, c -> c.id }) { index, channel ->
 
-                val focusRequester = remember { FocusRequester() }
-
-                // Restore focus when coming back
-//                LaunchedEffect(lastFocusedChannelId) {
-//                    if (channel.id == lastFocusedChannelId) {
-//                        focusRequester.requestFocus()
-//                    }
-//                }
-
-//                val itemModifier = when {
-//                    channel.id == lastFocusedChannelId -> Modifier.focusRequester(focusRequester)
-//                    index == 0 -> Modifier.focusRequester(firstItem)
-//                    else -> Modifier
-//                }
+                val focusRequester = focusRequesters[channel.id] ?: FocusRequester()
 
                 ChannelListItem(
                     itemWidth = 432.dp,
@@ -83,11 +107,12 @@ fun TVScreenChannelList (
                     },
                     channel = channel,
                     modifier = Modifier
-//                        .onFocusChanged {
-//                            if (it.isFocused) {
-//                                onChannelFocused(channel.id)
-//                            }
-//                        }
+                        .focusRequester(focusRequester)
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                onChannelFocused(channel.id)
+                            }
+                        }
                 )
             }
         }

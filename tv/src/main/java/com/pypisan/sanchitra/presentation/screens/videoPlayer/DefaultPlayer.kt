@@ -7,9 +7,11 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
@@ -30,10 +32,18 @@ fun buildDefaultExoPlayer(
         .setBufferDurationsMs(30000, 60000, 3000, 2000)
         .build()
 
+    val httpDataSourceFactory = DefaultHttpDataSource.Factory()
+        .setAllowCrossProtocolRedirects(true)
+        .setConnectTimeoutMs(60_000)
+        .setReadTimeoutMs(90_000)
+
+    val mediaSourceFactory = DefaultMediaSourceFactory(httpDataSourceFactory)
+
     val videoMetaHelper = VideoMetaHelper()
 
     return ExoPlayer.Builder(context, renderersFactory)
         .setLoadControl(loadControl)
+        .setMediaSourceFactory(mediaSourceFactory)
         .build()
         .apply {
 

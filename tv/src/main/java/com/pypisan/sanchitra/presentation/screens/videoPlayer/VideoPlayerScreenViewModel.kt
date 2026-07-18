@@ -1,55 +1,64 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 import androidx.compose.runtime.Immutable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pypisan.sanchitra.data.entities.Videos
-import kotlinx.coroutines.flow.map
 import com.pypisan.sanchitra.data.repositories.VideoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class VideoPlayerScreenViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
-    repository: VideoRepository,
+    private val repository: VideoRepository,
 ) : ViewModel() {
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState = savedStateHandle
-        .getStateFlow<String?>(VideoPlayerScreen.metaID, null)
-        .flatMapLatest { id ->
 
-            val movieId = id?.toIntOrNull()
+    private val _uiState = MutableStateFlow<VideoPlayerScreenUiState>(VideoPlayerScreenUiState.Loading)
+    val uiState = _uiState.asStateFlow()
 
-            if (movieId == null) {
+    private var videoJob: Job? = null
 
-                flowOf(VideoPlayerScreenUiState.Error)
+    fun loadVideo(id: String) {
+        _uiState.value = VideoPlayerScreenUiState.Loading
 
-            } else {
+        val movieId = id.toIntOrNull()
+        if (movieId == null) {
+            _uiState.value = VideoPlayerScreenUiState.Error
+            return
+        }
 
-                repository.getVideoDetails(movieId)
-                    .filterNotNull()
-                    .map<Videos, VideoPlayerScreenUiState> { details ->
-                        VideoPlayerScreenUiState.Done(details)
-                    }
-                    .catch {
-                        emit(VideoPlayerScreenUiState.Error)
-                    }
+        videoJob?.cancel()
+        videoJob = viewModelScope.launch {
+            repository.getVideoDetails(movieId)
+                .filterNotNull()
+                .catch { _uiState.value = VideoPlayerScreenUiState.Error }
+                .collect { details ->
+                    _uiState.value = VideoPlayerScreenUiState.Done(details)
+                }
+        }
+    }
+
+    fun reset() {
+        videoJob?.cancel()
+        _uiState.value = VideoPlayerScreenUiState.Loading
+    }
+
+    fun updateViewCount(movieId: Int?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                repository.updateMovieViewCount(movieId ?: 0)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = VideoPlayerScreenUiState.Loading
-        )
+    }
 }
 
 @Immutable
