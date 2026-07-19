@@ -1,5 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.livetv
 
+
 import com.pypisan.sanchitra.presentation.theme.JetStreamBorderWidth
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
@@ -14,19 +15,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -39,83 +33,43 @@ import androidx.tv.material3.CompactCard
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
-import com.pypisan.sanchitra.data.models.Channel
+import com.pypisan.sanchitra.data.entities.Channel
 import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
-import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRestorer
 
 @Composable
-fun TVScreenChannelList (
+fun TVScreenChannelList(
     modifier: Modifier = Modifier,
     channelList: List<Channel>,
     startPadding: Dp = rememberChildPadding().start,
     endPadding: Dp = rememberChildPadding().end,
-    goToTVPlayer:  (id: Int) -> Unit,
-    isActive: Boolean,
-    lastFocusedChannelId: Int?,
-    onChannelFocused: (Int) -> Unit,
-){
-    val (lazyRow) = remember { FocusRequester.createRefs() }
+    goToTVPlayer: (id: Int) -> Unit,
+    onChannelFocused: (Int) -> Unit
+) {
+    LazyRow(
+        modifier = modifier.focusRestorer(),
+        contentPadding = PaddingValues(start = startPadding, end = endPadding)
+    ) {
+        itemsIndexed(channelList, key = { _, c -> c.id }) { _, channel ->
 
-    val focusRequesters = remember(channelList) {
-        channelList.associate { it.id to FocusRequester() }
-    }
-
-    val latestIsActive by rememberUpdatedState(isActive)
-    val latestChannelId by rememberUpdatedState(lastFocusedChannelId)
-    val latestChannelList by rememberUpdatedState(channelList)
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME && latestIsActive) {
-                try {
-                    if (latestChannelId != null && focusRequesters.containsKey(latestChannelId)) {
-                        focusRequesters[latestChannelId]?.requestFocus()
-                    } else {
-                        focusRequesters[latestChannelList.firstOrNull()?.id]?.requestFocus()
-                    }
-                } catch (e: Exception) {
-                    // Ignore gracefully
-                }
+            val onCardClicked = remember(channel.id) {
+                { goToTVPlayer(channel.id) }
             }
-        }
 
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
-        LazyRow(
-            modifier = modifier
-                .focusRequester(lazyRow)
-                .focusRestorer(),
-            contentPadding = PaddingValues(start = startPadding, end = endPadding)
-        ) {
-            itemsIndexed(channelList, key = { _, c -> c.id }) { index, channel ->
-
-                val focusRequester = focusRequesters[channel.id] ?: FocusRequester()
-
-                ChannelListItem(
-                    itemWidth = 432.dp,
-                    onChannelClick = {
-                        lazyRow.saveFocusedChild()
-                        goToTVPlayer(channel.id)
-                    },
-                    channel = channel,
-                    modifier = Modifier
-                        .focusRequester(focusRequester)
-                        .onFocusChanged {
-                            if (it.isFocused) {
-                                onChannelFocused(channel.id)
-                            }
+            ChannelListItem(
+                itemWidth = 432.dp,
+                onChannelClick = { onCardClicked() },
+                channel = channel,
+                modifier = Modifier
+                    .onFocusChanged {
+                        if (it.isFocused) {
+                            onChannelFocused(channel.id)
                         }
-                )
-            }
+                    }
+            )
         }
+    }
 }
 
 @Composable
@@ -123,10 +77,13 @@ private fun ChannelListItem(
     itemWidth: Dp,
     channel: Channel,
     modifier: Modifier = Modifier,
-    onChannelClick:  (id: Int) -> Unit
+    onChannelClick: (id: Int) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
         Spacer(modifier = Modifier.height(JetStreamBorderWidth))
+
         var isFocused by remember { mutableStateOf(false) }
         CompactCard(
             modifier = modifier
@@ -176,7 +133,7 @@ private fun ChannelListItem(
                             .padding(start = 24.dp)
                     )
                     Text(
-                        text = channel.name,
+                        text = channel.description?.takeIf { it.isNotBlank() } ?: channel.name,
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding(
                             start = 24.dp,

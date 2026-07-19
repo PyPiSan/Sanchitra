@@ -10,7 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,8 +29,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -81,7 +81,6 @@ fun NowAiringDialog(
     val focusRequesterPrev = remember { FocusRequester() }
     val focusRequesterNext = remember { FocusRequester() }
 
-    // Request initial focus on opening
     LaunchedEffect(Unit) {
         try {
             if (currentIndex < programs.lastIndex) {
@@ -122,8 +121,12 @@ fun NowAiringDialog(
                     targetState = currentProgram,
                     modifier = Modifier.fillMaxSize(),
                     transitionSpec = {
-                        (slideInVertically(animationSpec = tween(300)) { h -> -h } + fadeIn(animationSpec = tween(300)))
-                            .with(slideOutVertically(animationSpec = tween(300)) { h -> h } + fadeOut(animationSpec = tween(300)))
+                        (slideInVertically(animationSpec = tween(300)) { h -> -h } + fadeIn(
+                            animationSpec = tween(300)
+                        ))
+                            .togetherWith(slideOutVertically(animationSpec = tween(300)) { h -> h } + fadeOut(
+                                animationSpec = tween(300)
+                            ))
                     },
                     label = "ProgramTransition"
                 ) { targetProgram ->
@@ -213,7 +216,7 @@ fun NowAiringDialog(
                 // Next Button
                 if (currentIndex < programs.lastIndex) {
                     DpadKeyNavigationButton(
-                        icon = Icons.Default.ArrowForwardIos,
+                        icon = Icons.AutoMirrored.Filled.ArrowForwardIos,
                         focused = true,
                         onClick = {
                             // *** EXPLICIT FOCUS MANAGEMENT ON CLICK ***

@@ -1,5 +1,4 @@
-package com.pypisan.sanchitra.data.models
-
+package com.pypisan.sanchitra.data.entities
 
 data class IPTVChannel(
     val id: String,

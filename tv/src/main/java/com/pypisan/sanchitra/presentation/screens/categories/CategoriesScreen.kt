@@ -40,6 +40,7 @@ import androidx.tv.material3.Text
 import com.pypisan.sanchitra.data.entities.IPTVCategoryDto
 import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.presentation.common.MovieCard
+import com.pypisan.sanchitra.presentation.screens.common.CommonErrorScreen
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.utils.GradientBg
 
@@ -69,7 +70,7 @@ fun CategoriesScreen(
         }
 
         is CategoriesScreenUiState.Error -> {
-            CategoryErrorScreen(
+            CommonErrorScreen(
                 message = s.message
             )
         }
@@ -97,9 +98,7 @@ private fun Catalog(
     DisposableEffect(lifecycleOwner, iptvCategories) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                focusRequesters
-                    .getOrNull(lastFocusedIndex)
-                    ?.requestFocus()
+                focusRequesters.getOrNull(lastFocusedIndex)?.requestFocus()
             }
         }
 
@@ -135,23 +134,24 @@ private fun Catalog(
             itemsIndexed(it) { index, movieCategory ->
                 var isFocused by remember { mutableStateOf(false) }
 
-                MovieCard(onClick = {
+                MovieCard(
+                    onClick = {
                     onCategoryClick(movieCategory.name)
                 }, modifier = Modifier
-                    .padding(8.dp)
-                    .aspectRatio(16 / 9f)
-                    .onFocusChanged {
-                        isFocused = it.isFocused
-                        if (it.isFocused) {
-                            lastFocusedIndex = index
+                        .padding(8.dp)
+                        .aspectRatio(16 / 9f)
+                        .onFocusChanged {
+                            isFocused = it.isFocused
+                            if (it.isFocused) {
+                                lastFocusedIndex = index
+                            }
                         }
-                    }
-                    .focusRequester(focusRequesters[index])
-                    .focusProperties {
-                        if (index % gridColumns == 0) {
-                            left = FocusRequester.Cancel
-                        }
-                    }) {
+                        .focusRequester(focusRequesters[index])
+                        .focusProperties {
+                            if (index % gridColumns == 0) {
+                                left = FocusRequester.Cancel
+                            }
+                        }) {
                     val itemAlpha by animateFloatAsState(
                         targetValue = if (isFocused) .6f else 0.2f, label = ""
                     )

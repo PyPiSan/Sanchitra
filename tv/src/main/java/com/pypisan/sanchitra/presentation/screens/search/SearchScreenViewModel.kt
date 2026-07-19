@@ -2,7 +2,7 @@ package com.pypisan.sanchitra.presentation.screens.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pypisan.sanchitra.data.models.IPTVChannel
+import com.pypisan.sanchitra.data.entities.IPTVChannel
 import com.pypisan.sanchitra.data.repositories.IPTVRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow

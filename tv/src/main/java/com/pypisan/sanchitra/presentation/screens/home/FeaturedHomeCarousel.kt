@@ -66,10 +66,8 @@ import com.pypisan.sanchitra.utils.Padding
 import com.pypisan.sanchitra.utils.handleDPadKeyEvents
 
 @OptIn(ExperimentalTvMaterial3Api::class)
-val CarouselSaver = Saver<CarouselState, Int>(
-    save = { it.activeItemIndex },
-    restore = { CarouselState(it) }
-)
+val CarouselSaver =
+    Saver<CarouselState, Int>(save = { it.activeItemIndex }, restore = { CarouselState(it) })
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -114,7 +112,9 @@ fun FeaturedHomeCarousel(
 
     Carousel(
         modifier = modifier
-            .padding(start = padding.start, end = padding.start, top = padding.top)
+            .padding(
+                start = padding.start, end = padding.start, top = padding.top
+            )
             .border(
                 width = JetStreamBorderWidth,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
@@ -123,15 +123,13 @@ fun FeaturedHomeCarousel(
             .clip(ShapeDefaults.Medium)
             .focusRequester(focusRequester)
             .onFocusChanged {
-                // Because the carousel itself never gets the focus
                 isCarouselFocused = it.hasFocus
                 if (it.hasFocus) {
                     onCarouselFocused()
                 }
             }
             .semantics {
-                contentDescription =
-                    StringConstants.Composable.ContentDescription.MoviesCarousel
+                contentDescription = StringConstants.Composable.ContentDescription.MoviesCarousel
             }
             .handleDPadKeyEvents(onEnter = {
                 goToTVPlayer(channels[carouselState.activeItemIndex].id)
@@ -140,26 +138,28 @@ fun FeaturedHomeCarousel(
         carouselState = carouselState,
         carouselIndicator = {
             CarouselIndicator(
-                itemCount = channels.size,
-                activeItemIndex = carouselState.activeItemIndex
+                itemCount = channels.size, activeItemIndex = carouselState.activeItemIndex
             )
         },
-        contentTransformStartToEnd = fadeIn(tween(durationMillis = 1000))
-            .togetherWith(fadeOut(tween(durationMillis = 1000))),
-        contentTransformEndToStart = fadeIn(tween(durationMillis = 1000))
-            .togetherWith(fadeOut(tween(durationMillis = 1000))),
+        contentTransformStartToEnd = fadeIn(tween(durationMillis = 1000)).togetherWith(
+                fadeOut(
+                    tween(durationMillis = 1000)
+                )
+            ),
+        contentTransformEndToStart = fadeIn(tween(durationMillis = 1000)).togetherWith(
+                fadeOut(
+                    tween(durationMillis = 1000)
+                )
+            ),
         content = { index ->
             val channel = channels[index]
-            // background
             CarouselItemBackground(channel = channel, modifier = Modifier.fillMaxSize())
-            // foreground
             CarouselItemForeground(
                 channel = channel,
                 isCarouselFocused = isCarouselFocused,
                 modifier = Modifier.fillMaxSize()
             )
-        }
-    )
+        })
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -177,8 +177,7 @@ private fun BoxScope.CarouselIndicator(
                 clip = true
                 shape = ShapeDefaults.ExtraSmall
             }
-            .align(Alignment.BottomEnd)
-    ) {
+            .align(Alignment.BottomEnd)) {
         CarouselDefaults.IndicatorRow(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -196,8 +195,7 @@ private fun CarouselItemForeground(
     isCarouselFocused: Boolean = false
 ) {
     Box(
-        modifier = modifier,
-        contentAlignment = Alignment.BottomStart
+        modifier = modifier, contentAlignment = Alignment.BottomStart
     ) {
         Column(
             modifier = Modifier
@@ -206,57 +204,47 @@ private fun CarouselItemForeground(
             verticalArrangement = Arrangement.Bottom
         ) {
             Text(
-                text = channel.name,
-                style = MaterialTheme.typography.displayMedium.copy(
+                text = channel.name, style = MaterialTheme.typography.displayMedium.copy(
                     shadow = Shadow(
                         color = Color.Black.copy(alpha = 0.5f),
                         offset = Offset(x = 2f, y = 4f),
                         blurRadius = 2f
                     )
-                ),
-                maxLines = 1
+                ), maxLines = 1
             )
             Text(
-                text = channel.name,
-                style = MaterialTheme.typography.titleMedium.copy(
+                text = channel.name, style = MaterialTheme.typography.titleMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface.copy(
                         alpha = 0.65f
-                    ),
-                    shadow = Shadow(
+                    ), shadow = Shadow(
                         color = Color.Black.copy(alpha = 0.5f),
                         offset = Offset(x = 2f, y = 4f),
                         blurRadius = 2f
                     )
-                ),
-                maxLines = 1,
-                modifier = Modifier.padding(top = 8.dp)
+                ), maxLines = 1, modifier = Modifier.padding(top = 8.dp)
             )
             AnimatedVisibility(
-                visible = isCarouselFocused,
-                content = {
+                visible = isCarouselFocused, content = {
                     WatchNowButton()
-                }
-            )
+                })
         }
     }
 }
 
 @Composable
-private fun CarouselItemBackground(channel: TrendingChannel, modifier: Modifier = Modifier) {
+private fun CarouselItemBackground(
+    channel: TrendingChannel,
+    modifier: Modifier = Modifier
+) {
     AsyncImage(
         model = channel.bannerUrl,
-        contentDescription = StringConstants
-            .Composable
-            .ContentDescription
-            .moviePoster(channel.name),
-        modifier = modifier
-            .drawWithContent {
+        contentDescription = StringConstants.Composable.ContentDescription.moviePoster(channel.name),
+        modifier = modifier.drawWithContent {
                 drawContent()
                 drawRect(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.5f)
+                            Color.Transparent, Color.Black.copy(alpha = 0.5f)
                         )
                     )
                 )
@@ -285,8 +273,7 @@ private fun WatchNowButton() {
         )
         Spacer(Modifier.size(8.dp))
         Text(
-            text = stringResource(R.string.watch_now),
-            style = MaterialTheme.typography.titleSmall
+            text = stringResource(R.string.watch_now), style = MaterialTheme.typography.titleSmall
         )
     }
 }

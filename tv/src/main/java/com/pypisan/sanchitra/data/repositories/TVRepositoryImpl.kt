@@ -1,13 +1,11 @@
 package com.pypisan.sanchitra.data.repositories
 
-
-import android.util.Log
 import com.pypisan.sanchitra.utils.APIService
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import com.pypisan.sanchitra.data.models.Channel
+import com.pypisan.sanchitra.data.entities.Channel
 import com.pypisan.sanchitra.data.models.toDomain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob

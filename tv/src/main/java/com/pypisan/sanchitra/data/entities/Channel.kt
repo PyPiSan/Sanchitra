@@ -1,10 +1,11 @@
-package com.pypisan.sanchitra.data.models
+package com.pypisan.sanchitra.data.entities
 
 data class Channel(
     val id: Int,
     val name: String,
     val category: String,
     val logoUrl: String?,
+    val description: String?,
     val bannerUrl: String?,
     val streamUrl: String,
     val language: String,

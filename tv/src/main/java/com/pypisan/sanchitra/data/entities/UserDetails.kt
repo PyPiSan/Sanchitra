@@ -1,4 +1,4 @@
-package com.pypisan.sanchitra.data.models
+package com.pypisan.sanchitra.data.entities
 
 import com.google.gson.annotations.SerializedName
 
