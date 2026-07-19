@@ -1,10 +1,10 @@
 package com.pypisan.sanchitra.presentation.screens.categories
 
-import android.util.Log
+
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pypisan.sanchitra.data.models.IPTVChannel
+import com.pypisan.sanchitra.data.entities.IPTVChannel
 import com.pypisan.sanchitra.data.repositories.IPTVRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi

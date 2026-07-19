@@ -8,9 +8,3 @@ data class ProgramDisplayModel(
     val endTime: String,
     val progress: Float
 )
-
-data class EpgScheduleWindow(
-    val current: ProgramDisplayModel?,
-    val previous: List<ProgramDisplayModel>,
-    val next: List<ProgramDisplayModel>
-)

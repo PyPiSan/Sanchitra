@@ -2,7 +2,7 @@ package com.pypisan.sanchitra.presentation.screens.livetv
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pypisan.sanchitra.data.models.Channel
+import com.pypisan.sanchitra.data.entities.Channel
 import com.pypisan.sanchitra.data.repositories.TVRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

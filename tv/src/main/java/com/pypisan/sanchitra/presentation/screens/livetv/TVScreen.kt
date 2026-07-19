@@ -1,5 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.livetv
 
+//Entry Point for TV TAB
+
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,8 +22,9 @@ import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pypisan.sanchitra.data.models.Channel
+import com.pypisan.sanchitra.data.entities.Channel
 import com.pypisan.sanchitra.presentation.common.Loading
+import com.pypisan.sanchitra.presentation.screens.common.CommonErrorScreen
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 
@@ -40,7 +43,7 @@ fun TVScreen(
         }
 
         is TVScreenViewModel.TVScreenUiState.Error -> {
-            TVErrorScreen(message = s.message)
+            CommonErrorScreen(message = s.message)
         }
 
         is TVScreenViewModel.TVScreenUiState.Ready -> {
@@ -79,12 +82,12 @@ fun TVCatalog(
         }
     }
 
+    var focusedSection by rememberSaveable { mutableStateOf("") }
+    var lastFocusedChannelId by rememberSaveable { mutableStateOf<Int?>(null) }
+
     LaunchedEffect(shouldShowTopBar) {
         onScroll(shouldShowTopBar)
     }
-
-    var focusedSection by rememberSaveable { mutableStateOf("") }
-    var lastFocusedChannelId by rememberSaveable { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(isTopBarVisible) {
         if (isTopBarVisible) {
@@ -94,20 +97,21 @@ fun TVCatalog(
 
     LazyColumn(
         state = lazyListState,
-        contentPadding = PaddingValues(top = childPadding.top, bottom = 104.dp),
+        contentPadding = PaddingValues(
+            top = childPadding.top,
+            bottom = 104.dp
+        ),
         modifier = modifier
             .focusGroup()
             .focusRestorer(),
     ) {
 
-        item( key = "Carousel") {
+        item( key = "carousel") {
             TVScreenChannelList(
                 channelList = carouselList,
                 goToTVPlayer = goToTVPlayer,
-                isActive = focusedSection == "Carousel",
-                lastFocusedChannelId = lastFocusedChannelId,
                 onChannelFocused = {
-                    focusedSection = "Carousel"
+                    focusedSection = "carousel"
                     lastFocusedChannelId = it
                 }
             )

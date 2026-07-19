@@ -119,8 +119,8 @@ class OnboardingViewModel @Inject constructor(
 
                     UserProfileMap(
                         id = it.id,
-                        name = it.profile_name,
-                        imageUrl = it.profile_picture,
+                        name = it.profileName,
+                        imageUrl = it.profilePicture,
                         icon = Icons.Default.AccountCircle
                     )
                 }

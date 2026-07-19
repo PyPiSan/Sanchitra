@@ -12,8 +12,8 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.pypisan.sanchitra.data.entities.Videos
-import com.pypisan.sanchitra.data.models.Channel
-import com.pypisan.sanchitra.data.models.IPTVChannel
+import com.pypisan.sanchitra.data.entities.Channel
+import com.pypisan.sanchitra.data.entities.IPTVChannel
 import com.pypisan.sanchitra.data.models.TrendingChannel
 import com.pypisan.sanchitra.data.util.StringConstants
 

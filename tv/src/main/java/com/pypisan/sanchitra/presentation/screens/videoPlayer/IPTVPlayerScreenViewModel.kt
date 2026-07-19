@@ -6,7 +6,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pypisan.sanchitra.data.models.EPGResponse
-import com.pypisan.sanchitra.data.models.IPTVChannelDetail
+import com.pypisan.sanchitra.data.entities.IPTVChannelDetail
 import com.pypisan.sanchitra.data.repositories.EPGManager
 import com.pypisan.sanchitra.data.repositories.IPTVRepository
 import com.pypisan.sanchitra.data.repositories.IPTVRepositoryImpl
