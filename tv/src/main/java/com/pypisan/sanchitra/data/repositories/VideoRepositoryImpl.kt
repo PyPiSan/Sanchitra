@@ -7,14 +7,12 @@ import com.pypisan.sanchitra.utils.MediaAPIService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
-import kotlin.collections.emptyList
 import kotlin.collections.map
 import kotlin.collections.orEmpty
 
@@ -25,40 +23,54 @@ class VideoRepositoryImpl  @Inject constructor (
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    private val videosFlow: StateFlow<List<Videos>> = flow {
+    private val videosFlow: StateFlow<Map<String, List<Videos>>> = flow {
         val response = api.getMoviesList()
 
         if (response.isSuccessful) {
-            emit(response.body()?.videos.orEmpty().map { it.toDomain() })
+            emit(
+                response.body()
+                    ?.videos
+                    ?.mapValues { (_, videos) ->
+                        videos.map { it.toDomain() }
+                    }
+                .orEmpty()
+            )
         } else {
-            emit(emptyList())
+            emit(emptyMap())
         }
     }
         .catch {
-            emit(emptyList())
+            emit(emptyMap())
         }
         .stateIn(
             scope = scope,
             started = SharingStarted.Eagerly,
-            initialValue = emptyList()
+            initialValue = emptyMap()
         )
 
-    private val carouselVideosFlow: StateFlow<List<Videos>> = flow {
+    private val carouselVideosFlow: StateFlow<Map<String, List<Videos>>>  = flow {
         val response = api.getCarouselVideoList()
 
         if (response.isSuccessful) {
-            emit(response.body()?.videos.orEmpty().map { it.toDomain() })
+            emit(
+                response.body()
+                    ?.videos
+                    ?.mapValues { (_, videos) ->
+                        videos.map { it.toDomain() }
+                    }
+                    .orEmpty()
+            )
         } else {
-            emit(emptyList())
+            emit(emptyMap())
         }
     }
         .catch {
-            emit(emptyList())
+            emit(emptyMap())
         }
         .stateIn(
             scope = scope,
             started = SharingStarted.Eagerly,
-            initialValue = emptyList()
+            initialValue = emptyMap()
         )
 
     override fun getVideoDetails(movieId: Int): StateFlow<Videos?> =
@@ -82,8 +94,8 @@ class VideoRepositoryImpl  @Inject constructor (
                 initialValue = null
             )
 
-    override fun getVideos(): Flow<List<Videos>> = videosFlow
-    override fun getCarouselVideos(): Flow<List<Videos>> = carouselVideosFlow
+    override fun getVideos(): StateFlow<Map<String, List<Videos>>> = videosFlow
+    override fun getCarouselVideos(): StateFlow<Map<String, List<Videos>>> = carouselVideosFlow
 
     override suspend fun updateMovieViewCount(movieID: Int) {
         api.updateMovieViewCount(movieID)

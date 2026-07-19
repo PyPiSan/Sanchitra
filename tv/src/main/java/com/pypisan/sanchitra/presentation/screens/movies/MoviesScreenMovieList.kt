@@ -3,7 +3,6 @@ package com.pypisan.sanchitra.presentation.screens.movies
 import com.pypisan.sanchitra.presentation.theme.JetStreamBorderWidth
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -14,18 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -52,33 +47,9 @@ fun MoviesScreenMovieList(
     onMovieClick: (video: Videos) -> Unit,
     onMovieFocused: (Int) -> Unit
 ) {
-    val listState = rememberLazyListState()
-
-    // 1. Manually track the ID (survives perfectly because the screen is never destroyed)
-    var lastFocusedId by rememberSaveable { mutableStateOf<Int?>(null) }
-
-    // 2. Map Requesters for the interceptor
-    val focusRequesters = remember(videoList) {
-        videoList.associate { it.id to FocusRequester() }
-    }
 
     LazyRow(
-        modifier = modifier
-            .focusGroup()
-            // 3. THE MAGIC INTERCEPTOR
-            .focusProperties {
-                onEnter = {
-                    // When focus tries to enter this row, explicitly route it to our saved ID!
-                    val target = lastFocusedId ?: videoList.firstOrNull()?.id
-
-                    if (target != null && focusRequesters.containsKey(target)) {
-                        focusRequesters[target]!! // Send focus here
-                    } else {
-                        FocusRequester.Default // Fallback
-                    }
-                }
-            },
-        state = listState,
+        modifier = modifier.focusRestorer(),
         contentPadding = PaddingValues(
             start = startPadding,
             end = endPadding
@@ -87,9 +58,7 @@ fun MoviesScreenMovieList(
         itemsIndexed(
             items = videoList,
             key = { _, movie -> movie.id }
-        ) { index, movie ->
-
-            val focusRequester = focusRequesters[movie.id] ?: FocusRequester()
+        ) { _, movie ->
 
             val onCardClicked = remember(movie.id) {
                 { onMovieClick(movie) }
@@ -97,16 +66,10 @@ fun MoviesScreenMovieList(
 
             MovieListItem(
                 modifier = Modifier
-                    .focusRequester(focusRequester)
                     .onFocusChanged {
                         if (it.isFocused) {
-                            // 4. Update our memory every time a new card is highlighted
-                            lastFocusedId = movie.id
                             onMovieFocused(movie.id)
                         }
-                    }
-                    .focusProperties {
-                        left = if (index == 0) FocusRequester.Cancel else FocusRequester.Default
                     },
                 itemWidth = 432.dp,
                 onMovieClick = { onCardClicked() },
@@ -123,12 +86,14 @@ private fun MovieListItem(
     modifier: Modifier = Modifier,
     onMovieClick: (video: Videos) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
         Spacer(modifier = Modifier.height(JetStreamBorderWidth))
         var isFocused by remember { mutableStateOf(false) }
 
         CompactCard(
-            modifier = modifier // The logged modifier is passed directly here
+            modifier = modifier
                 .width(itemWidth)
                 .aspectRatio(2f)
                 .padding(end = 32.dp)
@@ -158,15 +123,16 @@ private fun MovieListItem(
             title = {
                 Column {
                     Text(
-                        text = video.title,
+                        text = video.meta.description.takeIf { it.isNotBlank() } ?: video.title,
+                        maxLines = 2,
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Normal),
-                        modifier = Modifier.graphicsLayer { alpha = 0.6f }.padding(start = 24.dp)
+                        modifier = Modifier.graphicsLayer { alpha = 0.6f }.padding(start = 24.dp, end = 24.dp),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = video.title,
                         style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
-                        color = MaterialTheme.colorScheme.onSurface
+                        modifier = Modifier.padding(start = 24.dp, bottom = 24.dp)
                     )
                 }
             }

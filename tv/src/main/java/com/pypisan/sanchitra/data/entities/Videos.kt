@@ -22,5 +22,9 @@ data class VideoMeta(
     val trailer: String?,
     val releaseDate: String?,
     val subtitleUrl: String?,
+    val imdbRating: String?,
+    val rottenTomatoes: String?,
+    val budget: String?,
+    val revenue: String?,
 
 )

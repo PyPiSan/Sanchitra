@@ -1,6 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
-import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.view.WindowManager
@@ -8,8 +7,6 @@ import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -20,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,6 +30,7 @@ import androidx.tv.material3.MaterialTheme
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
+import com.pypisan.sanchitra.data.util.findActivity
 import com.pypisan.sanchitra.presentation.common.Loading
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -44,17 +41,17 @@ fun VideoPlayerScreen(
     videoPlayerScreenViewModel: VideoPlayerScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val activity = context as Activity
+    val activity = context.findActivity()
 
     LaunchedEffect(metaId) {
         videoPlayerScreenViewModel.loadVideo(metaId)
     }
 
     DisposableEffect(Unit) {
-        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         onDispose {
-            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             videoPlayerScreenViewModel.reset()
         }
     }
@@ -80,31 +77,14 @@ fun VideoPlayerScreen(
             .focusRequester(focusRequester)
             .focusProperties { onExit = { FocusRequester.Cancel } } // Traps D-Pad
             .focusGroup()
-            // Holds focus during loading, then passes it to ExoPlayer controls!
-            .focusable(uiState !is VideoPlayerScreenUiState.Done)
-            .pointerInput(Unit) { detectTapGestures { } }
     ) {
         when (val s = uiState) {
             VideoPlayerScreenUiState.Loading -> {
-                // 2. FOCUSABLE LOADING: Wrap in a focusable Box so we can securely
-                // hold the focus on this layer while the video compiles!
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .focusable()
-                ) {
                     Loading(modifier = Modifier.fillMaxSize())
-                }
             }
 
             VideoPlayerScreenUiState.Error -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .focusable()
-                ) {
                     Error(modifier = Modifier.fillMaxSize())
-                }
             }
 
             is VideoPlayerScreenUiState.Done -> {

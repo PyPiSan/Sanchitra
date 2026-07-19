@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.android.awaitFrame
 
 @Composable
 fun VideoPlayerOverlay(
@@ -52,17 +51,6 @@ fun VideoPlayerOverlay(
         targetValue = if (isControlsVisible) 140.dp else 36.dp,
         label = ""
     )
-
-    LaunchedEffect(isControlsVisible, isSubtitleDrawerVisible) {
-        // Only request focus on underlying controls IF controls are visible AND NO overlay is open
-        if (isControlsVisible && !isSubtitleDrawerVisible) {
-            try {
-                awaitFrame()
-                focusRequester.requestFocus() // Focus underlying controls (e.g., play button)
-            } catch (_: Exception) {
-            }
-        }
-    }
 
     LaunchedEffect(isPlaying) {
         showControls()
