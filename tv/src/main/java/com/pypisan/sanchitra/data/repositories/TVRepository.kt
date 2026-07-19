@@ -1,7 +1,6 @@
 package com.pypisan.sanchitra.data.repositories
 
-import com.pypisan.sanchitra.data.models.Channel
-import kotlinx.coroutines.flow.Flow
+import com.pypisan.sanchitra.data.entities.Channel
 import kotlinx.coroutines.flow.StateFlow
 
 interface TVRepository {

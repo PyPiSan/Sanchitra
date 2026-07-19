@@ -1,6 +1,7 @@
 package com.pypisan.sanchitra.data.models
 
 import com.google.gson.annotations.SerializedName
+import com.pypisan.sanchitra.data.entities.IPTVChannelDetail
 
 
 data class IPTVChannelDetailDto(

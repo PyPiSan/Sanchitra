@@ -47,7 +47,6 @@ import com.pypisan.sanchitra.presentation.screens.movies.MoviesScreen
 import com.pypisan.sanchitra.presentation.screens.profile.ProfileScreen
 import com.pypisan.sanchitra.presentation.screens.home.HomeScreen
 import com.pypisan.sanchitra.presentation.screens.livetv.TVScreen
-import com.pypisan.sanchitra.presentation.screens.search.SearchScreen
 import com.pypisan.sanchitra.utils.Padding
 
 val ParentPadding = PaddingValues(vertical = 16.dp, horizontal = 58.dp)
@@ -172,10 +171,10 @@ fun DashboardScreen(
             }
         }
 
+
         Body(
             openCategoryIPTVList = openCategoryIPTVList,
             openMovieDetailsScreen = openMovieDetailsScreen,
-            openVideoPlayer = openVideoPlayer,
             openTVPlayer = openTVPlayer,
             updateTopBarVisibility = { isTopBarVisible = it },
             isTopBarVisible = isTopBarVisible,
@@ -209,7 +208,6 @@ private fun BackPressHandledArea(
 private fun Body(
     openCategoryIPTVList: (categoryName: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
-    openVideoPlayer: (Videos) -> Unit,
     openTVPlayer: (channelId: Int) -> Unit,
     updateTopBarVisibility: (Boolean) -> Unit,
     modifier: Modifier = Modifier,

@@ -5,7 +5,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,24 +24,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.ui.AspectRatioFrameLayout
-import androidx.media3.ui.PlayerView
+import androidx.media3.ui.compose.PlayerSurface
+import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
+import androidx.media3.ui.compose.modifiers.resizeWithContentScale
+import androidx.media3.ui.compose.state.rememberPresentationState
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -64,6 +62,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MovieDetails(
     video: Videos,
+    isPlayerActive: Boolean,
     openVideoPlayer: (metaId: String) -> Unit
 ) {
     val childPadding = rememberChildPadding()
@@ -78,7 +77,8 @@ fun MovieDetails(
     ) {
         MovieImageWithGradients(
             video = video,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            isPlayerActive = isPlayerActive
         )
 
         Column(modifier = Modifier.fillMaxWidth(0.55f)) {
@@ -145,36 +145,36 @@ private fun WatchMovieButton(
     }
 }
 
-@Composable
-private fun DirectorScreenplayMusicRow(
-    director: String,
-    screenplay: String,
-    music: String
-) {
-    Row(modifier = Modifier.padding(top = 32.dp)) {
-        TitleValueText(
-            modifier = Modifier
-                .padding(end = 32.dp)
-                .weight(1f),
-            title = stringResource(R.string.director),
-            value = director
-        )
-
-        TitleValueText(
-            modifier = Modifier
-                .padding(end = 32.dp)
-                .weight(1f),
-            title = stringResource(R.string.screenplay),
-            value = screenplay
-        )
-
-        TitleValueText(
-            modifier = Modifier.weight(1f),
-            title = stringResource(R.string.music),
-            value = music
-        )
-    }
-}
+//@Composable
+//private fun DirectorScreenplayMusicRow(
+//    director: String,
+//    screenplay: String,
+//    music: String
+//) {
+//    Row(modifier = Modifier.padding(top = 32.dp)) {
+//        TitleValueText(
+//            modifier = Modifier
+//                .padding(end = 32.dp)
+//                .weight(1f),
+//            title = stringResource(R.string.director),
+//            value = director
+//        )
+//
+//        TitleValueText(
+//            modifier = Modifier
+//                .padding(end = 32.dp)
+//                .weight(1f),
+//            title = stringResource(R.string.screenplay),
+//            value = screenplay
+//        )
+//
+//        TitleValueText(
+//            modifier = Modifier.weight(1f),
+//            title = stringResource(R.string.music),
+//            value = music
+//        )
+//    }
+//}
 
 @Composable
 private fun MovieDescription(description: String) {
@@ -199,17 +199,16 @@ private fun MovieLargeTitle(movieTitle: String) {
         maxLines = 2
     )
 }
-
 @androidx.annotation.OptIn(UnstableApi::class, ExperimentalTvMaterial3Api::class)
 @Composable
 private fun MovieImageWithGradients(
     video: Videos,
+    isPlayerActive: Boolean,
     modifier: Modifier = Modifier,
     gradientColor: Color = MaterialTheme.colorScheme.surface,
 ) {
     Box(modifier = modifier) {
 
-        // ===== ALWAYS SHOW IMAGE =====
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(video.meta.banner)
@@ -224,10 +223,11 @@ private fun MovieImageWithGradients(
         )
 
         // ===== TRAILER PLAYER =====
-        if (!video.meta.trailer.isNullOrEmpty()) {
+        if (!video.meta.trailer.isNullOrEmpty() && !isPlayerActive) {
 
             val exoPlayer = loopPlayer(video.meta.trailer, 50f)
             var isVideoReady by remember { mutableStateOf(false) }
+            val presentationState = rememberPresentationState(exoPlayer)
 
             DisposableEffect(exoPlayer) {
                 val listener = object : Player.Listener {
@@ -243,9 +243,9 @@ private fun MovieImageWithGradients(
                 }
             }
 
-            if (isVideoReady) {
+            val videoSize = presentationState.videoSizeDp
+            if (isVideoReady && videoSize != null) {
 
-                // 1. Fixed the underlying Box to use 'gradientColor' instead of 'Color.Black'
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -254,30 +254,22 @@ private fun MovieImageWithGradients(
                                 colors = listOf(
                                     DeepPurple300.copy(alpha = 0.8f),
                                     BlueGray300.copy(alpha = 0.6f),
-                                    gradientColor // <--- CHANGED THIS
+                                    gradientColor
                                 )
                             )
                         )
                 )
 
-                AndroidView(
-                    factory = { context ->
-                        PlayerView(context).apply {
-                            player = exoPlayer
-                            useController = false
-                            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-                            setKeepContentOnPlayerReset(true)
-                            setShutterBackgroundColor(android.graphics.Color.TRANSPARENT)
-
-                            // 1. Tell Android exactly where the borders of this View are
-                            outlineProvider = android.view.ViewOutlineProvider.BOUNDS
-                            // 2. Force the hardware to chop off the oversized zoomed SurfaceView
-                            clipToOutline = true
-                        }
-                    },
+                PlayerSurface(
+                    player = exoPlayer,
+                    surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(RectangleShape) // Keep this to enforce standard Compose bounding as well
+                        // This will now crop perfectly instantly with zero black bars!
+                        .resizeWithContentScale(
+                            contentScale = ContentScale.Crop,
+                            sourceSizeDp = videoSize
+                        )
                 )
             }
         }
@@ -288,9 +280,6 @@ private fun MovieImageWithGradients(
                 .fillMaxSize()
                 .drawWithContent {
                     drawContent()
-
-                    // FIX: Use relative sizes (size.height / size.width) instead of hardcoded floats (600f)
-                    // This ensures the gradient perfectly aligns with the bottom edge on ALL TV resolutions.
 
                     // Bottom fading into the background
                     drawRect(

@@ -1,11 +1,14 @@
 package com.pypisan.sanchitra.presentation.screens.movies
 
+//Entry Point for Movies TAB
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,9 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pypisan.sanchitra.data.entities.Videos
-import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.presentation.common.MoviesRow
+import com.pypisan.sanchitra.presentation.screens.common.CommonErrorScreen
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 @Composable
@@ -40,13 +43,13 @@ fun MoviesScreen(
         is MoviesScreenUiState.Loading -> Loading(modifier = Modifier.fillMaxSize())
 
         is MoviesScreenUiState.Error -> {
-            MovieErrorScreen(message = s.message)
+            CommonErrorScreen(message = s.message)
         }
 
         is MoviesScreenUiState.Ready -> {
             Catalog(
                 carouselMovieList = s.carouselMovieList,
-                popularFilms = s.popularFilms,
+                categorizedMovies = s.categorizedMovies,
                 onMovieClick = onMovieClick,
                 onScroll = onScroll,
                 isTopBarVisible = isTopBarVisible,
@@ -59,7 +62,7 @@ fun MoviesScreen(
 @Composable
 private fun Catalog(
     carouselMovieList: List<Videos>,
-    popularFilms: List<Videos>,
+    categorizedMovies: Map<String, List<Videos>>,
     onMovieClick: (video: Videos) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
@@ -68,8 +71,13 @@ private fun Catalog(
 
     val childPadding = rememberChildPadding()
     val lazyListState = rememberLazyListState()
+
     var focusedRowIndex by rememberSaveable {
         mutableIntStateOf(0)
+    }
+
+    val categoryList = remember(categorizedMovies) {
+        categorizedMovies.entries.toList()
     }
 
     var focusedSection by rememberSaveable { mutableStateOf("") }
@@ -100,7 +108,9 @@ private fun Catalog(
     }
 
     LazyColumn(
-        modifier = modifier.focusRestorer(),
+        modifier = modifier
+            .focusGroup()
+            .focusRestorer(),
         state = lazyListState,
         contentPadding = PaddingValues(
             top = childPadding.top,
@@ -117,21 +127,25 @@ private fun Catalog(
                 },
                 onMovieFocused = {
                     focusedSection = "Carousel"
-                    focusedRowIndex = 0
+                    lastFocusedMovieId = it
                 }
             )
         }
 
-        item(key = "popular_films") {
+        items(
+            items = categoryList,
+            key = { it.key }
+        ) { entry ->
             MoviesRow(
                 modifier = Modifier.padding(top = childPadding.top),
-                title = StringConstants.Composable.PopularFilmsTitle,
-                videoList = popularFilms,
-                onMovieFocused = { video ->
-                    focusedRowIndex = 1
+                title = entry.key,
+                videoList = entry.value,
+                onMovieFocused = {
+                    focusedSection = entry.key
+                    lastFocusedMovieId = it.id
                 },
                 onMovieSelected = { video ->
-                    focusedRowIndex = 1
+                    focusedSection = entry.key
                     sharedVideoVM.setVideo(video)
                     onMovieClick(video)
                 }

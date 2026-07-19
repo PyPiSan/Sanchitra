@@ -22,14 +22,17 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -47,7 +50,6 @@ fun VideoPlayerControls(
     title: String,
     currentEpisode: String,
     nextEpisode: String,
-    focusRequester: FocusRequester,
     onShowControls: () -> Unit = {},
     onShowInfo: () -> Unit = {},
     onShowAudioSettings: () -> Unit = {},
@@ -63,6 +65,9 @@ fun VideoPlayerControls(
                 !player.isCurrentMediaItemSeekable
     }
 
+    val playButtonRequester = remember { FocusRequester() }
+    var hasFocusedPlayButton by remember { mutableStateOf(false) }
+
     VideoPlayerMainFrame(
         mediaTitle = {
             Column {
@@ -74,13 +79,20 @@ fun VideoPlayerControls(
                 )
 
                 VideoPlayerControlsIcon(
-                    modifier = Modifier.focusRequester(focusRequester),
+                    modifier = Modifier
+                        .focusRequester(playButtonRequester)
+                        .onGloballyPositioned {
+                            if (!hasFocusedPlayButton) {
+                                try {
+                                    playButtonRequester.requestFocus()
+                                    hasFocusedPlayButton = true
+                                } catch (e: Exception) {}
+                            }
+                        },
                     icon = if (state.showPlay) Icons.Default.PlayArrow else Icons.Default.Pause,
                     onClick = state::onClick,
                     isPlaying = player.isPlaying,
-                    contentDescription = StringConstants
-                        .Composable
-                        .VideoPlayerControlPlayPauseButton
+                    contentDescription = StringConstants.Composable.VideoPlayerControlPlayPauseButton
                 )
             }
         },
@@ -151,7 +163,6 @@ fun VideoPlayerControls(
                     // Standard interactive seeker for movies
                     VideoPlayerSeeker(
                         player = player,
-                        focusRequester = focusRequester,
                         onShowControls = onShowControls,
                         modifier = Modifier
                             .fillMaxWidth()

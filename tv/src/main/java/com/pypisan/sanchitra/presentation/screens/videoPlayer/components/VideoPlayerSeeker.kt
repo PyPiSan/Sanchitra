@@ -10,7 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import kotlin.time.Duration.Companion.milliseconds
@@ -20,7 +19,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun VideoPlayerSeeker(
     player: Player,
-    focusRequester: FocusRequester,
+//    focusRequester: FocusRequester,
     modifier: Modifier = Modifier,
     onSeek: (Float) -> Unit = {
         player.seekTo(player.duration.times(it).toLong())

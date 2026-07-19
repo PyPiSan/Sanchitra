@@ -1,6 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.movies
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pypisan.sanchitra.data.entities.Videos
@@ -18,20 +17,34 @@ class MoviesScreenViewModel @Inject constructor(
     videoRepository: VideoRepository
 ) : ViewModel() {
 
+    private var cachedVideosCategories: Map<String, List<Videos>>? = null
+
+    private var cachedCarousel: List<Videos>? = null
+
     val uiState : StateFlow<MoviesScreenUiState> =
-        combine(
+        combine<Map<String, List<Videos>>, Map<String, List<Videos>>, MoviesScreenUiState>(
             videoRepository.getVideos(),
             videoRepository.getCarouselVideos()
         ) { videos, carousel ->
 
-            if (videos.isEmpty() && carousel.isEmpty()) {
+            val featuredVideos = carousel["Featured Videos"] ?: emptyList()
+            if (videos.isEmpty() && featuredVideos.isEmpty()) {
+                if (cachedVideosCategories != null && cachedCarousel != null) {
+                    return@combine MoviesScreenUiState.Ready(
+                        categorizedMovies = cachedVideosCategories!!,
+                        carouselMovieList = cachedCarousel!!
+                    )
+                }
                 return@combine MoviesScreenUiState.Loading
             }
 
+            cachedVideosCategories = videos
+            cachedCarousel = featuredVideos
+
 
             MoviesScreenUiState.Ready(
-                carouselMovieList = carousel,
-                popularFilms = videos
+                carouselMovieList = featuredVideos,
+                categorizedMovies = videos
             )
         }.catch { e ->
             emit(MoviesScreenUiState.Error(e.message ?: "Something went wrong"))
@@ -47,7 +60,7 @@ sealed interface MoviesScreenUiState {
     data object Loading : MoviesScreenUiState
     data class Ready(
         val carouselMovieList: List<Videos>,
-        val popularFilms: List<Videos>
+        val categorizedMovies: Map<String, List<Videos>>
     ) : MoviesScreenUiState
 
     data class Error(

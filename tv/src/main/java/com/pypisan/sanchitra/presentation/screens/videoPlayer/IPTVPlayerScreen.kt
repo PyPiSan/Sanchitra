@@ -1,6 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
-import android.app.Activity
+
 import android.content.Context
 import android.os.Build
 import android.view.WindowManager
@@ -8,8 +8,6 @@ import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -24,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,7 +35,8 @@ import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
 import com.pypisan.sanchitra.data.models.EPGResponse
-import com.pypisan.sanchitra.data.models.IPTVChannelDetail
+import com.pypisan.sanchitra.data.entities.IPTVChannelDetail
+import com.pypisan.sanchitra.data.util.findActivity
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.common.Loading
 
@@ -50,19 +48,17 @@ fun IPTVPlayerScreen(
     iptvPlayerScreenViewModel: IPTVPlayerScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val activity = context as Activity
+    val activity = context.findActivity()
 
-    // 1. Tell ViewModel to load data based on the ID passed from Overlay
     LaunchedEffect(channelId) {
         iptvPlayerScreenViewModel.loadChannel(channelId)
     }
 
     DisposableEffect(Unit) {
-        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         onDispose {
-            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            // 2. Wipe memory so the next video starts clean
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             iptvPlayerScreenViewModel.reset()
         }
     }
@@ -72,49 +68,21 @@ fun IPTVPlayerScreen(
 
     val focusRequester = remember { FocusRequester() }
 
-    // 3. Request focus with a dynamic delay
-    // FIXED: Corrected type check to use IPTVPlayerScreenUiState.Done
-    LaunchedEffect(uiState) {
-        val delayTime = if (uiState is IPTVPlayerScreenUiState.Done) 250L else 50L
-        kotlinx.coroutines.delay(delayTime)
-        try {
-            focusRequester.requestFocus()
-        } catch (e: Exception) {
-            // Ignore silently
-        }
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
             .focusRequester(focusRequester)
-            .focusProperties { onExit = { FocusRequester.Cancel } } // Traps D-Pad
+            .focusProperties { onExit = { FocusRequester.Cancel } }
             .focusGroup()
-            // FIXED: Corrected type check to use IPTVPlayerScreenUiState.Done
-            .focusable(uiState !is IPTVPlayerScreenUiState.Done)
-            .pointerInput(Unit) { detectTapGestures { } }
     ) {
         when (val s = uiState) {
             is IPTVPlayerScreenUiState.Loading -> {
-                // 4. Wrap loaders in focusable Boxes to hold focus while buffering
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .focusable()
-                ) {
-                    Loading(modifier = Modifier.fillMaxSize())
-                }
+                Loading(modifier = Modifier.fillMaxSize())
             }
 
             is IPTVPlayerScreenUiState.Error -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .focusable()
-                ) {
-                    Error(modifier = Modifier.fillMaxSize())
-                }
+                Error(modifier = Modifier.fillMaxSize())
             }
 
             is IPTVPlayerScreenUiState.Done -> {
@@ -177,9 +145,10 @@ fun IPTVPlayerBuild(
 
             subtitles = listOf(
                 SubtitleTrack(
-                    label = "Off", language = "off", group = null, trackIndex = -1,
-
-                    // OFF only selected when nothing selected
+                    label = "Off",
+                    language = "off",
+                    group = null,
+                    trackIndex = -1,
                     isSelected = !hasSelectedTrack
                 )
             ) + newTracks

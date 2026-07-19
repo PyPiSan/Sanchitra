@@ -18,14 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -36,6 +31,7 @@ import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.data.entities.MovieReviewsAndRatings
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.util.StringConstants
+import com.pypisan.sanchitra.data.util.findActivity
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
@@ -49,36 +45,21 @@ fun MovieDetailsScreen(
     openVideoPlayer: (metaId: String) -> Unit,
     onBackPressed: () -> Unit,
 ) {
-    val sharedVideoVM: VideoSharedViewModel =
-        hiltViewModel(LocalContext.current as ComponentActivity)
+    val context = LocalContext.current
+    val activity = context.findActivity() as ComponentActivity
+
+    val sharedVideoVM: VideoSharedViewModel = hiltViewModel(activity)
     val video by sharedVideoVM.selectedVideo.collectAsStateWithLifecycle()
 
-    // 1. Clear the memory when we press back and close the overlay
     DisposableEffect(Unit) {
         onDispose { sharedVideoVM.clearVideo() }
     }
-
-    // 2. Grab focus for the overlay
-    val focusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(isPlayerActive) {
-        if (!isPlayerActive) {
-            kotlinx.coroutines.delay(100) // Wait for Player overlay to unmount
-            try {
-                focusRequester.requestFocus()
-            } catch (e: Exception) {
-                // Ignore gracefully
-            }
-        }
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
-        .focusRequester(focusRequester)
-            .focusProperties { onExit = { FocusRequester.Cancel } } // Traps D-Pad
-        .focusGroup()) {
+            .focusGroup()
+    ) {
         when {
             video == null -> {
                 Error(modifier = Modifier.fillMaxSize())
@@ -87,6 +68,7 @@ fun MovieDetailsScreen(
             else -> {
                 Details(
                     video = video!!,
+                    isPlayerActive = isPlayerActive,
                     openVideoPlayer = openVideoPlayer,
                     onBackPressed = {
                         onBackPressed()
@@ -102,10 +84,11 @@ fun MovieDetailsScreen(
 
 @Composable
 private fun Details(
+    modifier: Modifier = Modifier,
     video: Videos,
     openVideoPlayer: (metaId: String) -> Unit,
     onBackPressed: () -> Unit,
-    modifier: Modifier = Modifier,
+    isPlayerActive: Boolean,
 ) {
     val childPadding = rememberChildPadding()
 
@@ -116,7 +99,9 @@ private fun Details(
     ) {
         item {
             MovieDetails(
-                video = video, openVideoPlayer = openVideoPlayer
+                video = video,
+                openVideoPlayer = openVideoPlayer,
+                isPlayerActive =isPlayerActive
             )
         }
 

@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.pypisan.sanchitra.data.models.Channel
+import com.pypisan.sanchitra.data.entities.Channel
 import com.pypisan.sanchitra.presentation.common.ChannelCard
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.presentation.common.PosterImageChannel
@@ -83,7 +83,8 @@ fun TVRow(
                 end = endPadding,
             ),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
-            modifier = Modifier.focusRestorer()
+            modifier = Modifier
+                .focusRestorer()
         ) {
             itemsIndexed(channels, key = { _, channel -> channel.id }) { index, channel ->
 

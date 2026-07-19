@@ -43,8 +43,8 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.pypisan.sanchitra.R
-import com.pypisan.sanchitra.data.models.Channel
-import com.pypisan.sanchitra.data.models.IPTVChannel
+import com.pypisan.sanchitra.data.entities.Channel
+import com.pypisan.sanchitra.data.entities.IPTVChannel
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 @Composable
