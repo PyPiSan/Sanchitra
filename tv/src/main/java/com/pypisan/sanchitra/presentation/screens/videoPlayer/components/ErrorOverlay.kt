@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun ErrorOverlay(
     modifier: Modifier = Modifier,
-    // Use a clearer, default message for TV
     message: String = "Playback has encountered an issue. Please try again.",
     buttonText: String = "Retry",
     onRetry: () -> Unit,

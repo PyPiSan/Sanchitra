@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,6 +50,7 @@ import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.NowAiri
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SeekController
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleTextOverlay
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoQualityDrawer
+import kotlinx.coroutines.delay
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -107,14 +109,24 @@ fun PlayerScreenContent(
     var showQualityDrawer by rememberSaveable { mutableStateOf(false) }
     var showNowAiring by rememberSaveable { mutableStateOf(false) }
 
-    val (epgPrograms, initialAiringIndex) = remember(epgResponse, showNowAiring) {
-        if (showNowAiring && epgResponse != null) {
+    // 1. Create a ticker that updates every minute
+    var ticker by remember { mutableIntStateOf(0) }
+
+    // Only run the ticker if the controls are actually visible or the user is looking at the EPG
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60_000) // Wait 60 seconds
+            ticker++      // Trigger a recalculation
+        }
+    }
+
+    val (epgPrograms, initialAiringIndex) = remember(epgResponse, showNowAiring, ticker) {
+        if (epgResponse != null) {
             prepareEPGProgramData(epgResponse)
         } else {
             Pair(emptyList(), 0)
         }
     }
-
     var showAudioQualityDrawer by rememberSaveable { mutableStateOf(false) }
     var subtitleText by remember { mutableStateOf("") }
     var showSubtitleDrawer by rememberSaveable { mutableStateOf(false) }
@@ -200,8 +212,7 @@ fun PlayerScreenContent(
                 VideoPlayerControls(
                     player = exoPlayer,
                     title = title,
-                    currentEpisode = currentEpisode,
-                    nextEpisode = nextEpisode,
+                    epgPrograms = epgPrograms,
                     onShowInfo = {
                         showNowAiring = true
                         exoPlayer.pause()
