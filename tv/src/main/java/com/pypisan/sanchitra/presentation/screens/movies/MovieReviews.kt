@@ -1,4 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.movies
+
 import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -17,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
@@ -26,6 +28,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import androidx.tv.material3.surfaceColorAtElevation
+import coil.compose.AsyncImage
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.data.entities.MovieReviewsAndRatings
 import com.pypisan.sanchitra.data.util.StringConstants
@@ -102,13 +105,20 @@ private fun Review(
                             MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
                         ),
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxSize(0.8f)
-                            .align(Alignment.Center),
-                    )
+                    if (reviewAndRating.reviewerIconUri.isNotBlank()) {
+                        AsyncImage(
+                            model = reviewAndRating.reviewerIconUri,
+                            contentDescription = reviewAndRating.reviewerName,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(0.8f)
+                        )
+                    }
                 }
                 Column(
                     modifier = Modifier.padding(start = 16.dp)

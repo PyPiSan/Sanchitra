@@ -1,6 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.movies
 
-
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
@@ -121,15 +120,15 @@ private fun Details(
             MovieReviews(
                 modifier = Modifier.padding(top = childPadding.top), reviewsAndRatings = listOf(
                     MovieReviewsAndRatings(
-                        StringConstants.Movie.Reviewer.FreshTomatoes,
-                        StringConstants.Movie.Reviewer.FreshTomatoesImageUrl,
-                        StringConstants.Movie.Reviewer.FreshTomatoesReviewCount,
-                        StringConstants.Movie.Reviewer.FreshTomatoesScore
+                        StringConstants.Movie.Reviewer.RottenTomatoes,
+                        StringConstants.Movie.Reviewer.RottenTomatoesImageUrl,
+                        StringConstants.Movie.Reviewer.RottenTomatoesReviewCount,
+                        video.meta.rottenTomatoes?:StringConstants.Movie.Reviewer.RottenTomatoesScore
                     ), MovieReviewsAndRatings(
-                        StringConstants.Movie.Reviewer.ReviewerName,
-                        StringConstants.Movie.Reviewer.ImageUrl,
-                        StringConstants.Movie.Reviewer.DefaultCount,
-                        StringConstants.Movie.Reviewer.DefaultRating
+                        StringConstants.Movie.Reviewer.IMDBReviewerName,
+                        StringConstants.Movie.Reviewer.IMDBImageUrl,
+                        StringConstants.Movie.Reviewer.IMDBDefaultCount,
+                        video.meta.imdbRating?:StringConstants.Movie.Reviewer.IMDBDefaultRating
                     )
                 )
             )
@@ -169,12 +168,12 @@ private fun Details(
                 TitleValueText(
                     modifier = itemModifier,
                     title = stringResource(R.string.budget),
-                    value = StringConstants.Movie.BudgetDefault
+                    value = video.meta.budget?:StringConstants.Movie.BudgetDefault
                 )
                 TitleValueText(
                     modifier = itemModifier,
                     title = stringResource(R.string.revenue),
-                    value = StringConstants.Movie.WorldWideGrossDefault
+                    value = video.meta.revenue?: StringConstants.Movie.WorldWideGrossDefault
                 )
             }
         }

@@ -39,8 +39,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
-import androidx.media3.ui.compose.modifiers.resizeWithContentScale
-import androidx.media3.ui.compose.state.rememberPresentationState
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -207,6 +205,7 @@ private fun MovieImageWithGradients(
     modifier: Modifier = Modifier,
     gradientColor: Color = MaterialTheme.colorScheme.surface,
 ) {
+
     Box(modifier = modifier) {
 
         AsyncImage(
@@ -227,7 +226,6 @@ private fun MovieImageWithGradients(
 
             val exoPlayer = loopPlayer(video.meta.trailer, 50f)
             var isVideoReady by remember { mutableStateOf(false) }
-            val presentationState = rememberPresentationState(exoPlayer)
 
             DisposableEffect(exoPlayer) {
                 val listener = object : Player.Listener {
@@ -242,9 +240,7 @@ private fun MovieImageWithGradients(
                     exoPlayer.release()
                 }
             }
-
-            val videoSize = presentationState.videoSizeDp
-            if (isVideoReady && videoSize != null) {
+            if (isVideoReady) {
 
                 Box(
                     modifier = Modifier
@@ -266,10 +262,10 @@ private fun MovieImageWithGradients(
                     modifier = Modifier
                         .fillMaxSize()
                         // This will now crop perfectly instantly with zero black bars!
-                        .resizeWithContentScale(
-                            contentScale = ContentScale.Crop,
-                            sourceSizeDp = videoSize
-                        )
+//                        .resizeWithContentScale(
+//                            contentScale = ContentScale.Crop,
+//                            sourceSizeDp = videoSize
+//                        )
                 )
             }
         }
