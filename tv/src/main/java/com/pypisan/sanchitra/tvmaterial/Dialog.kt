@@ -1,4 +1,5 @@
 package com.pypisan.sanchitra.tvmaterial
+
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Transition
@@ -61,38 +62,6 @@ import androidx.tv.material3.ProvideTextStyle
 import androidx.tv.material3.surfaceColorAtElevation
 import kotlin.math.max
 
-/**
- * Dialogs provide important prompts in a user flow. They can require an action, communicate
- * information, or help users accomplish a task.
- *
- * The dialog will position its buttons, typically FilledButtons, based on the available space.
- * By default it will try to place them horizontally next to each other and fallback to vertical
- * placement if not enough space is available.
- *
- * @param onDismissRequest called when the user tries to dismiss the Dialog by  pressing the back
- * button. This is not called when the dismiss button is clicked.
- * @param modifier the [Modifier] to be applied to this dialog
- * @param dismissButton button which is meant to dismiss the dialog. The dialog does not set up any
- * events for this button so they need to be set up by the caller.
- * @param confirmButton button which is meant to confirm a proposed action, thus resolving what
- * triggered the dialog. The dialog does not set up any events for this button so they need to be
- * set up by the caller.
- * @param icon optional icon that will appear above the [title] or above the [text], in case
- * a title was not provided.
- * @param title title which should specify the purpose of the dialog. The title is not mandatory,
- * because there may be sufficient information inside the [text].
- * @param text text which presents the details regarding the dialog's purpose.
- * @param shape defines the shape of this dialog's container
- * @param iconContentColor the content color used for the icon.
- * @param containerColor the color used for the background of this dialog. Use [Color.Transparent]
- * to have no color.
- * @param titleContentColor the content color used for the title.
- * @param textContentColor the content color used for the [text].
- * @param tonalElevation when [containerColor] is [ColorScheme.surface], a translucent primary color
- * overlay is applied on top of the container. A higher tonal elevation value will result in a
- * darker color in light theme and lighter color in dark theme..
- * @param properties typically platform specific properties to further configure the dialog.
- */
 @ExperimentalFoundationApi
 @ExperimentalComposeUiApi
 @ExperimentalTvMaterial3Api
@@ -194,31 +163,6 @@ fun StandardDialog(
     }
 }
 
-/**
- * Full-screen dialogs fill the entire screen, containing actions that require a series of tasks to
- * complete. Because they take up the entire screen, full-screen dialogs are the only dialogs over
- * which other dialogs can appear.
- *
- * @param onDismissRequest called when the user tries to dismiss the Dialog by pressing the back
- * button. This is not called when the dismiss button is clicked.
- * @param modifier the [Modifier] to be applied to this dialog
- * @param dismissButton button which is meant to dismiss the dialog. The dialog does not set up any
- * events for this button so they need to be set up by the caller.
- * @param confirmButton button which is meant to confirm a proposed action, thus resolving what
- * triggered the dialog. The dialog does not set up any events for this button so they need to be
- * set up by the caller.
- * @param icon optional icon that will appear above the [title] or above the [text], in case
- * a title was not provided.
- * @param title title which should specify the purpose of the dialog. The title is not mandatory,
- * because there may be sufficient information inside the [text].
- * @param text text which presents the details regarding the dialog's purpose.
- * @param backgroundColor the color used for the background of this dialog. Use [Color.Transparent]
- * to have no color.
- * @param iconContentColor the content color used for the icon.
- * @param titleContentColor the content color used for the title.
- * @param textContentColor the content color used for the text.
- * @param properties typically platform specific properties to further configure the dialog.
- */
 @ExperimentalFoundationApi
 @ExperimentalComposeUiApi
 @ExperimentalTvMaterial3Api
@@ -340,20 +284,6 @@ class DialogState {
     }
 }
 
-/**
- * [Dialog] displays a full-screen dialog, layered over any other content. It takes a single
- * composable slot, which is expected to be an opinionated TV dialog content, such as
- * [StandardDialog], [FullScreenDialog], etc.
-
- * @param showDialog Controls whether to display the [Dialog]. Set to true initially to trigger
- * an 'intro' animation and display the [Dialog]. Subsequently, setting to false triggers
- * an 'outro' animation, then [Dialog] calls [onDismissRequest] and hides itself.
- * @param onDismissRequest Executes when the user dismisses the dialog.
- * Must remove the dialog from the composition.
- * @param modifier Modifier to be applied to the dialog.
- * @param properties Typically platform specific properties to further configure the dialog.
- * @param content Slot for dialog content such as [StandardDialog], [FullScreenDialog], etc.
- */
 @ExperimentalComposeUiApi
 @ExperimentalTvMaterial3Api
 @Composable

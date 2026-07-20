@@ -27,29 +27,15 @@ object StringConstants {
         const val WorldWideGrossDefault = "$720M"
 
         object Reviewer {
-            const val FreshTomatoes = "Fresh Tomatoes"
-            const val FreshTomatoesScore = "89%"
-            const val FreshTomatoesReviewCount = "125"
-            const val FreshTomatoesImageUrl = ""
-            const val ReviewerName = "Rater"
-            const val ImageUrl = ""
-            const val DefaultCount = "1.8M"
-            const val DefaultRating = "9.2"
+            const val RottenTomatoes = "Rotten Tomatoes"
+            const val RottenTomatoesScore = "89%"
+            const val RottenTomatoesReviewCount = "125"
+            const val RottenTomatoesImageUrl = "https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/movies/rt.png"
+            const val IMDBReviewerName = "IMDB"
+            const val IMDBImageUrl = "https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/movies/imdb.png"
+            const val IMDBDefaultCount = "1.8M"
+            const val IMDBDefaultRating = "9.2"
         }
-    }
-
-    object Assets {
-        const val Top250Movies = "movies.json"
-        const val MostPopularMovies = "movies.json"
-        const val InTheaters = "movies.json"
-        const val MostPopularTVShows = "movies.json"
-        const val MovieCategories = "movieCategories.json"
-        const val MovieCast = "movieCast.json"
-    }
-
-    object Exceptions {
-        const val UnknownException = "Unknown Exception!"
-        const val InvalidCategoryId = "Invalid category ID!"
     }
 
     object Composable {
@@ -60,17 +46,8 @@ object StringConstants {
             const val UserAvatar = "User Profile Button"
             const val DashboardSearchButton = "Dashboard Search Button"
             const val BrandLogoImage = "Brand Logo Image"
-            const val FilterSelected = "Filter Selected"
-            fun reviewerName(name: String) = "$name's logo"
         }
-
-        const val CategoryDetailsFailureSubject = "category details"
-        const val MoviesFailureSubject = "movies"
-        const val MovieDetailsFailureSubject = "movie details"
         const val HomeScreenTrendingTitle = "Trending Movies"
-        const val PopularFilmsTitle = "Popular films"
-        const val BingeWatchDramasTitle = "Bingewatch dramas"
-        fun movieDetailsScreenSimilarTo(name: String) = "Similar to $name"
         fun reviewCount(count: String) = "$count reviews"
 
         object Placeholders {
@@ -94,7 +71,7 @@ object StringConstants {
                 "The Light Knight",
                 "Iceberg",
                 "Jungle Gump",
-                "The Devilfather",
+                "The Devil father",
                 "Space Wars",
                 "The Lion Queen"
             )
@@ -116,8 +93,6 @@ object StringConstants {
             const val HelpAndSupportSectionContactItem = "Contact us on"
             const val HelpAndSupportSectionContactValue = "support@pypisan.com"
         }
-
-        const val VideoPlayerControlPlaylistButton = "Playlist Button"
         const val VideoPlayerControlClosedCaptionsButton = "Playlist Button"
 
         const val VideoPlayerControlInfoButton = "Playlist Button"
@@ -125,12 +100,8 @@ object StringConstants {
         const val VideoPlayerControlAudioSelectionButton = "Playlist Button"
         const val VideoPlayerControlSettingsButton = "Playlist Button"
         const val VideoPlayerControlPlayPauseButton = "Playlist Button"
-        const val VideoPlayerControlForward = "Fast forward 10 seconds"
         const val VideoPlayerControlSkipNextButton = "Skip to the next movie"
         const val VideoPlayerControlSkipPreviousButton = "Skip to the previous movie"
-        const val VideoPlayerControlRepeatAll = "Repeat all movies"
-        const val VideoPlayerControlRepeatOne = "Repeat movie"
-        const val VideoPlayerControlRepeatNone = "No repeat"
         const val VideoPlayerControlRepeatButton = "Repeat Button"
     }
 }

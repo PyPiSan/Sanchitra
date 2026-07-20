@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 
 val Coral = Color(0xFFF3A397)
 val LightYellow = Color(0xFFF8EE94)
-
 val Red300 = Color(0xFFE57373)
 val Pink300 = Color(0xFFF06292)
 val Purple300 = Color(0xFFBA68C8)

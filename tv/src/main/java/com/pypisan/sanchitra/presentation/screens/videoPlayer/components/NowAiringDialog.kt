@@ -11,17 +11,19 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -102,8 +104,9 @@ fun NowAiringDialog(
         ElevatedCard(
             modifier = Modifier
                 .width(720.dp)
-                .height(280.dp)
-                .border(2.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp)),
+                .height(300.dp)
+                .border(2.dp,
+                    Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp)),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.elevatedCardColors(
                 containerColor = Color(0xFF212124)
@@ -116,7 +119,6 @@ fun NowAiringDialog(
                     .padding(horizontal = 24.dp, vertical = 20.dp),
                 contentAlignment = Alignment.Center
             ) {
-
                 AnimatedContent(
                     targetState = currentProgram,
                     modifier = Modifier.fillMaxSize(),
@@ -124,71 +126,103 @@ fun NowAiringDialog(
                         (slideInVertically(animationSpec = tween(300)) { h -> -h } + fadeIn(
                             animationSpec = tween(300)
                         ))
-                            .togetherWith(slideOutVertically(animationSpec = tween(300)) { h -> h } + fadeOut(
-                                animationSpec = tween(300)
-                            ))
+                            .togetherWith(
+                                slideOutVertically(animationSpec = tween(300)) { h -> h } +
+                                        fadeOut(animationSpec = tween(300))
+                            )
                     },
                     label = "ProgramTransition"
                 ) { targetProgram ->
-                    Row(
+
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 48.dp),
-                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        ProgramPreview(targetProgram.imageUrl)
 
-                        Spacer(Modifier.width(24.dp))
+                        // Status
+                        Text(
+                            text = targetProgram.status,
+                            color = Color(0xFF64B5F6),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            letterSpacing = 1.sp
+                        )
 
-                        Column(
+                        Spacer(Modifier.height(4.dp))
+
+                        Text(
+                            text = targetProgram.title,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .basicMarquee(
+                                    iterations = Int.MAX_VALUE,
+                                    animationMode = MarqueeAnimationMode.Immediately
+                                ),
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        // Poster + Description
+                        Row(
                             modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.Center
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = targetProgram.status,
-                                color = Color(0xFF64B5F6),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
-                                letterSpacing = 1.sp
-                            )
-                            Spacer(Modifier.height(4.dp))
 
-                            Text(
-                                text = targetProgram.title,
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                            ProgramPreview(
+                                imageUrl = targetProgram.imageUrl,
+                                modifier = Modifier.size(width = 280.dp, height = 300.dp)
                             )
 
-                            Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.width(24.dp))
 
                             Text(
-                                text = targetProgram.description,
-                                maxLines = 4,
-                                overflow = TextOverflow.Ellipsis,
-                                color = Color(0xFFE0E0E0),
-                                lineHeight = 18.sp,
-                                fontSize = 14.sp
-                            )
-
-                            Spacer(Modifier.height(16.dp))
-
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(targetProgram.startTime, fontWeight = FontWeight.SemiBold, color = Color.White, fontSize = 13.sp)
-                                Spacer(Modifier.width(10.dp))
-
-                                LinearProgressIndicator(
-                                    progress = { targetProgram.progress },
-                                    modifier = Modifier.weight(1f),
-                                    color = Color(0xFF64B5F6),
-                                    trackColor = Color.LightGray.copy(alpha = 0.3f)
+                                    text = targetProgram.description,
+                                    color = Color(0xFFE0E0E0),
+                                    fontSize = 15.sp,
+                                    lineHeight = 22.sp,
+                                    maxLines = 6,
+                                    overflow = TextOverflow.Ellipsis
                                 )
-                                Spacer(Modifier.width(10.dp))
+                        }
 
-                                Text(targetProgram.endTime, fontWeight = FontWeight.SemiBold, color = Color.White, fontSize = 13.sp)
-                            }
+                        Spacer(Modifier.height(16.dp))
+
+                        // Timeline
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Text(
+                                text = targetProgram.startTime,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
+
+                            Spacer(Modifier.width(12.dp))
+
+                            LinearProgressIndicator(
+                                progress = { targetProgram.progress },
+                                modifier = Modifier.weight(1f),
+                                color = Color(0xFF64B5F6),
+                                trackColor = Color.LightGray.copy(alpha = 0.3f)
+                            )
+
+                            Spacer(Modifier.width(12.dp))
+
+                            Text(
+                                text = targetProgram.endTime,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
                         }
                     }
                 }
@@ -209,10 +243,10 @@ fun NowAiringDialog(
                         },
                         modifier = Modifier
                             .align(Alignment.CenterStart)
+                            .padding(end = 10.dp)
                             .focusRequester(focusRequesterPrev)
                     )
                 }
-
                 // Next Button
                 if (currentIndex < programs.lastIndex) {
                     DpadKeyNavigationButton(
@@ -232,6 +266,7 @@ fun NowAiringDialog(
                         },
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
+                            .padding(start = 10.dp)
                             .focusRequester(focusRequesterNext)
                     )
                 }
@@ -249,7 +284,7 @@ fun DpadKeyNavigationButton(
 ) {
     // Styling constants
     val buttonWidth = 28.dp
-    val buttonHeight = 100.dp // High aesthetic height
+    val buttonHeight = 120.dp // High aesthetic height
     var hasFocus by remember { mutableStateOf(false) }
 
 
@@ -269,7 +304,6 @@ fun DpadKeyNavigationButton(
         modifier = modifier
             .width(buttonWidth)
             .height(buttonHeight)
-            // --- FOCUS STATE HANDLING ---
             .onFocusChanged { hasFocus = it.isFocused }
             .focusable()
 
@@ -306,26 +340,27 @@ fun DpadKeyNavigationButton(
 
 @Composable
 private fun ProgramPreview(
-    imageUrl: String?
+    imageUrl: String?,
+    modifier: Modifier = Modifier
 ) {
+
+    val shape = RoundedCornerShape(14.dp)
 
     if (!imageUrl.isNullOrBlank()) {
 
         AsyncImage(
             model = imageUrl,
             contentDescription = null,
-            modifier = Modifier
-                .size(width = 280.dp, height = 170.dp)
-                .clip(RoundedCornerShape(14.dp)),
+            modifier = modifier
+                .clip(shape),
             contentScale = ContentScale.Crop
         )
 
     } else {
 
         Box(
-            modifier = Modifier
-                .size(width = 280.dp, height = 170.dp)
-                .clip(RoundedCornerShape(14.dp))
+            modifier = modifier
+                .clip(shape)
                 .background(Color.DarkGray),
             contentAlignment = Alignment.Center
         ) {
@@ -335,8 +370,8 @@ private fun ProgramPreview(
             ) {
 
                 Icon(
-                    Icons.Default.Image,
-                    null,
+                    imageVector = Icons.Default.Image,
+                    contentDescription = null,
                     tint = Color.Gray,
                     modifier = Modifier.size(48.dp)
                 )
@@ -344,7 +379,7 @@ private fun ProgramPreview(
                 Spacer(Modifier.height(8.dp))
 
                 Text(
-                    "No Preview",
+                    text = "No Preview",
                     color = Color.Gray
                 )
             }
