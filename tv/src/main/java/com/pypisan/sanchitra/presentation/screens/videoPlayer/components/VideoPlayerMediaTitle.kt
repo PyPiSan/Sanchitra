@@ -60,7 +60,7 @@ fun VideoPlayerMediaTitle(
                         append(secondaryText)
 
                         if (tertiaryText.isNotEmpty()) {
-                            append(" • ")
+                            append("   •   ")
 
                             withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                                 append("Next: ")
