@@ -58,8 +58,6 @@ import kotlinx.coroutines.delay
 @Composable
 fun PlayerScreenContent(
     title: String,
-    currentEpisode: String,
-    nextEpisode: String,
     epgResponse: EPGResponse?,
     exoPlayer: ExoPlayer,
     subtitles: List<SubtitleTrack>,
@@ -83,6 +81,10 @@ fun PlayerScreenContent(
         SeekController(exoPlayer, scope)
     }
 
+//    val doubleClickHandler = remember {
+//        DoubleClickHandler()
+//    }
+
     // to capture focus
     LaunchedEffect(videoPlayerState.isControlsVisible) {
         if (!videoPlayerState.isControlsVisible) {
@@ -92,7 +94,7 @@ fun PlayerScreenContent(
                     fallbackFocusRequester.requestFocus()
                     isRescued = true
                 } catch (e: Exception) {
-                    kotlinx.coroutines.delay(10) // Try again in 10ms if it fails
+                    delay(10) // Try again in 10ms if it fails
                 }
             }
         }
@@ -145,19 +147,14 @@ fun PlayerScreenContent(
         }
     }
 
-//    RememberPlaybackWatchdog(
-//        exoPlayer = exoPlayer,
-//        onFreeze = {
-//            val mediaItem = exoPlayer.currentMediaItem
-//            if (mediaItem != null) {
-//                exoPlayer.stop()
-//                exoPlayer.clearMediaItems()
-//                exoPlayer.setMediaItem(mediaItem)
-//                exoPlayer.seekToDefaultPosition()
-//                exoPlayer.play()
-//            }
-//        }
-//    )
+    RememberPlaybackWatchdog(
+        exoPlayer = exoPlayer,
+        onFreeze = {
+            exoPlayer.seekToDefaultPosition()
+            exoPlayer.prepare()
+            exoPlayer.play()
+        }
+    )
 
     BackHandler {
         exoPlayer.release()

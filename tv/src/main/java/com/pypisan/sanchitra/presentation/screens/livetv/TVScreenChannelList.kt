@@ -140,7 +140,6 @@ private fun ChannelListItem(
                             end = 24.dp,
                             bottom = 24.dp
                         ),
-
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }

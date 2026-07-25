@@ -200,8 +200,6 @@ fun TVPlayerBuild(
 
     PlayerScreenContent(
         title = channel.name,
-        currentProgram?.name ?: "",
-        nextProgram?.name ?: "",
         epg,
         exoPlayer = exoPlayer,
         subtitles = subtitles,

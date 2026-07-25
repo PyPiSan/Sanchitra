@@ -201,8 +201,6 @@ fun VideoPlayerBuild(
 
     PlayerScreenContent(
         title = title ?: "",
-        "",
-        "",
         epgResponse = null,
         exoPlayer = exoPlayer,
         subtitles = subtitles,

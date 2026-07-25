@@ -204,7 +204,8 @@ private fun CarouselItemForeground(
             verticalArrangement = Arrangement.Bottom
         ) {
             Text(
-                text = channel.name, style = MaterialTheme.typography.displayMedium.copy(
+                text = channel.name,
+                style = MaterialTheme.typography.displayMedium.copy(
                     shadow = Shadow(
                         color = Color.Black.copy(alpha = 0.5f),
                         offset = Offset(x = 2f, y = 4f),
@@ -213,7 +214,8 @@ private fun CarouselItemForeground(
                 ), maxLines = 1
             )
             Text(
-                text = channel.name, style = MaterialTheme.typography.titleMedium.copy(
+                text = channel.description?.takeIf { it.isNotBlank() } ?: channel.name,
+                style = MaterialTheme.typography.titleMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface.copy(
                         alpha = 0.65f
                     ), shadow = Shadow(
@@ -221,7 +223,8 @@ private fun CarouselItemForeground(
                         offset = Offset(x = 2f, y = 4f),
                         blurRadius = 2f
                     )
-                ), maxLines = 1, modifier = Modifier.padding(top = 8.dp)
+                ), maxLines = 2,
+                modifier = Modifier.padding(top = 8.dp)
             )
             AnimatedVisibility(
                 visible = isCarouselFocused, content = {
