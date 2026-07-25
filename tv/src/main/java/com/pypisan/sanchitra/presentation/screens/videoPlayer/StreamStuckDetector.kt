@@ -22,6 +22,16 @@ fun RememberPlaybackWatchdog(
         while (true) {
 
             delay(1500)
+//            Log.d("RememberPlaybackWatchdog", "Checking playback state , ${exoPlayer.playbackState}")
+
+            // Handle playback ended
+            if (exoPlayer.playbackState == Player.STATE_ENDED || exoPlayer.playbackState == Player.STATE_IDLE) {
+                if (!freezeReported) {
+                    freezeReported = true
+                    onFreeze()
+                }
+                continue
+            }
 
             if (!exoPlayer.isPlaying) {
                 freezeStart = 0L
@@ -41,6 +51,9 @@ fun RememberPlaybackWatchdog(
             // tolerance avoids false positives
             val stuck =
                 kotlin.math.abs(currentPosition - lastPosition) < 300
+
+//            Log.d("RememberPlaybackWatchdog", "Checking playback state , $stuck")
+//            Log.d("RememberPlaybackWatchdog", "currentPosition: $currentPosition")
 
             if (stuck) {
 

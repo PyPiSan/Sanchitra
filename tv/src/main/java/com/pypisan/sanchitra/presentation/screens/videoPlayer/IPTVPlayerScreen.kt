@@ -184,8 +184,6 @@ fun IPTVPlayerBuild(
 
     PlayerScreenContent(
         title = iptvChannel.name,
-        currentProgram?.name ?: "",
-        nextProgram?.name ?: "",
         epg,
         exoPlayer = exoPlayer,
         subtitles = subtitles,

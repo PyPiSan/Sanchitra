@@ -14,6 +14,8 @@ data class CategorySectionDTO(
 data class MediaDTO(
     val id: Int,
     val name: String,
+    @SerializedName("description")
+    val description: String?,
     val category: String,
     @SerializedName("logo_url")
     val logo: String?,
@@ -40,6 +42,7 @@ fun MediaDTO.toTrendingChannel(): TrendingChannel {
     return TrendingChannel(
         id = id,
         name = name,
+        description = description,
         category = category,
         logoUrl = logo,
         bannerUrl = banner,

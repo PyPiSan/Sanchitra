@@ -12,6 +12,7 @@ data class TrendingCategory(
 data class TrendingChannel(
     val id: Int,
     val name: String,
+    val description: String?,
     val category: String,
     val logoUrl: String?,
     val bannerUrl: String?,
