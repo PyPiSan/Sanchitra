@@ -25,7 +25,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
@@ -105,8 +104,6 @@ fun IPTVPlayerBuild(
     onBackPressed: () -> Unit
 ) {
     val context = LocalContext.current
-    var isError by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("Something went wrong") }
 
     var isBuffering by rememberSaveable { mutableStateOf(false) }
 
@@ -122,9 +119,6 @@ fun IPTVPlayerBuild(
         mutableStateOf<List<VideoQuality>>(emptyList())
     }
 
-    val currentProgram = epg.getCurrentProgram()
-    val nextProgram = epg.getNextProgram()
-
     val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
         .forceEnableMediaCodecAsynchronousQueueing()
         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
@@ -132,10 +126,6 @@ fun IPTVPlayerBuild(
     val exoPlayer = rememberExoPlayer(
         context = context,
         iptvChannel = iptvChannel,
-        onError = { exception ->
-            errorMessage = exception.message ?: "Playback Error"
-            isError = true
-        },
         onBuffering = { state ->
             isBuffering = state == Player.STATE_BUFFERING
         },
@@ -191,11 +181,6 @@ fun IPTVPlayerBuild(
         qualities = qualities,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
-        isErrorState = isError,
-        errorMessage = errorMessage,
-        onClearError = {
-            isError = false
-        },
         onSubtitlesChanged = {
             subtitles = it
         })
@@ -206,7 +191,6 @@ fun IPTVPlayerBuild(
 fun rememberExoPlayer(
     context: Context,
     iptvChannel: IPTVChannelDetail,
-    onError: (PlaybackException) -> Unit,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
     onAudiosChanged: (List<AudioTrack>) -> Unit,
@@ -218,7 +202,7 @@ fun rememberExoPlayer(
             buildDefaultExoPlayer(
                 context,
                 iptvChannel.streamUrl,
-                onError,
+                subtitleUrl = null,
                 onBuffering,
                 onSubtitlesChanged,
                 onAudiosChanged,

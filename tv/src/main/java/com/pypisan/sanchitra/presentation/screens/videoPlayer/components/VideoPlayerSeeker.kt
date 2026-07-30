@@ -19,7 +19,6 @@ import kotlinx.coroutines.delay
 @Composable
 fun VideoPlayerSeeker(
     player: Player,
-//    focusRequester: FocusRequester,
     modifier: Modifier = Modifier,
     onSeek: (Float) -> Unit = {
         player.seekTo(player.duration.times(it).toLong())

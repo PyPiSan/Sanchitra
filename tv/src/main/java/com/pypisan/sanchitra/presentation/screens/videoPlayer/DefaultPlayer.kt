@@ -2,8 +2,10 @@ package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
 import android.content.Context
 import androidx.annotation.OptIn
+import androidx.media3.common.C
+import androidx.media3.common.Format
 import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
@@ -12,15 +14,17 @@ import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.extractor.DefaultExtractorsFactory
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
+import androidx.core.net.toUri
 
 @OptIn(UnstableApi::class)
 fun buildDefaultExoPlayer(
     context: Context,
     stream: String,
-    onError: (PlaybackException) -> Unit,
+    subtitleUrl: String?,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
     onAudiosChanged: (List<AudioTrack>) -> Unit,
@@ -37,7 +41,51 @@ fun buildDefaultExoPlayer(
         .setConnectTimeoutMs(60_000)
         .setReadTimeoutMs(90_000)
 
-    val mediaSourceFactory = DefaultMediaSourceFactory(httpDataSourceFactory)
+    // Configure the Extractors Factory correctly
+    val extractorsFactory = DefaultExtractorsFactory()
+        // 1. Only pass SEI closed caption types here (CEA-608 / CEA-708)
+        .setTsSubtitleFormats(
+            com.google.common.collect.ImmutableList.of(
+                Format.Builder().setSampleMimeType(MimeTypes.APPLICATION_CEA608).build(),
+                Format.Builder().setSampleMimeType(MimeTypes.APPLICATION_CEA708).build()
+            )
+        )
+        .setTsExtractorFlags(
+            androidx.media3.extractor.ts.DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES
+        )
+
+
+    val mediaSourceFactory = DefaultMediaSourceFactory(httpDataSourceFactory, extractorsFactory)
+
+    val mediaItemBuilder = MediaItem.Builder()
+        .setUri(stream)
+
+    if (!subtitleUrl.isNullOrBlank()) {
+
+        val mimeType = when {
+            subtitleUrl.endsWith(".vtt", ignoreCase = true) ->
+                MimeTypes.TEXT_VTT
+
+            subtitleUrl.endsWith(".srt", ignoreCase = true) ->
+                MimeTypes.APPLICATION_SUBRIP
+
+            else -> null
+        }
+
+        mimeType?.let {
+            mediaItemBuilder.setSubtitleConfigurations(
+                listOf(
+                    MediaItem.SubtitleConfiguration.Builder(subtitleUrl.toUri())
+                        .setMimeType(it)
+                        .setLanguage("en")
+                        .setLabel("English")
+                        .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                        .build()
+                )
+            )
+        }
+    }
+
 
     val videoMetaHelper = VideoMetaHelper()
 
@@ -57,33 +105,19 @@ fun buildDefaultExoPlayer(
                 .build()
 
             addListener(object : Player.Listener {
-                override fun onPlayerError(error: PlaybackException) {
-                    onError(error)
-                }
 
                 override fun onPlaybackStateChanged(state: Int) {
                     onBuffering(state)
                 }
 
                 override fun onTracksChanged(tracks: Tracks) {
-                    val subtitles =
-                        videoMetaHelper.getSubtitleTracks(this@apply)
-
-                    val audios =
-                        videoMetaHelper.getAudioTracks(this@apply)
-
-                    val qualities =
-                        videoMetaHelper.getVideoQualities(this@apply)
-
-                    onSubtitlesChanged(subtitles)
-
-                    onAudiosChanged(audios)
-
-                    onQualitiesChanged(qualities)
+                    onSubtitlesChanged(videoMetaHelper.getSubtitleTracks(this@apply))
+                    onAudiosChanged(videoMetaHelper.getAudioTracks(this@apply))
+                    onQualitiesChanged(videoMetaHelper.getVideoQualities(this@apply))
                 }
             })
 
-            setMediaItem(MediaItem.fromUri(stream))
+            setMediaItem(mediaItemBuilder.build())
             prepare()
             playWhenReady = true
         }

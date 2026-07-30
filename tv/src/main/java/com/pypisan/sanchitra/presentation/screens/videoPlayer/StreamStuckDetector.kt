@@ -10,7 +10,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun RememberPlaybackWatchdog(
     exoPlayer: ExoPlayer,
-    onFreeze: () -> Unit
+    onFreeze: () -> Boolean
 ) {
 
     LaunchedEffect(exoPlayer) {
@@ -28,7 +28,11 @@ fun RememberPlaybackWatchdog(
             if (exoPlayer.playbackState == Player.STATE_ENDED || exoPlayer.playbackState == Player.STATE_IDLE) {
                 if (!freezeReported) {
                     freezeReported = true
-                    onFreeze()
+                    val shouldContinue = onFreeze()
+
+                    if (!shouldContinue) {
+                        break // stop the watchdog
+                    }
                 }
                 continue
             }
@@ -52,9 +56,6 @@ fun RememberPlaybackWatchdog(
             val stuck =
                 kotlin.math.abs(currentPosition - lastPosition) < 300
 
-//            Log.d("RememberPlaybackWatchdog", "Checking playback state , $stuck")
-//            Log.d("RememberPlaybackWatchdog", "currentPosition: $currentPosition")
-
             if (stuck) {
 
                 if (freezeStart == 0L) {
@@ -64,13 +65,14 @@ fun RememberPlaybackWatchdog(
                 val frozenFor =
                     System.currentTimeMillis() - freezeStart
 
-                if (
-                    frozenFor > 6000 &&
-                    !freezeReported
-                ) {
-
+                if (frozenFor > 6000 && !freezeReported) {
                     freezeReported = true
-                    onFreeze()
+
+                    val shouldContinue = onFreeze()
+
+                    if (!shouldContinue) {
+                        break
+                    }
                 }
 
             } else {

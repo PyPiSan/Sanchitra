@@ -6,7 +6,6 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.MimeTypes
-import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
@@ -36,14 +35,13 @@ fun buildDrmExoPlayer(
     streamUrl: String,
     licenseKey: String? = "",
     licenseUrl: String? = "",
-    onError: (PlaybackException) -> Unit,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
     onAudiosChanged: (List<AudioTrack>) -> Unit,
     onQualitiesChanged: (List<VideoQuality>) -> Unit,
 ): ExoPlayer {
 
-    val isInternal = true
+    val isInternal = false
 
     val mediaItem = MediaItem.Builder()
         .setUri(streamUrl)
@@ -112,7 +110,7 @@ fun buildDrmExoPlayer(
                 .build(drmCallback)
         }
 
-        // ===== SPECIFIC INTERNAL DRM SCENARIO (JioTV Custom Headers & Cookies) =====
+        // ===== SPECIFIC INTERNAL DRM SCENARIO  =====
         !licenseUrl.isNullOrEmpty() && isInternal -> {
 
             // Set up DataSource with custom Cookie for fetching DASH segments and Manifests
@@ -145,7 +143,7 @@ fun buildDrmExoPlayer(
                     val url = request.defaultUrl + "&signedRequest=" + String(request.data)
                     val okReq = okhttp3.Request.Builder()
                         .url(url)
-                        .post(ByteArray(0).toRequestBody(null)) // Requires import okhttp3.RequestBody.Companion.toRequestBody
+                        .post(ByteArray(0).toRequestBody(null))
                         .build()
                     CustomDRMSessionManager.client.newCall(okReq).execute().use {
                         return it.body?.bytes() ?: ByteArray(0)
@@ -198,12 +196,11 @@ fun buildDrmExoPlayer(
             setMediaSource(mediaSourceFactory.createMediaSource(mediaItem), true)
 
             addListener(object : Player.Listener {
-                override fun onPlayerError(error: PlaybackException) {
-                    onError(error)
-                }
+
                 override fun onPlaybackStateChanged(state: Int) {
                     onBuffering(state)
                 }
+
                 override fun onTracksChanged(tracks: Tracks) {
                     onSubtitlesChanged(videoMetaHelper.getSubtitleTracks(this@apply))
                     onAudiosChanged(videoMetaHelper.getAudioTracks(this@apply))
@@ -218,7 +215,6 @@ fun buildDrmExoPlayer(
 
 
 fun getDrmKeys(licenseKey: String): Pair<String, String>? {
-//    if (!isDrm || licenseKey.isNullOrEmpty()) return null
     val parts = licenseKey.split(":")
     if (parts.size != 2) return null
     return parts[0] to parts[1]

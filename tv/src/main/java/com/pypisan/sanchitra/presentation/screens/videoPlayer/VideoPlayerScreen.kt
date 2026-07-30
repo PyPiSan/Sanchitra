@@ -20,7 +20,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.media3.common.PlaybackException
 import com.pypisan.sanchitra.presentation.common.Error
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -49,7 +48,6 @@ fun VideoPlayerScreen(
 
     DisposableEffect(Unit) {
         activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
         onDispose {
             activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             videoPlayerScreenViewModel.reset()
@@ -59,16 +57,6 @@ fun VideoPlayerScreen(
     val uiState by videoPlayerScreenViewModel.uiState.collectAsStateWithLifecycle()
 
     val focusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(uiState) {
-        val delayTime = if (uiState is VideoPlayerScreenUiState.Done) 250L else 50L
-        kotlinx.coroutines.delay(delayTime)
-        try {
-            focusRequester.requestFocus()
-        } catch (e: Exception) {
-            // Ignore gracefully
-        }
-    }
 
     Box(
         modifier = Modifier
@@ -116,24 +104,20 @@ fun VideoPlayerBuild(
     drm: Boolean? = false,
     licenseKey: String? = "",
     licenseUrl: String? = "",
-    subTitleUrl: String? = "",
+    subTitleUrl: String?,
     onBackPressed: () -> Unit,
     onVideoStarted: () -> Unit
 ) {
     val context = LocalContext.current
-    var isError by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("Something went wrong") }
 
     var isBuffering by rememberSaveable { mutableStateOf(false) }
 
     var subtitles by remember {
         mutableStateOf<List<SubtitleTrack>>(emptyList())
     }
-
     var audios by remember {
         mutableStateOf<List<AudioTrack>>(emptyList())
     }
-
     var qualities by remember {
         mutableStateOf<List<VideoQuality>>(emptyList())
     }
@@ -148,13 +132,10 @@ fun VideoPlayerBuild(
         title ?: "",
         context,
         streamUrl ?: "",
+        subTitleUrl,
         drm ?: false,
         licenseKey,
         licenseUrl,
-        onError = { exception ->
-            errorMessage = exception.message ?: "Playback Error"
-            isError = true
-        },
         { state ->
             isBuffering = state == Player.STATE_BUFFERING
         },
@@ -174,8 +155,8 @@ fun VideoPlayerBuild(
             audios = it
         },
 
-        onQualitiesChanged = {
-            qualities = it
+        onQualitiesChanged = { list ->
+            qualities = list.filter { it.width >= 1280 }.sortedByDescending { it.height }
         },
         renderersFactory = renderersFactory
     )
@@ -183,7 +164,6 @@ fun VideoPlayerBuild(
     DisposableEffect(exoPlayer) {
         val listener = object : Player.Listener {
             var hasCountedView = false // Ensures we only hit the API once per video
-
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying && !hasCountedView) {
                     hasCountedView = true
@@ -208,11 +188,6 @@ fun VideoPlayerBuild(
         qualities = qualities,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
-        isErrorState = isError,
-        errorMessage = errorMessage,
-        onClearError = {
-            isError = false
-        },
         onSubtitlesChanged = {
             subtitles = it
         })
@@ -225,10 +200,10 @@ fun rememberPlayer(
     title: String,
     context: Context,
     streamUrl: String,
+    subTitleUrl: String?,
     drm: Boolean,
     licenseKey: String? = "",
     licenseUrl: String? = "",
-    onError: (PlaybackException) -> Unit,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
     onAudiosChanged: (List<AudioTrack>) -> Unit,
@@ -240,7 +215,7 @@ fun rememberPlayer(
             buildDefaultExoPlayer(
                 context,
                 streamUrl,
-                onError,
+                subTitleUrl,
                 onBuffering,
                 onSubtitlesChanged,
                 onAudiosChanged,
@@ -254,7 +229,6 @@ fun rememberPlayer(
                 streamUrl,
                 licenseKey,
                 licenseUrl,
-                onError,
                 onBuffering,
                 onSubtitlesChanged,
                 onAudiosChanged,

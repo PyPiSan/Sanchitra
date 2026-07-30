@@ -1,5 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 @Composable
 fun ErrorOverlay(
     modifier: Modifier = Modifier,
@@ -39,8 +41,7 @@ fun ErrorOverlay(
         modifier = modifier
             .fillMaxSize()
             // Darken the background more dramatically for contrast (0.9 alpha)
-            .background(Color.Black.copy(alpha = 0.9f)),
-        contentAlignment = Alignment.Center
+            .background(Color.Black.copy(alpha = 0.9f)), contentAlignment = Alignment.Center
     ) {
         // We use a Card to contain the error info, optimized for TV screen width.
         Card(
@@ -67,14 +68,11 @@ fun ErrorOverlay(
 
                 // Upgraded title/headline text
                 Text(
-                    text = message,
-                    color = Color.White,
+                    text = message, color = Color.White,
                     // Use Material Headline styling
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Medium,
+                    style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Medium,
                     // Kept center alignment and multiline
-                    textAlign = TextAlign.Center,
-                    softWrap = true,
+                    textAlign = TextAlign.Center, softWrap = true,
                     // Added lineHeight for better vertical readability
                     lineHeight = 32.sp
                 )
@@ -84,15 +82,16 @@ fun ErrorOverlay(
                 // Standard Button component handles D-pad focus effects natively
                 // and feels much more polished than manual Box styling.
                 Button(
-                    onClick = onRetry,
+                    onClick = {
+                        onRetry()
+                    },
                     modifier = Modifier
                         .focusRequester(focusRequester)
                         .fillMaxWidth() // Button fills the card width
                         .height(56.dp), // Significant focus target height
                     colors = ButtonDefaults.buttonColors(
                         // High contrast: white button, black text/icon
-                        containerColor = Color.White,
-                        contentColor = Color.Black
+                        containerColor = Color.White, contentColor = Color.Black
                     ),
                     shape = RoundedCornerShape(8.dp),
                 ) {

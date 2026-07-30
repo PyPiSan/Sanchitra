@@ -1,16 +1,24 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
+//Main Player Screen--Common for all
+
+import android.graphics.Bitmap
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,16 +29,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.Color
 import androidx.media3.common.C
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.VideoSize
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.drm.DrmSession
+import androidx.media3.exoplayer.drm.MediaDrmCallbackException
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
-import androidx.media3.ui.compose.modifiers.resizeWithContentScale
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleDrawer
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerControls
@@ -48,9 +60,10 @@ import com.pypisan.sanchitra.data.util.prepareEPGProgramData
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.AudioTrackDrawer
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.NowAiringDialog
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SeekController
-import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleTextOverlay
+import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleOverlay
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoQualityDrawer
 import kotlinx.coroutines.delay
+
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -65,21 +78,32 @@ fun PlayerScreenContent(
     audios: List<AudioTrack>,
     qualities: List<VideoQuality>,
     onBackPressed: () -> Unit,
-    isBuffering: Boolean,
-    isErrorState: Boolean,
-    errorMessage: String,
-    onClearError: () -> Unit
+    isBuffering: Boolean
 ) {
     val videoPlayerState = rememberVideoPlayerState()
     val pulseState = rememberVideoPlayerPulseState()
     val scope = rememberCoroutineScope()
 
-    val focusRequester = remember { FocusRequester() }
     val fallbackFocusRequester = remember { FocusRequester() }
 
     val seekController = remember(exoPlayer) {
         SeekController(exoPlayer, scope)
     }
+    var showQualityDrawer by rememberSaveable { mutableStateOf(false) }
+    var showNowAiring by rememberSaveable { mutableStateOf(false) }
+    var showAudioQualityDrawer by rememberSaveable { mutableStateOf(false) }
+    var showSubtitleDrawer by rememberSaveable { mutableStateOf(false) }
+
+    var subtitleText by remember { mutableStateOf<String?>(null) }
+    var subtitleBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    var aspectRatio by remember { mutableFloatStateOf(16f / 9f) }
+    var retryCount by rememberSaveable { mutableIntStateOf(0) }
+    var fatalError by rememberSaveable { mutableStateOf(false) }
+    var isErrored by rememberSaveable { mutableStateOf(false) }
+    var errorValue by rememberSaveable { mutableStateOf("Something Went Wrong") }
+    var hasSuccessfullyPlayedOnce by remember { mutableStateOf(false) }
+    val maxRetries = 3
 
 //    val doubleClickHandler = remember {
 //        DoubleClickHandler()
@@ -108,13 +132,9 @@ fun PlayerScreenContent(
         }
     }
 
-    var showQualityDrawer by rememberSaveable { mutableStateOf(false) }
-    var showNowAiring by rememberSaveable { mutableStateOf(false) }
-
-    // 1. Create a ticker that updates every minute
+    // A ticker that updates EPG every minute
     var ticker by remember { mutableIntStateOf(0) }
 
-    // Only run the ticker if the controls are actually visible or the user is looking at the EPG
     LaunchedEffect(Unit) {
         while (true) {
             delay(60_000) // Wait 60 seconds
@@ -122,37 +142,102 @@ fun PlayerScreenContent(
         }
     }
 
-    val (epgPrograms, initialAiringIndex) = remember(epgResponse, showNowAiring, ticker) {
+    val (epgPrograms, initialAiringIndex) = remember(epgResponse,
+        showNowAiring, ticker) {
         if (epgResponse != null) {
             prepareEPGProgramData(epgResponse)
         } else {
             Pair(emptyList(), 0)
         }
     }
-    var showAudioQualityDrawer by rememberSaveable { mutableStateOf(false) }
-    var subtitleText by remember { mutableStateOf("") }
-    var showSubtitleDrawer by rememberSaveable { mutableStateOf(false) }
 
+    //    Player Listener for Error and Buffer
     DisposableEffect(exoPlayer) {
         val listener = object : Player.Listener {
-            override fun onCues(cues: CueGroup) {
-                subtitleText = cues.cues.joinToString("\n") { cue ->
-                    cue.text?.toString() ?: ""
+
+            override fun onRenderedFirstFrame() {
+                super.onRenderedFirstFrame()
+                hasSuccessfullyPlayedOnce = true
+            }
+
+            override fun onVideoSizeChanged(videoSize: VideoSize) {
+                if (videoSize.width > 0 && videoSize.height > 0) {
+                    val ratio = videoSize.width.toFloat() / videoSize.height.toFloat()
+
+                    if (ratio.isFinite() && ratio > 0f) {
+                        aspectRatio = ratio
+                    }
+                }
+            }
+
+            override fun onCues(cueGroup: CueGroup) {
+                val cue = cueGroup.cues.firstOrNull()
+                subtitleText = cue?.text?.toString()
+                subtitleBitmap = cue?.bitmap
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                val cause = error.cause
+                // Set fatalError to true if the video HAS NEVER played successfully
+                if (!hasSuccessfullyPlayedOnce) {
+                    if (cause is DrmSession.DrmSessionException) {
+                        fatalError = true
+                        isErrored = true
+
+                        val drmCause = cause.cause
+                        errorValue = if (drmCause is MediaDrmCallbackException) {
+                            "DRM License Server Error"
+                        } else {
+                            "DRM Session Exception"
+                        }
+                    }
+                    if (cause is HttpDataSource.InvalidResponseCodeException) {
+                        when (cause.responseCode) {
+                            400, 403, 404, 500, 503, 410 -> {
+                                fatalError = true
+                                isErrored = true
+                                errorValue = "Broken Stream Error"
+                            }
+                        }
+                    }
+                } else {
+                    // Optionally log this event here:
+                     Log.e("Player2", "Stream interrupted after playing, watchdog will retry $cause")
+                }
+            }
+
+            override fun onPlaybackStateChanged(state: Int) {
+                if (state == Player.STATE_READY) {
+                    retryCount = 0
+                    fatalError = false
                 }
             }
         }
+
         exoPlayer.addListener(listener)
+
         onDispose {
             exoPlayer.removeListener(listener)
+            exoPlayer.release()
         }
     }
 
     RememberPlaybackWatchdog(
         exoPlayer = exoPlayer,
         onFreeze = {
+            if (fatalError) {
+                return@RememberPlaybackWatchdog false
+            }
+
+            if (retryCount >= maxRetries) {
+                isErrored = true
+                return@RememberPlaybackWatchdog false
+            }
+            retryCount++
             exoPlayer.seekToDefaultPosition()
             exoPlayer.prepare()
             exoPlayer.play()
+            true
         }
     )
 
@@ -163,42 +248,38 @@ fun PlayerScreenContent(
 
     Box(
         Modifier
-//            .onKeyEvent { event ->
-//                if (!videoPlayerState.isControlsVisible) {
-//                    val key = event.key
-//                    if (key == Key.DirectionDown || key == Key.DirectionUp ||
-//                        key == Key.DirectionLeft || key == Key.DirectionRight ||
-//                        key == Key.DirectionCenter) {
-//                        return@onKeyEvent true // Consume event, kill focus search!
-//                    }
-//                }
-//                false // If controls are visible, let focus move normally!
-//            }
             .dPadEvents(exoPlayer, videoPlayerState, pulseState, seekController)
             .focusRequester(fallbackFocusRequester)
             .focusGroup()
             .focusable()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
     ) {
         PlayerSurface(
             player = exoPlayer,
             surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
-            modifier = Modifier.resizeWithContentScale(
-                contentScale = ContentScale.Fit,
-                sourceSizeDp = null
-            )
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(aspectRatio)
         )
         VideoPlayerOverlay(
             modifier = Modifier.align(Alignment.BottomCenter),
-            focusRequester = focusRequester,
             isPlaying = exoPlayer.isPlaying,
             isControlsVisible = videoPlayerState.isControlsVisible,
             centerButton = { VideoPlayerPulse(pulseState) },
-            subtitles = { SubtitleTextOverlay(subtitleText = subtitleText) },
+            subtitles = {
+                SubtitleOverlay(
+                    subtitleText = subtitleText,
+                    subtitleBitmap = subtitleBitmap
+                )
+            },
             showControls = videoPlayerState::showControls,
-            isError = isErrorState,
-            errorMessage = errorMessage,
+            isError = isErrored,
+            errorMessage = errorValue,
             onRetry = {
-                onClearError()
+                isErrored = false
+                errorValue = "Something Went Wrong"
+                fatalError = false
                 exoPlayer.stop()
                 exoPlayer.prepare()
                 exoPlayer.play()
