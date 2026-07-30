@@ -1,7 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer.components
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -12,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -23,13 +23,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pypisan.sanchitra.data.models.ProgramDisplayModel
 import com.pypisan.sanchitra.R
+import com.pypisan.sanchitra.utils.BrightRed
+import com.pypisan.sanchitra.utils.GradientColors
+import com.pypisan.sanchitra.utils.TrackBackgroundColor
+
 
 @Composable
 fun LiveEpgProgramSeeker(
     program: ProgramDisplayModel,
     modifier: Modifier = Modifier
 ) {
-    // 1. Progress state (Smoothly animates when data arrives)
     val safeProgress = program.progress.coerceIn(0f, 1f)
     val animatedProgress by animateFloatAsState(
         targetValue = safeProgress,
@@ -37,7 +40,6 @@ fun LiveEpgProgramSeeker(
         label = "ProgressAnim"
     )
 
-    // 2. Infinite pulsing animation for the "Live Edge" dot
     val infiniteTransition = rememberInfiniteTransition(label = "PulseTransition")
     val pulseAlpha by infiniteTransition.animateFloat(
         initialValue = 0.2f,
@@ -65,60 +67,70 @@ fun LiveEpgProgramSeeker(
 
         Spacer(Modifier.width(12.dp))
 
-        // Custom Canvas Progress Bar
-        Canvas(
+        // 2. Replaced Canvas with Spacer + drawWithCache
+        Spacer(
             modifier = Modifier
                 .weight(1f)
-                .height(16.dp) // Total height bounds (includes the glowing dot)
-        ) {
-            val trackHeight = 4.dp.toPx()
-            val cornerRadius = CornerRadius(trackHeight / 2)
-            val yCenter = size.height / 2
-            val yOffset = yCenter - (trackHeight / 2)
+                .height(16.dp)
+                .drawWithCache {
+                    // This block ONLY executes when the size changes or when
+                    // state read inside this block (animatedProgress) changes.
 
-            // A. Draw the inactive background track
-            drawRoundRect(
-                color = Color.White.copy(alpha = 0.2f),
-                topLeft = Offset(0f, yOffset),
-                size = Size(size.width, trackHeight),
-                cornerRadius = cornerRadius
-            )
+                    val trackHeight = 4.dp.toPx()
+                    val cornerRadius = CornerRadius(trackHeight / 2)
+                    val yCenter = size.height / 2
+                    val yOffset = yCenter - (trackHeight / 2)
+                    val dotRadius = 5.dp.toPx()
 
-            val progressWidth = size.width * animatedProgress
+                    val progressWidth = size.width * animatedProgress
 
-            if (progressWidth > 0) {
-                // B. Draw the Red Gradient Fill
-                drawRoundRect(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            Color(0xFF330000), // Very dark maroon/black-red at the start
-                            Color(0xFFFF0000)  // Pure bright red at the live edge
-                        ),
-                        startX = 0f,
-                        endX = progressWidth
-                    ),
-                    topLeft = Offset(0f, yOffset),
-                    size = Size(progressWidth, trackHeight),
-                    cornerRadius = cornerRadius
-                )
+                    // The Brush allocation is now CACHED! It stops re-allocating
+                    // once the 1-second progress animation finishes.
+                    val progressBrush = if (progressWidth > 0) {
+                        Brush.horizontalGradient(
+                            colors = GradientColors,
+                            startX = 0f,
+                            endX = progressWidth
+                        )
+                    } else null
 
-                // C. Draw the Pulsing "Live" Glow at the leading edge
-                val dotRadius = 5.dp.toPx()
+                    onDrawBehind {
+                        // This block executes on EVERY frame because it reads `pulseAlpha`.
+                        // However, NO objects are allocated here, ensuring perfectly smooth 60/120fps.
 
-                // The outer pulsing red halo (tinted red to match the gradient)
-                drawCircle(
-                    color = Color(0xFFFF0000).copy(alpha = pulseAlpha),
-                    radius = dotRadius * 1.8f,
-                    center = Offset(progressWidth, yCenter)
-                )
+                        // A. Draw the inactive background track
+                        drawRoundRect(
+                            color = TrackBackgroundColor,
+                            topLeft = Offset(0f, yOffset),
+                            size = Size(size.width, trackHeight),
+                            cornerRadius = cornerRadius
+                        )
 
-                drawCircle(
-                    color = Color.White,
-                    radius = dotRadius,
-                    center = Offset(progressWidth, yCenter)
-                )
-            }
-        }
+                        if (progressWidth > 0 && progressBrush != null) {
+                            // B. Draw the Red Gradient Fill using the cached brush
+                            drawRoundRect(
+                                brush = progressBrush,
+                                topLeft = Offset(0f, yOffset),
+                                size = Size(progressWidth, trackHeight),
+                                cornerRadius = cornerRadius
+                            )
+
+                            // C. Draw the Pulsing "Live" Glow at the leading edge
+                            drawCircle(
+                                color = BrightRed.copy(alpha = pulseAlpha), // pulseAlpha read here
+                                radius = dotRadius * 1.8f,
+                                center = Offset(progressWidth, yCenter)
+                            )
+
+                            drawCircle(
+                                color = Color.White,
+                                radius = dotRadius,
+                                center = Offset(progressWidth, yCenter)
+                            )
+                        }
+                    }
+                }
+        )
 
         Spacer(Modifier.width(12.dp))
 
@@ -131,6 +143,7 @@ fun LiveEpgProgramSeeker(
         )
     }
 }
+
 
 @Composable
 fun LiveAlwaysFullSeeker() {
@@ -187,7 +200,7 @@ fun LiveBadge() {
             modifier = Modifier
                 .background(
                     brush = Brush.horizontalGradient(
-                        colors = listOf(Color(0xFFCC0000), Color(0xFFFF0000))
+                        colors = GradientColors
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )

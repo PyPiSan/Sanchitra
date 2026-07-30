@@ -51,6 +51,7 @@ import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.util.StringConstants
+import com.pypisan.sanchitra.data.util.toHrMinFormat
 import com.pypisan.sanchitra.presentation.screens.auth.loopPlayer
 import com.pypisan.sanchitra.utils.BlueGray300
 import com.pypisan.sanchitra.utils.DeepPurple300
@@ -95,7 +96,7 @@ fun MovieDetails(
                         texts = listOf(
                             video.meta.releaseDate!!,
                             video.categories.joinToString(", "),
-                            "${video.duration} min"
+                            video.duration.toHrMinFormat()
                         )
                     )
                 }
@@ -183,7 +184,7 @@ private fun MovieDescription(description: String) {
             fontWeight = FontWeight.Normal
         ),
         modifier = Modifier.padding(top = 8.dp),
-        maxLines = 2
+        maxLines = 4
     )
 }
 
@@ -261,11 +262,6 @@ private fun MovieImageWithGradients(
                     surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
                     modifier = Modifier
                         .fillMaxSize()
-                        // This will now crop perfectly instantly with zero black bars!
-//                        .resizeWithContentScale(
-//                            contentScale = ContentScale.Crop,
-//                            sourceSizeDp = videoSize
-//                        )
                 )
             }
         }

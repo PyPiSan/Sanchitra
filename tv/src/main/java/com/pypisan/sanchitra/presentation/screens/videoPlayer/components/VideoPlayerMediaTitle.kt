@@ -72,55 +72,12 @@ fun VideoPlayerMediaTitle(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-
-//                        Row(
-//                            modifier = Modifier.weight(1f),
-//                            verticalAlignment = Alignment.CenterVertically
-//                        ) {
                             Text(
                                 text = epgText,
                                 modifier = Modifier.weight(1f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
-
-//                            Spacer(Modifier.width(8.dp))
-//
-//                            Text(
-//                                text = secondaryText,
-//                                modifier = Modifier.weight(1f),
-//                                maxLines = 1,
-//                                overflow = TextOverflow.Ellipsis
-//                            )
-//                        }
-
-//                        if (tertiaryText.isNotEmpty()) {
-//
-//                            Spacer(Modifier.width(20.dp))
-//
-//                            Text("•")
-//
-//                            Spacer(Modifier.width(20.dp))
-//
-//                            Row(
-//                                modifier = Modifier.weight(1f),
-//                                verticalAlignment = Alignment.CenterVertically
-//                            ) {
-//                                Text(
-//                                    text = "Next:",
-//                                    fontWeight = FontWeight.Bold
-//                                )
-//
-//                                Spacer(Modifier.width(8.dp))
-//
-//                                Text(
-//                                    text = tertiaryText,
-//                                    modifier = Modifier.weight(1f),
-//                                    maxLines = 1,
-//                                    overflow = TextOverflow.Ellipsis
-//                                )
-//                            }
-//                        }
                     }
                 }
             }

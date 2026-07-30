@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.media3.common.PlaybackException
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.pypisan.sanchitra.data.entities.Channel
@@ -37,15 +36,9 @@ import androidx.tv.material3.MaterialTheme
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
-import com.pypisan.sanchitra.data.models.EPGItem
 import com.pypisan.sanchitra.data.models.EPGResponse
 import com.pypisan.sanchitra.data.util.findActivity
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
-
-@RequiresApi(Build.VERSION_CODES.O)
-private val epgTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
 @kotlin.OptIn(ExperimentalComposeUiApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
@@ -84,16 +77,6 @@ fun TVPlayerScreen(
             .focusRequester(focusRequester)
             .focusProperties { onExit = { FocusRequester.Cancel } }
             .focusGroup()
-//            .focusable()
-//            .onGloballyPositioned {
-//                if (!hasRequestedFocus) {
-//                    try {
-//                        focusRequester.requestFocus()
-//                        hasRequestedFocus = true
-//                    } catch (e: Exception) {}
-//                }
-//            }
-//            .pointerInput(Unit) { detectTapGestures { } }
     ) {
         when (val s = uiState) {
             is TVPlayerScreenUiState.Loading -> {
@@ -127,8 +110,6 @@ fun TVPlayerBuild(
     onVideoStarted: () -> Unit
 ) {
     val context = LocalContext.current
-    var isError by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("Something went wrong") }
     var isBuffering by rememberSaveable { mutableStateOf(false) }
 
     var subtitles by remember {
@@ -141,9 +122,6 @@ fun TVPlayerBuild(
         mutableStateOf<List<VideoQuality>>(emptyList())
     }
 
-    val currentProgram = epg.getCurrentProgram()
-    val nextProgram = epg.getNextProgram()
-
     val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
         .forceEnableMediaCodecAsynchronousQueueing()
         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
@@ -151,10 +129,6 @@ fun TVPlayerBuild(
     val exoPlayer = rememberExoPlayer(
         context = context,
         channel = channel,
-        onError = { exception ->
-            errorMessage = exception.message ?: "Playback Error"
-            isError = true
-        },
         onBuffering = { state ->
             isBuffering = state == Player.STATE_BUFFERING
         },
@@ -207,11 +181,6 @@ fun TVPlayerBuild(
         qualities = qualities,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
-        isErrorState = isError,
-        errorMessage = errorMessage,
-        onClearError = {
-            isError = false
-        },
         onSubtitlesChanged = {
             subtitles = it
         })
@@ -222,7 +191,6 @@ fun TVPlayerBuild(
 fun rememberExoPlayer(
     context: Context,
     channel: Channel,
-    onError: (PlaybackException) -> Unit,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
     onAudiosChanged: (List<AudioTrack>) -> Unit,
@@ -234,7 +202,7 @@ fun rememberExoPlayer(
             buildDefaultExoPlayer(
                 context,
                 channel.streamUrl,
-                onError,
+                subtitleUrl = null,
                 onBuffering,
                 onSubtitlesChanged,
                 onAudiosChanged,
@@ -248,7 +216,6 @@ fun rememberExoPlayer(
                 channel.streamUrl,
                 channel.licenseKey,
                 channel.licenseUrl,
-                onError,
                 onBuffering,
                 onSubtitlesChanged,
                 onAudiosChanged,
@@ -258,42 +225,3 @@ fun rememberExoPlayer(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-fun EPGResponse.getCurrentProgram(): EPGItem? {
-    val now = LocalDateTime.now()
-    return epg.firstOrNull { item ->
-        try {
-
-            val start = LocalDateTime.parse(item.start, epgTimeFormatter)
-            val end = LocalDateTime.parse(item.end, epgTimeFormatter)
-
-            !now.isBefore(start) && !now.isAfter(end)
-        } catch (e: Exception) {
-            false
-        }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-fun EPGResponse.getNextProgram(): EPGItem? {
-    val now = LocalDateTime.now()
-    val current = getCurrentProgram()
-
-    return if (current != null) {
-        val currentIndex = epg.indexOf(current)
-        if (currentIndex != -1 && currentIndex < epg.size - 1) {
-            epg[currentIndex + 1]
-        } else {
-            null
-        }
-    } else {
-        epg.firstOrNull { item ->
-            try {
-                val start = LocalDateTime.parse(item.start, epgTimeFormatter)
-                start.isAfter(now)
-            } catch (e: Exception) {
-                false
-            }
-        }
-    }
-}

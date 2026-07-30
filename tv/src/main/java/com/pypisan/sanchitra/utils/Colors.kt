@@ -23,6 +23,10 @@ val DeepOrange300 = Color(0xFFFF8A65)
 val Brown300 = Color(0xFFA1887F)
 val Gray300 = Color(0xFFE0E0E0)
 val BlueGray300 = Color(0xFF90A4AE)
+val DarkRed = Color(0xFF330000)
+val BrightRed = Color(0xFFFF0000)
+val GradientColors = listOf(DarkRed, BrightRed)
+val TrackBackgroundColor = Color.White.copy(alpha = 0.2f)
 
 val ourColors = listOf(
     Coral,
@@ -46,4 +50,6 @@ val ourColors = listOf(
     Brown300,
     Gray300,
     BlueGray300,
+    DarkRed,
+    BrightRed
 )

@@ -63,7 +63,7 @@ fun VideoPlayerPulse(
                         CircleShape
                     )
                     .size(88.dp)
-                    .padding(20.dp) // controls inner icon spacing
+                    .padding(20.dp)
             )
         }
     }

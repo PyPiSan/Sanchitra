@@ -115,7 +115,7 @@ class VideoMetaHelper {
 
                     qualities.add(
                         VideoQuality(
-                            label = qualityLabel(format.height),
+                            label = qualityLabel(format.width, format.height),
                             group = group,
                             trackIndex = i,
                             width = format.width,
@@ -154,11 +154,11 @@ class VideoMetaHelper {
         }
     }
 
-    fun qualityLabel(height: Int): String {
+    fun qualityLabel(width: Int, height: Int): String {
         val type = when {
-            height >= 2160 -> "UHD"
-            height >= 1080 -> "FHD"
-            height >= 720 -> "HD"
+            width >= 3840 -> "UHD"
+            width >= 1920 -> "FHD"
+            width >= 1280 -> "HD"
             else -> "SD"
         }
 

@@ -284,7 +284,7 @@ fun DpadKeyNavigationButton(
 ) {
     // Styling constants
     val buttonWidth = 28.dp
-    val buttonHeight = 120.dp // High aesthetic height
+    val buttonHeight = 120.dp
     var hasFocus by remember { mutableStateOf(false) }
 
 

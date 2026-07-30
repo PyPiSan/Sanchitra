@@ -39,7 +39,6 @@ fun VideoPlayerOverlay(
     isBuffering: Boolean = false,
     isSubtitleDrawerVisible: Boolean = false,
     isControlsVisible: Boolean = true,
-    focusRequester: FocusRequester = remember { FocusRequester() },
     showControls: () -> Unit = {},
     onRetry: () -> Unit = {},
     centerButton: @Composable () -> Unit = {},
@@ -48,7 +47,7 @@ fun VideoPlayerOverlay(
 ) {
 
     val subtitleBottomPadding by animateDpAsState(
-        targetValue = if (isControlsVisible) 140.dp else 36.dp,
+        targetValue = if (isControlsVisible) 150.dp else 36.dp,
         label = ""
     )
 
