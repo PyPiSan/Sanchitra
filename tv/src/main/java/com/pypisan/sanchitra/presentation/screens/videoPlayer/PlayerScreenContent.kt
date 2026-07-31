@@ -171,9 +171,15 @@ fun PlayerScreenContent(
             }
 
             override fun onCues(cueGroup: CueGroup) {
-                val cue = cueGroup.cues.firstOrNull()
-                subtitleText = cue?.text?.toString()
-                subtitleBitmap = cue?.bitmap
+                //Combine all text cues into a single string separated by newlines
+                subtitleText = if (cueGroup.cues.isEmpty()) {
+                    null
+                } else {
+                    cueGroup.cues
+                        .mapNotNull { it.text }
+                        .joinToString(separator = "\n")
+                }
+                subtitleBitmap = cueGroup.cues.firstNotNullOfOrNull { it.bitmap }
             }
 
             override fun onPlayerError(error: PlaybackException) {
@@ -193,7 +199,7 @@ fun PlayerScreenContent(
                     }
                     if (cause is HttpDataSource.InvalidResponseCodeException) {
                         when (cause.responseCode) {
-                            400, 403, 404, 500, 503, 410 -> {
+                            400, 401, 403, 404, 500, 503, 410 -> {
                                 fatalError = true
                                 isErrored = true
                                 errorValue = "Broken Stream Error"
