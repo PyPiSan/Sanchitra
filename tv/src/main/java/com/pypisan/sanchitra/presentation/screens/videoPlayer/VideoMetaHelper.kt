@@ -1,5 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.Format
@@ -25,7 +26,6 @@ class VideoMetaHelper {
                 for (i in 0 until group.length) {
 
                     val format = group.getTrackFormat(i)
-
                     subtitles.add(
                         SubtitleTrack(
                             label = buildSubtitleLabel(format),
@@ -44,6 +44,7 @@ class VideoMetaHelper {
         return subtitles
     }
 
+    @OptIn(UnstableApi::class)
     fun getAudioTracks(player: Player): List<AudioTrack> {
 
         val list = mutableListOf<AudioTrack>()
@@ -65,18 +66,28 @@ class VideoMetaHelper {
 
                     // Optional: Append channel count (e.g., "English (5.1)" vs "English (Stereo)")
                     val channelString = when (format.channelCount) {
-                        2 -> " (Stereo)"
-                        6 -> " (5.1)"
-                        8 -> " (7.1)"
+                        2 -> " Stereo"
+                        6 -> " 5.1"
+                        8 -> " 7.1"
+                        1 -> " Mono"
                         else -> ""
                     }
+                    val codec = getAudioCodec(format)
+
+//                    val bitrate = if (format.bitrate != Format.NO_VALUE) {
+//                        " ${(format.bitrate / 1000)} kbps"
+//                    } else {
+//                        ""
+//                    }
+
+                    val label = "$readableLabel • $codec$channelString"
 
                     list.add(
                         AudioTrack(
                             group = group,
                             trackIndex = trackIndex,
-                            language = format.language ?: "und",
-                            label = readableLabel + channelString,
+                            language = format.language ?: "Unknown",
+                            label = label,
                             isSelected = group.isTrackSelected(trackIndex)
                         )
                     )
@@ -163,5 +174,20 @@ class VideoMetaHelper {
         }
 
         return "$type (${height}p)"
+    }
+
+    fun getAudioCodec(format: Format): String {
+        return when {
+            format.sampleMimeType?.contains("eac3", ignoreCase = true) == true -> "E-AC3"
+            format.sampleMimeType?.contains("ac3", ignoreCase = true) == true -> "AC-3"
+            format.sampleMimeType?.contains("aac", ignoreCase = true) == true -> "AAC"
+            format.sampleMimeType?.contains("mpeg", ignoreCase = true) == true -> "MP2"
+            format.sampleMimeType?.contains("opus", ignoreCase = true) == true -> "Opus"
+            format.sampleMimeType?.contains("vorbis", ignoreCase = true) == true -> "Vorbis"
+            format.sampleMimeType?.contains("flac", ignoreCase = true) == true -> "FLAC"
+            format.sampleMimeType?.contains("pcm", ignoreCase = true) == true -> "PCM"
+            !format.codecs.isNullOrBlank() -> format.codecs!!
+            else -> "Unknown"
+        }
     }
 }

@@ -41,9 +41,9 @@ class EPGManager @Inject constructor(
 
                 val nextRefreshDelay = calculateNextRefreshDelay(epg)
 
-                Log.d(
-                    "EPGManager", "Next refresh in ${nextRefreshDelay / 1000}s"
-                )
+//                Log.d(
+//                    "EPGManager", "Next refresh in ${nextRefreshDelay / 1000}s"
+//                )
 
                 delay(nextRefreshDelay)
 

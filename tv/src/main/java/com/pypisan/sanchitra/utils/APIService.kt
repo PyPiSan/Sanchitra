@@ -15,6 +15,7 @@ import com.pypisan.sanchitra.data.models.TVResponse
 import com.pypisan.sanchitra.data.models.TrendingMovieResponseDTO
 import com.pypisan.sanchitra.data.models.TrendingResponseDTO
 import com.pypisan.sanchitra.data.models.UserDetailResponse
+import com.pypisan.sanchitra.data.models.UserExtended
 import com.pypisan.sanchitra.data.models.VideoDTO
 import retrofit2.Response
 import retrofit2.http.Body
@@ -42,6 +43,9 @@ interface APIService {
     //    get user details
     @GET("users/detail/")
     suspend fun getUserDetail(): Response<UserDetailResponse>
+
+    @GET("users/get-auth/")
+    suspend fun getUserExtended(): Response<UserExtended>
 
     // languages
     @GET("utility/languages/")

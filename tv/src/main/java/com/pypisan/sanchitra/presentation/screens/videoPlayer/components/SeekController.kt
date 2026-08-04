@@ -17,9 +17,7 @@ class SeekController(
         private const val COMMIT_DELAY = 700L
     }
 
-    private var pendingOffset = 0L
     private var commitJob: Job? = null
-
     val pendingPosition = MutableStateFlow<Long?>(null)
 
     fun forward() {
@@ -31,12 +29,11 @@ class SeekController(
     }
 
     private fun update(delta: Long) {
-        pendingOffset += delta
-
-        val current = player.currentPosition
         val duration = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
 
-        val target = (current + pendingOffset)
+        val basePosition = pendingPosition.value ?: player.currentPosition
+
+        val target = (basePosition + delta)
             .coerceIn(0L, duration)
 
         pendingPosition.value = target
@@ -50,18 +47,12 @@ class SeekController(
 
     fun commit() {
         commitJob?.cancel()
-
-        pendingPosition.value?.let {
-            player.seekTo(it)
-        }
-
-        pendingOffset = 0L
+        pendingPosition.value?.let(player::seekTo)
         pendingPosition.value = null
     }
 
     fun cancel() {
         commitJob?.cancel()
-        pendingOffset = 0L
         pendingPosition.value = null
     }
 }

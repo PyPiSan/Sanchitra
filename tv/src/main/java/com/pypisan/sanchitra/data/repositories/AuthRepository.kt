@@ -9,6 +9,7 @@ import com.pypisan.sanchitra.data.models.DeviceLoginInitResponse
 import com.pypisan.sanchitra.data.models.LanguageResponse
 import com.pypisan.sanchitra.data.models.LoginStatusResponse
 import com.pypisan.sanchitra.data.models.UserDetailResponse
+import com.pypisan.sanchitra.data.models.UserExtended
 import com.pypisan.sanchitra.utils.APIService
 import javax.inject.Inject
 
@@ -35,8 +36,6 @@ class AuthRepository @Inject constructor(
         return try {
             val response = api.checkLoginStatus(deviceCode)
 
-//            Log.d("TV", "checkLoginStatus Response: ${response.body()}")
-
             if (response.isSuccessful) response.body() else null
 
         } catch (e: Exception) {
@@ -59,6 +58,24 @@ class AuthRepository @Inject constructor(
 
         } catch (e: Exception) {
             Log.e("TV", "UserDetail API Error: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun getUserExtended(): UserExtended? {
+        return try {
+
+            val response = api.getUserExtended()
+
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                Log.e("TV", "UserExtended error Code: ${response.code()}")
+                null
+            }
+
+        } catch (e: Exception) {
+            Log.e("TV", "UserExtended API Error: ${e.message}")
             null
         }
     }

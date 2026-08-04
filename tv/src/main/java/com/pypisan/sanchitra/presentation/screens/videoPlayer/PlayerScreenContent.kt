@@ -38,6 +38,7 @@ import androidx.media3.common.VideoSize
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.HttpDataSource
+import androidx.media3.exoplayer.ExoPlaybackException
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.drm.DrmSession
 import androidx.media3.exoplayer.drm.MediaDrmCallbackException
@@ -205,6 +206,11 @@ fun PlayerScreenContent(
                                 errorValue = "Broken Stream Error"
                             }
                         }
+                    }
+                    if (error is ExoPlaybackException){
+                        fatalError = true
+                        isErrored = true
+                        errorValue = "Unexpected Error"
                     }
                 } else {
                     // Optionally log this event here:
