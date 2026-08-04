@@ -8,13 +8,17 @@ import com.pypisan.sanchitra.utils.APIService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.isActive
 import javax.inject.Inject
 import kotlin.collections.emptyList
+import kotlin.time.Duration.Companion.hours
 
 class HomeRepositoryImpl @Inject constructor(
     private val api: APIService
@@ -22,18 +26,43 @@ class HomeRepositoryImpl @Inject constructor(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+//    private val liveChannelTrendingFlow: StateFlow<TrendingResponse> = flow {
+//        val response = api.getTrending()
+//        if (response.isSuccessful) {
+//            emit(
+//                response.body()?.toTrendingResponse()
+//                    ?: TrendingResponse(emptyList())
+//            )
+//        } else {
+//            emit(TrendingResponse(emptyList()))
+//        }
+//    }.catch {
+//        emit(TrendingResponse(emptyList()))
+//    }.stateIn(
+//        scope = scope,
+//        started = SharingStarted.Eagerly,
+//        initialValue = TrendingResponse(emptyList())
+//    )
+
     private val liveChannelTrendingFlow: StateFlow<TrendingResponse> = flow {
-        val response = api.getTrending()
-        if (response.isSuccessful) {
-            emit(
-                response.body()?.toTrendingResponse()
-                    ?: TrendingResponse(emptyList())
-            )
-        } else {
-            emit(TrendingResponse(emptyList()))
+        while (currentCoroutineContext().isActive) {
+            try {
+                val response = api.getTrending()
+
+                emit(
+                    if (response.isSuccessful) {
+                        response.body()?.toTrendingResponse()
+                            ?: TrendingResponse(emptyList())
+                    } else {
+                        TrendingResponse(emptyList())
+                    }
+                )
+            } catch (e: Exception) {
+                emit(TrendingResponse(emptyList()))
+            }
+
+            delay(1.hours)
         }
-    }.catch {
-        emit(TrendingResponse(emptyList()))
     }.stateIn(
         scope = scope,
         started = SharingStarted.Eagerly,
