@@ -1,0 +1,15 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/src/main/AndroidManifest.xml:17:1-53
+INJECTED from /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/src/main/AndroidManifest.xml:17:1-53
+	package
+		ADDED from /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/src/main/AndroidManifest.xml:17:11-51
+		INJECTED from /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/src/main/AndroidManifest.xml
+uses-sdk
+INJECTED from /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/src/main/AndroidManifest.xml
+INJECTED from /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/src/main/AndroidManifest.xml

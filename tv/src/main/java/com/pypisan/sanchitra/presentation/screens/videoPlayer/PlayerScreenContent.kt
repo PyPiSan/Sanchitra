@@ -13,6 +13,7 @@ import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -66,13 +67,13 @@ import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoQu
 import kotlinx.coroutines.delay
 
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(UnstableApi::class)
 @Composable
 fun PlayerScreenContent(
     title: String,
     epgResponse: EPGResponse?,
+    isMovie: Boolean = false,
     exoPlayer: ExoPlayer,
     subtitles: List<SubtitleTrack>,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
@@ -143,8 +144,9 @@ fun PlayerScreenContent(
         }
     }
 
-    val (epgPrograms, initialAiringIndex) = remember(epgResponse,
-        showNowAiring, ticker) {
+    val (epgPrograms, initialAiringIndex) = remember(
+        epgResponse, showNowAiring, ticker
+    ) {
         if (epgResponse != null) {
             prepareEPGProgramData(epgResponse)
         } else {
@@ -162,8 +164,10 @@ fun PlayerScreenContent(
             }
 
             override fun onVideoSizeChanged(videoSize: VideoSize) {
+
                 if (videoSize.width > 0 && videoSize.height > 0) {
-                    val ratio = videoSize.width.toFloat() / videoSize.height.toFloat()
+                    val ratio =
+                        (videoSize.width * videoSize.pixelWidthHeightRatio) / videoSize.height.toFloat()
 
                     if (ratio.isFinite() && ratio > 0f) {
                         aspectRatio = ratio
@@ -176,9 +180,7 @@ fun PlayerScreenContent(
                 subtitleText = if (cueGroup.cues.isEmpty()) {
                     null
                 } else {
-                    cueGroup.cues
-                        .mapNotNull { it.text }
-                        .joinToString(separator = "\n")
+                    cueGroup.cues.mapNotNull { it.text }.joinToString(separator = "\n")
                 }
                 subtitleBitmap = cueGroup.cues.firstNotNullOfOrNull { it.bitmap }
             }
@@ -207,14 +209,14 @@ fun PlayerScreenContent(
                             }
                         }
                     }
-                    if (error is ExoPlaybackException){
+                    if (error is ExoPlaybackException) {
                         fatalError = true
                         isErrored = true
                         errorValue = "Unexpected Error"
                     }
                 } else {
                     // Optionally log this event here:
-                     Log.e("Player2", "Stream interrupted after playing, watchdog will retry $cause")
+                    Log.e("Player2", "Stream interrupted after playing, watchdog will retry $cause")
                 }
             }
 
@@ -235,8 +237,7 @@ fun PlayerScreenContent(
     }
 
     RememberPlaybackWatchdog(
-        exoPlayer = exoPlayer,
-        onFreeze = {
+        exoPlayer = exoPlayer, onFreeze = {
             if (fatalError) {
                 return@RememberPlaybackWatchdog false
             }
@@ -250,8 +251,7 @@ fun PlayerScreenContent(
             exoPlayer.prepare()
             exoPlayer.play()
             true
-        }
-    )
+        })
 
     BackHandler {
         exoPlayer.release()
@@ -264,16 +264,19 @@ fun PlayerScreenContent(
             .focusRequester(fallbackFocusRequester)
             .focusGroup()
             .focusable()
-            .background(Color.Black),
-        contentAlignment = Alignment.Center
+            .background(Color.Black), contentAlignment = Alignment.Center
     ) {
+
         PlayerSurface(
-            player = exoPlayer,
-            surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(aspectRatio)
+            player = exoPlayer, surfaceType = SURFACE_TYPE_TEXTURE_VIEW, modifier = if (isMovie) {
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(aspectRatio)
+            } else {
+                Modifier.fillMaxSize()
+            }
         )
+
         VideoPlayerOverlay(
             modifier = Modifier.align(Alignment.BottomCenter),
             isPlaying = exoPlayer.isPlaying,
@@ -281,8 +284,7 @@ fun PlayerScreenContent(
             centerButton = { VideoPlayerPulse(pulseState) },
             subtitles = {
                 SubtitleOverlay(
-                    subtitleText = subtitleText,
-                    subtitleBitmap = subtitleBitmap
+                    subtitleText = subtitleText, subtitleBitmap = subtitleBitmap
                 )
             },
             showControls = videoPlayerState::showControls,
@@ -321,82 +323,70 @@ fun PlayerScreenContent(
                     })
             })
 
-        SubtitleDrawer(
-            visible = showSubtitleDrawer,
-            subtitles = subtitles,
-            onDismiss = {
-                showSubtitleDrawer = false
-                exoPlayer.play()
-            },
-            onSubtitleSelected = { selected ->
-                if (selected.trackIndex == -1) {
-                    exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters.buildUpon()
-                        .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true).build()
-                } else {
-                    exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters.buildUpon()
-                        .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
-                        .setPreferredTextLanguage(selected.language)
-                        .setSelectUndeterminedTextLanguage(true).build()
-                }
-                onSubtitlesChanged(
-                    subtitles.map {
-                        it.copy(isSelected = it.label == selected.label)
-                    })
-                showSubtitleDrawer = false
-                exoPlayer.playWhenReady = true
-                exoPlayer.prepare()
+        SubtitleDrawer(visible = showSubtitleDrawer, subtitles = subtitles, onDismiss = {
+            showSubtitleDrawer = false
+            exoPlayer.play()
+        }, onSubtitleSelected = { selected ->
+            if (selected.trackIndex == -1) {
+                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters.buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true).build()
+            } else {
+                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters.buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                    .setPreferredTextLanguage(selected.language)
+                    .setSelectUndeterminedTextLanguage(true).build()
             }
-        )
+            onSubtitlesChanged(
+                subtitles.map {
+                    it.copy(isSelected = it.label == selected.label)
+                })
+            showSubtitleDrawer = false
+            exoPlayer.playWhenReady = true
+            exoPlayer.prepare()
+        })
 
-        AudioTrackDrawer(
-            visible = showAudioQualityDrawer,
-            audioTracks = audios,
-            onDismiss = {
-                showAudioQualityDrawer = false
-                exoPlayer.play()
-            },
-            onTrackSelected = { selected ->
-                if (selected.trackIndex == -1) {
-                    exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters.buildUpon()
-                        .clearOverridesOfType(C.TRACK_TYPE_AUDIO).build()
-                } else {
-                    val group = selected.group
-                    exoPlayer.trackSelectionParameters = group?.mediaTrackGroup?.let {
+        AudioTrackDrawer(visible = showAudioQualityDrawer, audioTracks = audios, onDismiss = {
+            showAudioQualityDrawer = false
+            exoPlayer.play()
+        }, onTrackSelected = { selected ->
+            if (selected.trackIndex == -1) {
+                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters.buildUpon()
+                    .clearOverridesOfType(C.TRACK_TYPE_AUDIO).build()
+            } else {
+                val group = selected.group
+                exoPlayer.trackSelectionParameters = group?.mediaTrackGroup?.let {
+                    exoPlayer.trackSelectionParameters.buildUpon()
+                        .clearOverridesOfType(C.TRACK_TYPE_AUDIO).setOverrideForType(
+                            TrackSelectionOverride(it, listOf(selected.trackIndex))
+                        )
+                }?.build()!!
+            }
+            showAudioQualityDrawer = false
+            exoPlayer.playWhenReady = true
+        })
+
+        VideoQualityDrawer(visible = showQualityDrawer, qualities = qualities, onDismiss = {
+            showQualityDrawer = false
+            exoPlayer.play()
+        }, onQualitySelected = { selected ->
+            if (selected.height == -1) {
+                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters.buildUpon()
+                    .clearOverridesOfType(C.TRACK_TYPE_VIDEO).build()
+            } else {
+                val group = selected.group
+                if (group != null) {
+                    exoPlayer.trackSelectionParameters =
                         exoPlayer.trackSelectionParameters.buildUpon()
-                            .clearOverridesOfType(C.TRACK_TYPE_AUDIO).setOverrideForType(
-                                TrackSelectionOverride(it, listOf(selected.trackIndex))
-                            )
-                    }?.build()!!
-                }
-                showAudioQualityDrawer = false
-                exoPlayer.playWhenReady = true
-            }
-        )
-
-        VideoQualityDrawer(
-            visible = showQualityDrawer,
-            qualities = qualities,
-            onDismiss = {
-                showQualityDrawer = false
-                exoPlayer.play()
-            },
-            onQualitySelected = { selected ->
-                if (selected.height == -1) {
-                    exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters.buildUpon()
-                        .clearOverridesOfType(C.TRACK_TYPE_VIDEO).build()
-                } else {
-                    val group = selected.group
-                    if (group != null) {
-                        exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters.buildUpon()
                             .clearOverridesOfType(C.TRACK_TYPE_VIDEO).setOverrideForType(
-                                TrackSelectionOverride(group.mediaTrackGroup, listOf(selected.trackIndex))
+                                TrackSelectionOverride(
+                                    group.mediaTrackGroup, listOf(selected.trackIndex)
+                                )
                             ).build()
-                    }
                 }
-                showQualityDrawer = false
-                exoPlayer.playWhenReady = true
             }
-        )
+            showQualityDrawer = false
+            exoPlayer.playWhenReady = true
+        })
 
         if (showNowAiring && epgPrograms.isNotEmpty()) {
             NowAiringDialog(

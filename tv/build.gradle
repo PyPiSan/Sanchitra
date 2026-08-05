@@ -16,7 +16,7 @@ plugins {
 
 def versionMajor = 4
 def versionMinor = 1
-def versionPatch = 5
+def versionPatch = 7
 def buildType="alpha"
 
 def computedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
@@ -34,6 +34,11 @@ android {
         versionName computedVersionName
         multiDexEnabled true // add this to enable multi-dex
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            // Only package ARM native libraries for TV hardware
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
 
     }
     lint {
@@ -71,6 +76,7 @@ dependencies {
 
     implementation "com.google.dagger:hilt-android:2.59.2"
     ksp("com.google.dagger:hilt-android-compiler:2.59.2")
+    implementation project(':decoder_ffmpeg')
 
     def compose_version = "1.10.6"
     implementation "androidx.compose.foundation:foundation:$compose_version"

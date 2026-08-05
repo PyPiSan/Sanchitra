@@ -18,3 +18,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Sanchitra"
 include ':tv'
+
+//added ffmpeg decoder
+include ':decoder_ffmpeg'
+project(':decoder_ffmpeg')
