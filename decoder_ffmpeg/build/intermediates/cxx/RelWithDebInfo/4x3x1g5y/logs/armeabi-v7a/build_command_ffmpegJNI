@@ -1,0 +1,4 @@
+/Users/sanjeev/Library/Android/sdk/cmake/3.22.1/bin/ninja \
+  -C \
+  /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/.cxx/RelWithDebInfo/4x3x1g5y/armeabi-v7a \
+  ffmpegJNI

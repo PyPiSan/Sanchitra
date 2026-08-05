@@ -32,6 +32,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.media3.exoplayer.audio.AudioSink
+import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.tv.material3.MaterialTheme
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
@@ -76,15 +78,16 @@ fun TVPlayerScreen(
             .background(MaterialTheme.colorScheme.surface)
             .focusRequester(focusRequester)
             .focusProperties { onExit = { FocusRequester.Cancel } }
-            .focusGroup()
-    ) {
+            .focusGroup()) {
         when (val s = uiState) {
             is TVPlayerScreenUiState.Loading -> {
                 Loading(modifier = Modifier.fillMaxSize())
             }
+
             is TVPlayerScreenUiState.Error -> {
                 Error(modifier = Modifier.fillMaxSize())
             }
+
             is TVPlayerScreenUiState.Done -> {
                 TVPlayerBuild(
                     channel = s.channel,
@@ -92,8 +95,7 @@ fun TVPlayerScreen(
                     onBackPressed = onBackPressed,
                     onVideoStarted = {
                         tvPlayerScreenViewModel.updateViewCount(s.channel.id)
-                    }
-                )
+                    })
             }
         }
     }
@@ -104,10 +106,7 @@ fun TVPlayerScreen(
 @OptIn(UnstableApi::class)
 @Composable
 fun TVPlayerBuild(
-    channel: Channel,
-    epg: EPGResponse,
-    onBackPressed: () -> Unit,
-    onVideoStarted: () -> Unit
+    channel: Channel, epg: EPGResponse, onBackPressed: () -> Unit, onVideoStarted: () -> Unit
 ) {
     val context = LocalContext.current
     var isBuffering by rememberSaveable { mutableStateOf(false) }
@@ -122,22 +121,40 @@ fun TVPlayerBuild(
         mutableStateOf<List<VideoQuality>>(emptyList())
     }
 
-    val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
-        .forceEnableMediaCodecAsynchronousQueueing()
-        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+    val audioSink = DefaultAudioSink.Builder(context).setEnableFloatOutput(true).build()
+
+//    val renderersFactory = DefaultRenderersFactory(context)
+//        .setEnableDecoderFallback(true)
+//        .forceEnableMediaCodecAsynchronousQueueing()
+//        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+
+    // Custom RenderersFactory using our optimized audioSink
+    val renderersFactory = object : DefaultRenderersFactory(context) {
+        init {
+            setExtensionRendererMode(EXTENSION_RENDERER_MODE_PREFER)
+            setEnableDecoderFallback(true)
+            forceEnableMediaCodecAsynchronousQueueing()
+        }
+
+        override fun buildAudioSink(
+            context: Context, enableFloatOutput: Boolean, enableAudioTrackPlaybackParams: Boolean
+        ): AudioSink {
+            return audioSink
+        }
+    }
 
     val exoPlayer = rememberExoPlayer(
-        context = context,
-        channel = channel,
-        onBuffering = { state ->
+        context = context, channel = channel, onBuffering = { state ->
             isBuffering = state == Player.STATE_BUFFERING
-        },
-        onSubtitlesChanged = { newTracks ->
+        }, onSubtitlesChanged = { newTracks ->
 
             val hasSelectedTrack = newTracks.any { it.isSelected }
             subtitles = listOf(
                 SubtitleTrack(
-                    label = "Off", language = "off", group = null, trackIndex = -1,
+                    label = "Off",
+                    language = "off",
+                    group = null,
+                    trackIndex = -1,
                     isSelected = !hasSelectedTrack
                 )
             ) + newTracks
@@ -149,8 +166,7 @@ fun TVPlayerBuild(
 
         onQualitiesChanged = { list ->
             qualities = list.filter { it.height >= 720 }.sortedByDescending { it.height }
-        },
-        renderersFactory = renderersFactory
+        }, renderersFactory = renderersFactory
     )
 
     DisposableEffect(exoPlayer) {

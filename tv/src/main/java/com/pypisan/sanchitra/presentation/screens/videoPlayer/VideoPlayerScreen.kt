@@ -182,6 +182,7 @@ fun VideoPlayerBuild(
     PlayerScreenContent(
         title = title ?: "",
         epgResponse = null,
+        isMovie = true,
         exoPlayer = exoPlayer,
         subtitles = subtitles,
         audios = audios,

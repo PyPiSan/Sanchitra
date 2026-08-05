@@ -13,3 +13,12 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Gradle build outputs
+**/build/
+**/.cxx/
+**/.externalNativeBuild/
+
+# Android Studio temporary files
+.gradle/
+.idea/

@@ -50,9 +50,10 @@ fun buildDefaultExoPlayer(
                 Format.Builder().setSampleMimeType(MimeTypes.APPLICATION_CEA708).build()
             )
         )
-        .setTsExtractorFlags(
-            androidx.media3.extractor.ts.DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES
-        )
+//        .setTsExtractorFlags(
+//            DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES or
+//                    DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS
+//        )
 
 
     val mediaSourceFactory = DefaultMediaSourceFactory(httpDataSourceFactory, extractorsFactory)
