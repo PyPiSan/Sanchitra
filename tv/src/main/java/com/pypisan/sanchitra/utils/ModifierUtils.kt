@@ -50,9 +50,6 @@ fun Modifier.handleDPadKeyEvents(
     false
 }
 
-/**
- * Handles all D-Pad Keys
- * */
 fun Modifier.handleDPadKeyEvents(
     onLeft: (() -> Unit)? = null,
     onRight: (() -> Unit)? = null,
@@ -112,32 +109,12 @@ fun Modifier.focusOnInitialVisibility(isVisible: MutableState<Boolean>): Modifie
         }
 }
 
-/**
- * [FocusRequesterModifiers] defines a set of modifiers which can be used for restoring focus and
- * specifying the initially focused item.
- *
- * @param [parentModifier] is added to the parent container.
- * @param [childModifier] is added to the item that needs to first gain focus.
- *
- * For example, if you want the item at index 0 to get focus for the first time,
- * you can do the following:
- *
- * LazyRow(modifier.then(modifiers.parentModifier) {
- *   item1(modifier.then(modifiers.childModifier) {...}
- *   item2 {...}
- *   item3 {...}
- *   ...
- * }
- */
 data class FocusRequesterModifiers(
     val parentModifier: Modifier,
     val childModifier: Modifier
 )
 
-/**
- * Returns a set of modifiers [FocusRequesterModifiers] which can be used for restoring focus and
- * specifying the initially focused item.
- */
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun createInitialFocusRestorerModifiers(): FocusRequesterModifiers {

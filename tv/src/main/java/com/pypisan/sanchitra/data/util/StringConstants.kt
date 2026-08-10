@@ -5,7 +5,6 @@ object StringConstants {
     object API {
         const val TVURL = "https://media.pypisan.com/api/v1/"
         const val UIURL = "https://sanchitra.pypisan.com/"
-
         const val VIDEOURL = "https://tv.pypisan.com/api/v1/"
     }
 
@@ -15,6 +14,16 @@ object StringConstants {
         var userProfileName: String? = null
         var userProfilePicture: String? = null
         var userSelectedLanguage: List<String> = emptyList()
+    }
+
+    object ProfileExtended {
+        var isPremium: Boolean = false
+        var extToken: String? = null
+        var extJToken: String? = null
+        var extSSOToken: String? = null
+        var subscriberId: String? = null
+        var uniqueId: String? = null
+        var drmLink: String? = null
     }
 
     object Utils {
@@ -30,9 +39,11 @@ object StringConstants {
             const val RottenTomatoes = "Rotten Tomatoes"
             const val RottenTomatoesScore = "89%"
             const val RottenTomatoesReviewCount = "125"
-            const val RottenTomatoesImageUrl = "https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/movies/rt.png"
+            const val RottenTomatoesImageUrl =
+                "https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/movies/rt.png"
             const val IMDBReviewerName = "IMDB"
-            const val IMDBImageUrl = "https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/movies/imdb.png"
+            const val IMDBImageUrl =
+                "https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/movies/imdb.png"
             const val IMDBDefaultCount = "1.8M"
             const val IMDBDefaultRating = "9.2"
         }
@@ -47,22 +58,14 @@ object StringConstants {
             const val DashboardSearchButton = "Dashboard Search Button"
             const val BrandLogoImage = "Brand Logo Image"
         }
+
         const val HomeScreenTrendingTitle = "Trending Movies"
         fun reviewCount(count: String) = "$count reviews"
 
         object Placeholders {
             const val AboutSectionTitle = "About Sanchitra"
-            const val AboutSectionDescription = "Welcome to Sanchitra! We are a new and" +
-                    " exciting streaming platform that offers a vast selection of movies," +
-                    " TV shows, and original content for you to enjoy. Our team is dedicated" +
-                    " to providing an intuitive and seamless streaming experience for all" +
-                    " users. With a simple and intuitive interface, you can easily find and" +
-                    " watch your favourite content in just a few clicks. We are constantly" +
-                    " updating and expanding our library, so there is always something new" +
-                    " to discover. We also offer personalised recommendations based on your" +
-                    " viewing history, so you can easily find new and exciting content to" +
-                    " enjoy. Thank you for choosing Sanchitra for all of your entertainment" +
-                    " needs. We hope you have a great time streaming!"
+            const val AboutSectionDescription =
+                "Welcome to Sanchitra! We are a new and" + " exciting streaming platform that offers a vast selection of movies," + " TV shows, and original content for you to enjoy. Our team is dedicated" + " to providing an intuitive and seamless streaming experience for all" + " users. With a simple and intuitive interface, you can easily find and" + " watch your favourite content in just a few clicks. We are constantly" + " updating and expanding our library, so there is always something new" + " to discover. We also offer personalised recommendations based on your" + " viewing history, so you can easily find new and exciting content to" + " enjoy. Thank you for choosing Sanchitra for all of your entertainment" + " needs. We hope you have a great time streaming!"
             const val AboutSectionAppVersionTitle = "Application Version"
             const val LanguageSectionTitle = "Language"
             const val SearchHistorySectionTitle = "Search history"
@@ -93,6 +96,7 @@ object StringConstants {
             const val HelpAndSupportSectionContactItem = "Contact us on"
             const val HelpAndSupportSectionContactValue = "support@pypisan.com"
         }
+
         const val VideoPlayerControlClosedCaptionsButton = "Playlist Button"
 
         const val VideoPlayerControlInfoButton = "Playlist Button"
