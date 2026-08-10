@@ -104,7 +104,7 @@ fun MovieDetails(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = childPadding.start, top = 36.dp, end = 24.dp, bottom = 24.dp)
+                    .padding(start = childPadding.start, top = 80.dp, end = 24.dp, bottom = 24.dp)
             ) {
                 MovieLargeTitle(movieTitle = video.title)
 
