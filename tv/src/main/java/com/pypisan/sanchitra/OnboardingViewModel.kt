@@ -1,5 +1,7 @@
 package com.pypisan.sanchitra
 
+// Importing User data required for Profile buildup if registered
+
 import android.content.Context
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -42,6 +44,7 @@ class OnboardingViewModel @Inject constructor(
             if (!token.isNullOrEmpty()) {
                 loadProfiles(context)
                 loadLanguages()
+                loadUserExtended()
                 return@launch
             }
 
@@ -91,6 +94,7 @@ class OnboardingViewModel @Inject constructor(
 
                         loadProfiles(context)
                         loadLanguages()
+                        loadUserExtended()
 
                         return@withTimeoutOrNull true
                     }
@@ -175,6 +179,23 @@ class OnboardingViewModel @Inject constructor(
                     "Gujarati",
                     "Punjabi",
                 )
+            }
+        }
+    }
+
+    fun loadUserExtended() {
+        viewModelScope.launch {
+            val result = repo.getUserExtended()
+            if (result != null) {
+                StringConstants.ProfileExtended.extToken = result.authToken
+                StringConstants.ProfileExtended.extJToken = result.jToken
+                StringConstants.ProfileExtended.extSSOToken = result.sSOToken
+                StringConstants.ProfileExtended.subscriberId = result.subscriberId
+                StringConstants.ProfileExtended.uniqueId = result.unique
+                StringConstants.ProfileExtended.drmLink = result.drmLink
+                StringConstants.ProfileExtended.isPremium = true
+            } else {
+                StringConstants.ProfileExtended.isPremium = false
             }
         }
     }

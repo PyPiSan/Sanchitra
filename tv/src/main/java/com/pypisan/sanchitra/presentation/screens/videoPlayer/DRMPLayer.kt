@@ -12,6 +12,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.ResolvingDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.drm.DefaultDrmSessionManager
@@ -26,12 +27,16 @@ import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
 import com.pypisan.sanchitra.data.util.CustomDRMSessionManager
+import com.pypisan.sanchitra.data.util.HdneaTokenProvider
 import okhttp3.RequestBody.Companion.toRequestBody
 
 @androidx.annotation.OptIn(UnstableApi::class)
 fun buildDrmExoPlayer(
     context: Context,
     name: String,
+    channelId: String,
+    isInternal: Boolean = false,
+    hdneaTokenProvider: HdneaTokenProvider?,
     streamUrl: String,
     licenseKey: String? = "",
     licenseUrl: String? = "",
@@ -41,17 +46,11 @@ fun buildDrmExoPlayer(
     onQualitiesChanged: (List<VideoQuality>) -> Unit,
 ): ExoPlayer {
 
-    val isInternal = false
-
-    val mediaItem = MediaItem.Builder()
-        .setUri(streamUrl)
-        .setMimeType(MimeTypes.APPLICATION_MPD)
-        .setMediaMetadata(MediaMetadata.Builder().setTitle(name).build())
-        .build()
+    val mediaItem = MediaItem.Builder().setUri(streamUrl).setMimeType(MimeTypes.APPLICATION_MPD)
+        .setMediaMetadata(MediaMetadata.Builder().setTitle(name).build()).build()
     val trackSelector = DefaultTrackSelector(context)
-    val loadControl = DefaultLoadControl.Builder()
-        .setBufferDurationsMs(30000, 60000, 3000, 2000)
-        .build()
+    val loadControl =
+        DefaultLoadControl.Builder().setBufferDurationsMs(30000, 60000, 3000, 2000).build()
     val videoMetaHelper = VideoMetaHelper()
 
     // 1. Declare dataSourceFactory OUTSIDE the 'when' block so we can modify it and use it later
@@ -64,9 +63,13 @@ fun buildDrmExoPlayer(
 
             val (keyHex, kidHex) = getDrmKeys(licenseKey)!!
             val drmKeyBytes = kidHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-            val encodedDrmKey = Base64.encodeToString(drmKeyBytes, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+            val encodedDrmKey = Base64.encodeToString(
+                drmKeyBytes, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+            )
             val drmKeyIdBytes = keyHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-            val encodedDrmKeyId = Base64.encodeToString(drmKeyIdBytes, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+            val encodedDrmKeyId = Base64.encodeToString(
+                drmKeyIdBytes, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+            )
 
             val drmBody = """
                 {
@@ -82,8 +85,7 @@ fun buildDrmExoPlayer(
             """.trimIndent()
             val drmCallback = LocalMediaDrmCallback(drmBody.toByteArray())
 
-            DefaultDrmSessionManager.Builder()
-                .setPlayClearSamplesWithoutKeys(true)
+            DefaultDrmSessionManager.Builder().setPlayClearSamplesWithoutKeys(true)
                 .setMultiSession(false)
                 .setUuidAndExoMediaDrmProvider(C.CLEARKEY_UUID, FrameworkMediaDrm.DEFAULT_PROVIDER)
                 .build(drmCallback)
@@ -99,12 +101,13 @@ fun buildDrmExoPlayer(
                 val drm = FrameworkMediaDrm.newInstance(uuid)
                 try {
                     if (isFireTvDevice()) drm.setPropertyString("securityLevel", "L3")
-                } catch (e: Exception) { e.printStackTrace() }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
                 drm
             }
 
-            DefaultDrmSessionManager.Builder()
-                .setPlayClearSamplesWithoutKeys(true)
+            DefaultDrmSessionManager.Builder().setPlayClearSamplesWithoutKeys(true)
                 .setMultiSession(false)
                 .setUuidAndExoMediaDrmProvider(C.WIDEVINE_UUID, customDrmProvider)
                 .build(drmCallback)
@@ -114,37 +117,56 @@ fun buildDrmExoPlayer(
         !licenseUrl.isNullOrEmpty() && isInternal -> {
 
             // Set up DataSource with custom Cookie for fetching DASH segments and Manifests
-            val httpDataSourceFactory = DefaultHttpDataSource.Factory()
-                .setUserAgent("plaYtv/7.1.7 (Linux;Android 8.1.0) ExoPlayerLib/2.11.7")
-                .setDefaultRequestProperties(
-                    mapOf("Cookie" to "__hdnea__=")
+
+            val httpDataSourceFactory = DefaultHttpDataSource.Factory().setUserAgent(
+                    "plaYtv/7.1.7 (Linux;Android 8.1.0) ExoPlayerLib/2.11.7"
                 )
 
-            // Override the outer variable
-            dataSourceFactory = DefaultDataSource.Factory(context, httpDataSourceFactory)
+            val resolvingDataSourceFactory = ResolvingDataSource.Factory(
+                DefaultDataSource.Factory(
+                    context, httpDataSourceFactory
+                )
+            ) { dataSpec ->
+
+                val currentToken = hdneaTokenProvider?.getToken()
+
+                if (currentToken.isNullOrEmpty()) {
+
+                    dataSpec
+
+                } else {
+
+                    val finalHeaders = mapOf(
+                        "Cookie" to "__hdnea__=$currentToken"
+                    )
+
+                    val resolvedDataSpec =
+                        dataSpec.buildUpon().setHttpRequestHeaders(finalHeaders).build()
+                    resolvedDataSpec
+                }
+            }
+
+            dataSourceFactory = resolvingDataSourceFactory
 
             // Custom MediaDrmCallback connecting ExoPlayer to your CustomDRMSessionManager
             val drmCallback = object : MediaDrmCallback {
-
-                override fun executeKeyRequest(uuid: java.util.UUID, request: ExoMediaDrm.KeyRequest): ByteArray {
+                override fun executeKeyRequest(
+                    uuid: java.util.UUID, request: ExoMediaDrm.KeyRequest
+                ): ByteArray {
                     return CustomDRMSessionManager.fetchDrmLicense(
-                        licenseUrl = licenseUrl ,
+                        licenseUrl = licenseUrl,
                         challenge = request.data, // Payload ExoPlayer generated
-                        authToken =  "",
-                        subscriberId = "",
-                        uniqueId =  "",
-                        ssoToken =  "",
-                        channelId = "",
-                        hdnea = ""
+                        channelId = channelId
                     )
                 }
 
-                override fun executeProvisionRequest(uuid: java.util.UUID, request: ExoMediaDrm.ProvisionRequest): ByteArray {
+                override fun executeProvisionRequest(
+                    uuid: java.util.UUID, request: ExoMediaDrm.ProvisionRequest
+                ): ByteArray {
                     val url = request.defaultUrl + "&signedRequest=" + String(request.data)
-                    val okReq = okhttp3.Request.Builder()
-                        .url(url)
-                        .post(ByteArray(0).toRequestBody(null))
-                        .build()
+                    val okReq =
+                        okhttp3.Request.Builder().url(url).post(ByteArray(0).toRequestBody(null))
+                            .build()
                     CustomDRMSessionManager.client.newCall(okReq).execute().use {
                         return it.body?.bytes() ?: ByteArray(0)
                     }
@@ -156,13 +178,14 @@ fun buildDrmExoPlayer(
                 val drm = FrameworkMediaDrm.newInstance(uuid)
                 try {
                     if (isFireTvDevice()) drm.setPropertyString("securityLevel", "L3")
-                } catch (e: Exception) { e.printStackTrace() }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
                 drm
             }
 
             // Build and return the session manager for this branch
-            DefaultDrmSessionManager.Builder()
-                .setPlayClearSamplesWithoutKeys(true)
+            DefaultDrmSessionManager.Builder().setPlayClearSamplesWithoutKeys(true)
                 .setMultiSession(false)
                 .setUuidAndExoMediaDrmProvider(C.WIDEVINE_UUID, customDrmProvider)
                 .build(drmCallback)
@@ -180,17 +203,12 @@ fun buildDrmExoPlayer(
         }
     }
 
-    return ExoPlayer.Builder(context)
-        .setTrackSelector(trackSelector)
-        .setLoadControl(loadControl)
-        .setSeekForwardIncrementMs(10_000L)
-        .setSeekBackIncrementMs(10_000L)
-        .build().apply {
+    return ExoPlayer.Builder(context).setTrackSelector(trackSelector).setLoadControl(loadControl)
+        .setSeekForwardIncrementMs(10_000L).setSeekBackIncrementMs(10_000L).build().apply {
 
-            trackSelectionParameters = trackSelectionParameters.buildUpon()
-                .setForceHighestSupportedBitrate(true)
-                .setPreferredAudioLanguage("en")
-                .build()
+            trackSelectionParameters =
+                trackSelectionParameters.buildUpon().setForceHighestSupportedBitrate(true)
+                    .setPreferredAudioLanguage("en").build()
 
             // 3. Set the media source using the correct factory
             setMediaSource(mediaSourceFactory.createMediaSource(mediaItem), true)
@@ -224,6 +242,8 @@ fun isFireTvDevice(): Boolean {
     val manufacturer = android.os.Build.MANUFACTURER ?: ""
     val model = android.os.Build.MODEL ?: ""
     // Checks if the manufacturer is Amazon and the model name starts with "AFT"
-    return manufacturer.equals("Amazon", ignoreCase = true) &&
-            model.startsWith("AFT", ignoreCase = true)
+    return manufacturer.equals("Amazon", ignoreCase = true) && model.startsWith(
+        "AFT",
+        ignoreCase = true
+    )
 }

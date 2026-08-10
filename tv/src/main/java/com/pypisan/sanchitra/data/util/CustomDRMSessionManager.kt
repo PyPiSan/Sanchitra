@@ -1,5 +1,6 @@
 package com.pypisan.sanchitra.data.util
 
+import com.pypisan.sanchitra.data.util.StringConstants.ProfileExtended
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -11,112 +12,138 @@ import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
+import org.json.JSONObject
 
-// 1. Changed "class" to "object" so it can be called statically
 object CustomDRMSessionManager {
-
-    // 2. Moved the client here. It will now be reused perfectly.
     val client: OkHttpClient = OkHttpClient()
 
     suspend fun fetchStreamMpdContent(
-        m3u8Link: String,
         channelId: String,
         langId: String,
-        authToken: String,
-        subscriberId: String,
-        uniqueId: String
-    ): String? = withContext(Dispatchers.IO) {
+    ): MpdResponse? = withContext(Dispatchers.IO) {
 
-        val currentTime = SimpleDateFormat("yyyyMMdd'T'HHmmss", Locale.ENGLISH).format(Date())
-        val currentDate = SimpleDateFormat("yyyyMMdd", Locale.ENGLISH).format(Date())
+        val currentTime = SimpleDateFormat(
+            "yyyyMMdd'T'HHmmss", Locale.ENGLISH
+        ).format(Date())
 
-        // Form Payload
-        val formBody = FormBody.Builder()
-            .add("channel_id", channelId)
-            .add("stream_type", "Seek")
-            .add("begin", currentTime)
-            .add("srno", currentDate)
-            .build()
+        val currentDate = SimpleDateFormat(
+            "yyyyMMdd", Locale.ENGLISH
+        ).format(Date())
 
-        // Create specific request with headers
-        val request = Request.Builder()
-            .url(m3u8Link)
-            .post(formBody)
-            .addHeader("Channel_id", channelId)
-            .addHeader("Languageid", langId)
-            .addHeader("Lbcookie", "1")
-            .addHeader("Accesstoken", authToken)
-            .addHeader("Userid", subscriberId)
-            .addHeader("Subscriberid", subscriberId)
-            .addHeader("Uniqueid", uniqueId)
-            .addHeader("Crmid", subscriberId)
-            .addHeader("User-Agent", "plaYtv/7.1.7 (Linux;Android 8.1.0) ExoPlayerLib/2.11.7")
-            .addHeader("Deviceid", "888f74a772eee785")
-            .addHeader("Devicetype", "phone")
-            .addHeader("Os", "android")
-            .addHeader("Usergroup", "tvYR7NSNn7rymo3F")
-            .addHeader("Osversion", "13")
-            .addHeader("Appkey", "NzNiMDhlYzQyNjJm")
-            .addHeader("Versioncode", "389")
-            .addHeader("Isott", "false")
-            .build()
+        val formBody = FormBody.Builder().add("channel_id", channelId).add("stream_type", "Seek")
+            .add("begin", currentTime).add("srno", currentDate).build()
 
-        // 3 Tries Retry Loop
+        val request = Request.Builder().url(ProfileExtended.drmLink?:"").post(formBody)
+            .addHeader("Channel_id", channelId).addHeader("Languageid", langId)
+            .addHeader("Lbcookie", "1").addHeader("Accesstoken", ProfileExtended.extToken ?: "")
+            .addHeader("Userid", ProfileExtended.subscriberId ?: "")
+            .addHeader("Subscriberid", ProfileExtended.subscriberId ?: "")
+            .addHeader("Uniqueid", ProfileExtended.uniqueId ?: "")
+            .addHeader("Crmid", ProfileExtended.subscriberId ?: "").addHeader(
+                "User-Agent", "plaYtv/7.1.7 (Linux;Android 8.1.0) ExoPlayerLib/2.11.7"
+            ).addHeader("Deviceid", "888f74a772eee785").addHeader("Devicetype", "phone")
+            .addHeader("Os", "android").addHeader("Usergroup", "tvYR7NSNn7rymo3F")
+            .addHeader("Osversion", "13").addHeader("Appkey", "NzNiMDhlYzQyNjJm")
+            .addHeader("Versioncode", "389").addHeader("Isott", "false").build()
+
         var tries = 0
+
         while (tries < 3) {
             tries++
+
             try {
-                val response = client.newCall(request).execute()
-                if (response.isSuccessful) {
-                    return@withContext response.body?.string()
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        return@use
+                    }
+                    val responseBody = response.body?.string() ?: return@use
+
+                    val json = JSONObject(responseBody)
+
+                    if (json.optInt("code") != 200) {
+                        return@use
+                    }
+
+                    val mpd = json.optJSONObject("mpd") ?: run {
+                        return@use
+                    }
+
+                    val mpdUrl = mpd.optString("result")
+                    val licenseUrl = mpd.optString("key")
+
+                    if (mpdUrl.isEmpty()) {
+                        return@use
+                    }
+
+                    if (licenseUrl.isEmpty()) {
+                        return@use
+                    }
+
+                    return@withContext MpdResponse(
+                        mpdUrl = mpdUrl, licenseUrl = licenseUrl
+                    )
                 }
+
             } catch (e: Exception) {
                 if (tries >= 3) {
-                    e.printStackTrace()
+                    return@withContext null
                 }
             }
         }
+
         return@withContext null
+    }
+
+    suspend fun refreshHdneaToken(
+        channelId: String, hdneaTokenProvider: HdneaTokenProvider?
+    ): Boolean {
+
+        return try {
+
+            val result = fetchStreamMpdContent(
+                channelId = channelId, langId = "1"
+            ) ?: return false
+
+            val freshMpdUrl = result.mpdUrl
+            val newCookie = extractCookie(freshMpdUrl)
+            if (newCookie.isNullOrEmpty()) {
+                return false
+            }
+
+            hdneaTokenProvider?.updateToken(newCookie)
+            true
+
+        } catch (e: Exception) {
+            false
+        }
     }
 
     @Throws(IOException::class)
     fun fetchDrmLicense(
         licenseUrl: String,
         challenge: ByteArray, // Generated by ExoPlayer's CDM
-        authToken: String,
-        subscriberId: String,
-        uniqueId: String,
-        ssoToken: String,
         channelId: String,
-        hdnea: String
     ): ByteArray {
 
         // The challenge payload provided by ExoPlayer goes into the POST body
         val mediaType = "application/octet-stream".toMediaTypeOrNull()
         val requestBody = challenge.toRequestBody(mediaType)
+        val cookies = extractCookie(licenseUrl)
 
-        val request = Request.Builder()
-            .url(licenseUrl)
-            .post(requestBody)
-            .addHeader("accesstoken", authToken)
+        val request = Request.Builder().url(licenseUrl).post(requestBody)
+            .addHeader("accesstoken", ProfileExtended.extToken ?: "")
             .addHeader("User-Agent", "plaYtv/7.1.7 (Linux;Android 8.1.0) ExoPlayerLib/2.11.7")
-            .addHeader("appName", "RJIL_JioTV")
-            .addHeader("x-platform", "android")
-            .addHeader("subscriberid", subscriberId)
-            .addHeader("devicetype", "phone")
-            .addHeader("os", "android")
-            .addHeader("deviceId", "3c6d6b5702fa09bd")
-            .addHeader("channelid", channelId)
-            .addHeader("Cookie", "__hdnea__=$hdnea")
-            .addHeader("osVersion", "13")
+            .addHeader("appName", "RJIL_JioTV").addHeader("x-platform", "android")
+            .addHeader("subscriberid", ProfileExtended.subscriberId ?: "")
+            .addHeader("devicetype", "phone").addHeader("os", "android")
+            .addHeader("deviceId", "3c6d6b5702fa09bd").addHeader("channelid", channelId)
+            .addHeader("Cookie", "__hdnea__=$cookies").addHeader("osVersion", "13")
             .addHeader("srno", "230128144001")
-            .addHeader("ssotoken", ssoToken)
-            .addHeader("uniqueId", uniqueId)
-            .addHeader("crmid", subscriberId)
-            .addHeader("usergroup", "tvYR7NSNn7rymo3F")
-            .addHeader("versionCode", "330")
-            .addHeader("Connection", "Keep-Alive")
-            .addHeader("Accept-Encoding", "gzip, deflate")
+            .addHeader("ssotoken", ProfileExtended.extSSOToken ?: "")
+            .addHeader("uniqueId", ProfileExtended.uniqueId ?: "")
+            .addHeader("crmid", ProfileExtended.subscriberId ?: "")
+            .addHeader("usergroup", "tvYR7NSNn7rymo3F").addHeader("versionCode", "330")
+            .addHeader("Connection", "Keep-Alive").addHeader("Accept-Encoding", "gzip, deflate")
             .build()
 
         // Execute the network call synchronously
@@ -126,5 +153,15 @@ object CustomDRMSessionManager {
             }
             return response.body?.bytes() ?: ByteArray(0)
         }
+    }
+}
+
+
+class HdneaTokenProvider(initialToken: String? = null) {
+    @Volatile
+    private var token: String? = initialToken
+    fun getToken(): String? = token
+    fun updateToken(newToken: String?) {
+        token = newToken
     }
 }

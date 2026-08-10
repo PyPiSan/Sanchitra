@@ -24,6 +24,7 @@ import androidx.core.net.toUri
 fun buildDefaultExoPlayer(
     context: Context,
     stream: String,
+    mediaType: String? = null,
     subtitleUrl: String?,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
@@ -32,43 +33,44 @@ fun buildDefaultExoPlayer(
     renderersFactory: DefaultRenderersFactory
 ): ExoPlayer {
 
-    val loadControl = DefaultLoadControl.Builder()
-        .setBufferDurationsMs(30000, 60000, 3000, 2000)
-        .build()
+    val loadControl =
+        DefaultLoadControl.Builder().setBufferDurationsMs(30000, 60000, 3000, 2000).build()
+    val httpDataSourceFactory: DefaultHttpDataSource.Factory
 
-    val httpDataSourceFactory = DefaultHttpDataSource.Factory()
-        .setAllowCrossProtocolRedirects(true)
-        .setConnectTimeoutMs(60_000)
-        .setReadTimeoutMs(90_000)
+    if (mediaType.equals("movie", ignoreCase = true)) {
+        httpDataSourceFactory = DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true)
+            .setConnectTimeoutMs(60_000).setReadTimeoutMs(90_000).setDefaultRequestProperties(
+                mapOf(
+                    "Origin" to "https://cinesrc.st"
+                )
+            )
+    } else {
+
+        httpDataSourceFactory = DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true)
+            .setConnectTimeoutMs(60_000).setReadTimeoutMs(90_000)
+    }
 
     // Configure the Extractors Factory correctly
     val extractorsFactory = DefaultExtractorsFactory()
-        // 1. Only pass SEI closed caption types here (CEA-608 / CEA-708)
+        //Only pass SEI closed caption types here (CEA-608 / CEA-708)
         .setTsSubtitleFormats(
             com.google.common.collect.ImmutableList.of(
                 Format.Builder().setSampleMimeType(MimeTypes.APPLICATION_CEA608).build(),
                 Format.Builder().setSampleMimeType(MimeTypes.APPLICATION_CEA708).build()
             )
         )
-//        .setTsExtractorFlags(
-//            DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES or
-//                    DefaultTsPayloadReaderFactory.FLAG_DETECT_ACCESS_UNITS
-//        )
 
 
     val mediaSourceFactory = DefaultMediaSourceFactory(httpDataSourceFactory, extractorsFactory)
 
-    val mediaItemBuilder = MediaItem.Builder()
-        .setUri(stream)
+    val mediaItemBuilder = MediaItem.Builder().setUri(stream)
 
     if (!subtitleUrl.isNullOrBlank()) {
 
         val mimeType = when {
-            subtitleUrl.endsWith(".vtt", ignoreCase = true) ->
-                MimeTypes.TEXT_VTT
+            subtitleUrl.endsWith(".vtt", ignoreCase = true) -> MimeTypes.TEXT_VTT
 
-            subtitleUrl.endsWith(".srt", ignoreCase = true) ->
-                MimeTypes.APPLICATION_SUBRIP
+            subtitleUrl.endsWith(".srt", ignoreCase = true) -> MimeTypes.APPLICATION_SUBRIP
 
             else -> null
         }
@@ -76,12 +78,9 @@ fun buildDefaultExoPlayer(
         mimeType?.let {
             mediaItemBuilder.setSubtitleConfigurations(
                 listOf(
-                    MediaItem.SubtitleConfiguration.Builder(subtitleUrl.toUri())
-                        .setMimeType(it)
-                        .setLanguage("en")
-                        .setLabel("English")
-                        .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                        .build()
+                    MediaItem.SubtitleConfiguration.Builder(subtitleUrl.toUri()).setMimeType(it)
+                        .setLanguage("en").setLabel("English")
+                        .setSelectionFlags(C.SELECTION_FLAG_DEFAULT).build()
                 )
             )
         }
@@ -90,20 +89,13 @@ fun buildDefaultExoPlayer(
 
     val videoMetaHelper = VideoMetaHelper()
 
-    return ExoPlayer.Builder(context, renderersFactory)
-        .setLoadControl(loadControl)
-        .setMediaSourceFactory(mediaSourceFactory)
-        .build()
-        .apply {
+    return ExoPlayer.Builder(context, renderersFactory).setLoadControl(loadControl)
+        .setMediaSourceFactory(mediaSourceFactory).build().apply {
 
-            trackSelectionParameters = trackSelectionParameters
-                .buildUpon()
-//                .setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
-                .setForceHighestSupportedBitrate(true)
-                .setPreferredAudioLanguage("en")
-                .setPreferredTextLanguage("en")
-                .setSelectUndeterminedTextLanguage(true)
-                .build()
+            trackSelectionParameters =
+                trackSelectionParameters.buildUpon().setForceHighestSupportedBitrate(true)
+                    .setPreferredAudioLanguage("en").setPreferredTextLanguage("en")
+                    .setSelectUndeterminedTextLanguage(true).build()
 
             addListener(object : Player.Listener {
 

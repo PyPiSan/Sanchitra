@@ -3,9 +3,12 @@ package com.pypisan.sanchitra.presentation.screens.movies
 import com.pypisan.sanchitra.presentation.theme.JetStreamButtonShape
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,47 +17,35 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.ui.compose.PlayerSurface
-import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.data.entities.Videos
-import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.data.util.toHrMinFormat
-import com.pypisan.sanchitra.presentation.screens.auth.loopPlayer
-import com.pypisan.sanchitra.utils.BlueGray300
-import com.pypisan.sanchitra.utils.DeepPurple300
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -62,37 +53,67 @@ import kotlinx.coroutines.launch
 fun MovieDetails(
     video: Videos,
     isPlayerActive: Boolean,
+    hasHistory: Boolean = false,
     openVideoPlayer: (metaId: String) -> Unit
 ) {
     val childPadding = rememberChildPadding()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val coroutineScope = rememberCoroutineScope()
+    var showTrailerDialog by remember { mutableStateOf(false) }
+
+    val density = LocalDensity.current
+    val containerSize = LocalWindowInfo.current.containerSize
+    val screenHeight = with(density) { containerSize.height.toDp() }
+    val dynamicHeaderHeight = screenHeight * 0.85f
+
+    // Store surface color to use consistently across all layers
+    val surfaceColor = MaterialTheme.colorScheme.surface
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(432.dp)
+            .height(dynamicHeaderHeight)
+            .background(surfaceColor)
             .bringIntoViewRequester(bringIntoViewRequester)
     ) {
+        // 1. Movie Banner / Background Trailer
         MovieImageWithGradients(
             video = video,
             modifier = Modifier.fillMaxSize(),
-            isPlayerActive = isPlayerActive
+            isPlayerActive = isPlayerActive,
+            isTrailerDialogOpen = showTrailerDialog,
+            gradientColor = surfaceColor
         )
 
-        Column(modifier = Modifier.fillMaxWidth(0.55f)) {
-            Spacer(modifier = Modifier.height(108.dp))
+        // 2. Full-Height Glass Overlay Panel (Uses surfaceColor instead of Color.Black)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.55f)
+                .fillMaxHeight()
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            surfaceColor,
+                            surfaceColor.copy(alpha = 0.9f),
+                            surfaceColor.copy(alpha = 0.5f),
+                            surfaceColor.copy(alpha = 0f)
+                        )
+                    )
+                )
+        ) {
             Column(
-                modifier = Modifier.padding(start = childPadding.start)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = childPadding.start, top = 36.dp, end = 24.dp, bottom = 24.dp)
             ) {
                 MovieLargeTitle(movieTitle = video.title)
 
                 Column(
-                    modifier = Modifier.alpha(0.75f)
+                    modifier = Modifier.alpha(0.85f)
                 ) {
                     MovieDescription(description = video.meta.description)
                     DotSeparatedRow(
-                        modifier = Modifier.padding(top = 20.dp),
+                        modifier = Modifier.padding(top = 16.dp),
                         texts = listOf(
                             video.meta.releaseDate!!,
                             video.categories.joinToString(", "),
@@ -100,214 +121,119 @@ fun MovieDetails(
                         )
                     )
                 }
-                WatchMovieButton(
-                    metaId = video.id.toString(),
+
+                // Side-by-Side Action Buttons
+                MovieActionButtons(
+                    hasTrailerLink = !video.meta.trailer.isNullOrEmpty(),
+                    hasHistory = hasHistory,
+                    onWatchClick = { openVideoPlayer(video.id.toString()) },
+                    onTrailerClick = { showTrailerDialog = true },
                     modifier = Modifier.onFocusChanged {
                         if (it.isFocused) {
                             coroutineScope.launch {
                                 bringIntoViewRequester.bringIntoView()
                             }
                         }
-                    },
-                    openVideoPlayer = openVideoPlayer
+                    }
+                )
+            }
+        }
+    }
+
+    // Trailer Dialog Overlay
+    if (showTrailerDialog && !video.meta.trailer.isNullOrEmpty()) {
+        TrailerDialog(
+            trailerUrl = video.meta.trailer,
+            onDismiss = { showTrailerDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun MovieActionButtons(
+    hasTrailerLink: Boolean,
+    hasHistory: Boolean,
+    onWatchClick: () -> Unit,
+    onTrailerClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.padding(top = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Button 1: Watch Now / Continue Watching
+        Button(
+            onClick = onWatchClick,
+            contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+            shape = ButtonDefaults.shape(shape = JetStreamButtonShape)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.PlayArrow,
+                contentDescription = null
+            )
+            Spacer(Modifier.size(8.dp))
+            Text(
+                text = if (hasHistory) "Continue Watching" else "Watch Now",
+                style = MaterialTheme.typography.titleSmall
+            )
+        }
+
+        // Button 2: Watch Trailer
+        if (hasTrailerLink) {
+            Button(
+                onClick = onTrailerClick,
+                contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+                shape = ButtonDefaults.shape(shape = JetStreamButtonShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Movie,
+                    contentDescription = null
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(
+                    text = stringResource(R.string.watch_trailer),
+                    style = MaterialTheme.typography.titleSmall
                 )
             }
         }
     }
 }
-
-@Composable
-private fun WatchMovieButton(
-    modifier: Modifier = Modifier,
-    metaId: String,
-    openVideoPlayer: (metaId: String) -> Unit
-) {
-    Button(
-        onClick = {
-            openVideoPlayer(metaId)
-        },
-        modifier = modifier.padding(top = 24.dp),
-        contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-        shape = ButtonDefaults.shape(shape = JetStreamButtonShape)
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.PlayArrow,
-            contentDescription = null
-        )
-
-        Spacer(Modifier.size(8.dp))
-
-        Text(
-            text = stringResource(R.string.watch_trailer),
-            style = MaterialTheme.typography.titleSmall
-        )
-    }
-}
-
-//@Composable
-//private fun DirectorScreenplayMusicRow(
-//    director: String,
-//    screenplay: String,
-//    music: String
-//) {
-//    Row(modifier = Modifier.padding(top = 32.dp)) {
-//        TitleValueText(
-//            modifier = Modifier
-//                .padding(end = 32.dp)
-//                .weight(1f),
-//            title = stringResource(R.string.director),
-//            value = director
-//        )
-//
-//        TitleValueText(
-//            modifier = Modifier
-//                .padding(end = 32.dp)
-//                .weight(1f),
-//            title = stringResource(R.string.screenplay),
-//            value = screenplay
-//        )
-//
-//        TitleValueText(
-//            modifier = Modifier.weight(1f),
-//            title = stringResource(R.string.music),
-//            value = music
-//        )
-//    }
-//}
 
 @Composable
 private fun MovieDescription(description: String) {
     Text(
         text = description,
         style = MaterialTheme.typography.titleSmall.copy(
-            fontSize = 15.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Normal
         ),
         modifier = Modifier.padding(top = 8.dp),
-        maxLines = 4
+        maxLines = 3
     )
 }
 
 @Composable
-private fun MovieLargeTitle(movieTitle: String) {
+private fun MovieLargeTitle(
+    movieTitle: String,
+    modifier: Modifier = Modifier
+) {
+    // Gold/Amber gradient (or replace with your brand colors)
+    val titleGradient = Brush.horizontalGradient(
+        colors = listOf(
+            Color(0xFFFFD700), // Gold
+            Color(0xFFFFA500), // Orange
+            Color(0xFFFF4500)  // Red-Orange
+        )
+    )
+
     Text(
         text = movieTitle,
+        modifier = modifier,
         style = MaterialTheme.typography.headlineLarge.copy(
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Black,
+            brush = titleGradient
         ),
         maxLines = 2
     )
-}
-@androidx.annotation.OptIn(UnstableApi::class, ExperimentalTvMaterial3Api::class)
-@Composable
-private fun MovieImageWithGradients(
-    video: Videos,
-    isPlayerActive: Boolean,
-    modifier: Modifier = Modifier,
-    gradientColor: Color = MaterialTheme.colorScheme.surface,
-) {
-
-    Box(modifier = modifier) {
-
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(video.meta.banner)
-                .crossfade(true)
-                .build(),
-            contentDescription = StringConstants
-                .Composable
-                .ContentDescription
-                .moviePoster(video.title),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-
-        // ===== TRAILER PLAYER =====
-        if (!video.meta.trailer.isNullOrEmpty() && !isPlayerActive) {
-
-            val exoPlayer = loopPlayer(video.meta.trailer, 50f)
-            var isVideoReady by remember { mutableStateOf(false) }
-
-            DisposableEffect(exoPlayer) {
-                val listener = object : Player.Listener {
-                    override fun onPlaybackStateChanged(state: Int) {
-                        isVideoReady = state == Player.STATE_READY && exoPlayer.isPlaying
-                    }
-                }
-                exoPlayer.addListener(listener)
-
-                onDispose {
-                    exoPlayer.removeListener(listener)
-                    exoPlayer.release()
-                }
-            }
-            if (isVideoReady) {
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    DeepPurple300.copy(alpha = 0.8f),
-                                    BlueGray300.copy(alpha = 0.6f),
-                                    gradientColor
-                                )
-                            )
-                        )
-                )
-
-                PlayerSurface(
-                    player = exoPlayer,
-                    surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
-                    modifier = Modifier
-                        .fillMaxSize()
-                )
-            }
-        }
-
-        // ===== GRADIENT OVERLAY =====
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .drawWithContent {
-                    drawContent()
-
-                    // Bottom fading into the background
-                    drawRect(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                gradientColor
-                            ),
-                            startY = size.height * 0.65f // Starts 65% of the way down
-                        )
-                    )
-
-                    // Left side fading
-                    drawRect(
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                gradientColor,
-                                Color.Transparent
-                            ),
-                            startX = size.width * 0.15f,
-                            endX = size.width * 0.5f
-                        )
-                    )
-
-                    // Corner blend
-                    drawRect(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                gradientColor,
-                                Color.Transparent
-                            ),
-                            start = Offset(size.width * 0.25f, size.height * 0.6f),
-                            end = Offset(size.width * 0.5f, 0f)
-                        )
-                    )
-                }
-        )
-    }
 }
