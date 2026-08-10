@@ -22,9 +22,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -77,30 +81,28 @@ private fun Catalog(
     modifier: Modifier = Modifier,
     isTopBarVisible: Boolean = true,
 ) {
-
     val lazyListState = rememberLazyListState()
     val childPadding = rememberChildPadding()
 
-    var focusedSection by rememberSaveable {
-        mutableStateOf("")
+    // 🎯 FOCUS FIX: Requester attached to Item 1 of MoviesRow
+    val firstMovieFocusRequester = remember { FocusRequester() }
+
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
+
+    val carouselHeight = remember(windowInfo.containerSize, density) {
+        with(density) {
+            val containerHeightDp = windowInfo.containerSize.height.toDp()
+            val calculatedDp = containerHeightDp * 0.55f
+            calculatedDp.coerceIn(350.dp, 530.dp)
+        }
     }
 
-    var focusedRowIndex by rememberSaveable {
-        mutableIntStateOf(0)
-    }
-
-    var lastFocusedMovieId by rememberSaveable {
-        mutableStateOf<Int?>(null)
-    }
-
-    var lastFocusedTop10MovieId by rememberSaveable {
-        mutableStateOf<Int?>(null)
-    }
-
-    var lastFocusedChannelId by rememberSaveable {
-        mutableStateOf<Int?>(null)
-    }
-
+    var focusedSection by rememberSaveable { mutableStateOf("") }
+    var focusedRowIndex by rememberSaveable { mutableIntStateOf(0) }
+    var lastFocusedMovieId by rememberSaveable { mutableStateOf<Int?>(null) }
+    var lastFocusedTop10MovieId by rememberSaveable { mutableStateOf<Int?>(null) }
+    var lastFocusedChannelId by rememberSaveable { mutableStateOf<Int?>(null) }
     var immersiveListHasFocus by remember { mutableStateOf(false) }
 
     val groupedTrendingChannels = trendingHomeChannels.groupBy { it.category }
@@ -130,63 +132,58 @@ private fun Catalog(
             .focusRestorer(),
     ) {
 
-        item(key = "FeaturedHomeCarousel", contentType = "FeaturedHomeCarousel") {
-            FeaturedHomeCarousel(
+        item(key = "FeaturedGlassHomeCarousel", contentType = "FeaturedGlassHomeCarousel") {
+            FeaturedGlassHomeCarousel(
                 channels = featuredHome,
                 padding = childPadding,
                 goToTVPlayer = goToTVPlayer,
                 isActive = focusedSection == "carousel" || focusedSection.isEmpty(),
+                nextFocusDown = firstMovieFocusRequester, // Pass down route to Item 1
                 onCarouselFocused = {
                     focusedSection = "carousel"
                     focusedRowIndex = 0
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(324.dp)
+                    .height(carouselHeight)
             )
         }
 
         item(key = "MoviesRow", contentType = "MoviesRow") {
-
             MoviesRow(
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .focusRequester(firstMovieFocusRequester),
                 videoList = trendingMovies,
                 title = StringConstants.Composable.HomeScreenTrendingTitle,
-
                 onMovieFocused = { video ->
                     focusedSection = "movies"
                     focusedRowIndex = 1
                     lastFocusedMovieId = video.id
                 },
-
                 onMovieSelected = { video ->
                     sharedVideoVM.setVideo(video)
                     onMovieClick(video)
                 }
             )
         }
-        item(key = "Top10Movies", contentType = "Top10MoviesList") {
 
+        item(key = "Top10Movies", contentType = "Top10MoviesList") {
             Top10MoviesList(
                 movieList = top10Movies,
-
                 isActive = focusedSection == "top10",
                 lastFocusedMovieId = lastFocusedTop10MovieId,
-
                 onSectionFocused = {
                     focusedSection = "top10"
                     focusedRowIndex = 2
                 },
-
                 onMovieFocused = { video ->
                     lastFocusedTop10MovieId = video.id
                 },
-
                 onMovieClick = { video ->
                     sharedVideoVM.setVideo(video)
                     onMovieClick(video)
                 },
-
                 modifier = Modifier.onFocusChanged {
                     immersiveListHasFocus = it.hasFocus
                 },
@@ -194,32 +191,24 @@ private fun Catalog(
         }
 
         groupedTrendingChannels.entries.toList().forEachIndexed { index, entry ->
-
             val category = entry.key
             val channels = entry.value
 
             item(key = "Trending_$category", contentType = "TrendingChannelRow") {
-
                 TrendingChannelRow(
                     modifier = Modifier.padding(top = 16.dp),
-
                     channels = channels,
                     title = category,
-
                     isActive = focusedSection == "channel_$index",
-
                     lastFocusedChannelId = lastFocusedChannelId,
-
                     onChannelFocused = {
                         focusedSection = "channel_$index"
                         focusedRowIndex = index + 3
                         lastFocusedChannelId = it
                     },
-
                     goToTVPlayer = goToTVPlayer,
                 )
             }
         }
-
     }
 }

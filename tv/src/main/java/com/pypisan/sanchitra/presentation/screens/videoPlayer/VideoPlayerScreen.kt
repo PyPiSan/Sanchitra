@@ -216,6 +216,7 @@ fun rememberPlayer(
             buildDefaultExoPlayer(
                 context,
                 streamUrl,
+                "movie",
                 subTitleUrl,
                 onBuffering,
                 onSubtitlesChanged,
@@ -227,6 +228,9 @@ fun rememberPlayer(
             buildDrmExoPlayer(
                 context,
                 title,
+                "",
+                false,
+                null,
                 streamUrl,
                 licenseKey,
                 licenseUrl,
