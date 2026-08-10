@@ -1,8 +1,0 @@
-androidx.media3.decoder.ffmpeg.decoder_ffmpeg-pngs-0 /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/build/generated/res/pngs/release
-androidx.media3.decoder.ffmpeg.decoder_ffmpeg-updated_navigation_xml-1 /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/build/generated/updated_navigation_xml/release
-androidx.media3.decoder.ffmpeg.decoder_ffmpeg-mergeReleaseResources-2 /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
-androidx.media3.decoder.ffmpeg.decoder_ffmpeg-mergeReleaseResources-3 /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
-androidx.media3.decoder.ffmpeg.decoder_ffmpeg-release-4 /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/build/intermediates/merged_res/release/mergeReleaseResources
-androidx.media3.decoder.ffmpeg.decoder_ffmpeg-release-5 /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/build/intermediates/packaged_res/release/packageReleaseResources
-androidx.media3.decoder.ffmpeg.decoder_ffmpeg-main-6 /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/src/main/res
-androidx.media3.decoder.ffmpeg.decoder_ffmpeg-release-7 /Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/src/release/res

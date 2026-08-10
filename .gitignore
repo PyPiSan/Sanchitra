@@ -13,6 +13,10 @@ decoder_ffmpeg/src/main/jniLibs/
 /.gradle/
 /captures
 
+# Android / Gradle build folders
+build/
+.cxx/
+
 # NDK & C++ Native Build Outputs
 .cxx/
 **/.cxx/
