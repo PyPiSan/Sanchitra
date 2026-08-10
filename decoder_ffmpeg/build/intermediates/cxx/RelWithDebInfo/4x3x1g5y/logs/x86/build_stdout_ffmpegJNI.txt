@@ -1,2 +1,0 @@
-ninja: Entering directory `/Users/sanjeev/Documents/android/Sanchitra/decoder_ffmpeg/.cxx/RelWithDebInfo/4x3x1g5y/x86'
-ninja: no work to do.
