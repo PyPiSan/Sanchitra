@@ -39,7 +39,12 @@ import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
 import com.pypisan.sanchitra.data.models.EPGResponse
+import com.pypisan.sanchitra.data.util.CustomDRMSessionManager.refreshHdneaToken
+import com.pypisan.sanchitra.data.util.HdneaTokenProvider
+import com.pypisan.sanchitra.data.util.extractCookie
 import com.pypisan.sanchitra.data.util.findActivity
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 
 @kotlin.OptIn(ExperimentalComposeUiApi::class)
@@ -111,6 +116,14 @@ fun TVPlayerBuild(
     val context = LocalContext.current
     var isBuffering by rememberSaveable { mutableStateOf(false) }
 
+    val hdneaTokenProvider = remember(channel.id) {
+        if (channel.isDrm && channel.isInternal) {
+            HdneaTokenProvider(extractCookie(channel.streamUrl))
+        } else {
+            null
+        }
+    }
+
     var subtitles by remember {
         mutableStateOf<List<SubtitleTrack>>(emptyList())
     }
@@ -143,10 +156,27 @@ fun TVPlayerBuild(
         }
     }
 
+    if (channel.isDrm && channel.isInternal && hdneaTokenProvider != null) {
+        LaunchedEffect(channel.id) {
+            while (isActive) {
+                refreshHdneaToken(
+                    channelId = (channel.id / 10).toString(),
+                    hdneaTokenProvider = hdneaTokenProvider
+                )
+                // Refresh before the 120-second token expires.
+                delay(90_000L)
+            }
+        }
+    }
+
     val exoPlayer = rememberExoPlayer(
-        context = context, channel = channel, onBuffering = { state ->
+        context = context,
+        channel = channel,
+        hdneaTokenProvider = hdneaTokenProvider,
+        onBuffering = { state ->
             isBuffering = state == Player.STATE_BUFFERING
-        }, onSubtitlesChanged = { newTracks ->
+        },
+        onSubtitlesChanged = { newTracks ->
 
             val hasSelectedTrack = newTracks.any { it.isSelected }
             subtitles = listOf(
@@ -166,7 +196,8 @@ fun TVPlayerBuild(
 
         onQualitiesChanged = { list ->
             qualities = list.filter { it.height >= 720 }.sortedByDescending { it.height }
-        }, renderersFactory = renderersFactory
+        },
+        renderersFactory = renderersFactory
     )
 
     DisposableEffect(exoPlayer) {
@@ -207,6 +238,7 @@ fun TVPlayerBuild(
 fun rememberExoPlayer(
     context: Context,
     channel: Channel,
+    hdneaTokenProvider: HdneaTokenProvider? = null,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
     onAudiosChanged: (List<AudioTrack>) -> Unit,
@@ -218,7 +250,8 @@ fun rememberExoPlayer(
             buildDefaultExoPlayer(
                 context,
                 channel.streamUrl,
-                subtitleUrl = null,
+                "tv",
+                null,
                 onBuffering,
                 onSubtitlesChanged,
                 onAudiosChanged,
@@ -229,6 +262,9 @@ fun rememberExoPlayer(
             buildDrmExoPlayer(
                 context,
                 channel.name,
+                (channel.id / 10).toString(),
+                channel.isInternal,
+                hdneaTokenProvider,
                 channel.streamUrl,
                 channel.licenseKey,
                 channel.licenseUrl,

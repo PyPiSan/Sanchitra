@@ -202,7 +202,8 @@ fun rememberExoPlayer(
             buildDefaultExoPlayer(
                 context,
                 iptvChannel.streamUrl,
-                subtitleUrl = null,
+                "iptv",
+                null,
                 onBuffering,
                 onSubtitlesChanged,
                 onAudiosChanged,
