@@ -38,21 +38,25 @@ fun buildDefaultExoPlayer(
     val httpDataSourceFactory: DefaultHttpDataSource.Factory
 
     if (mediaType.equals("movie", ignoreCase = true)) {
-        httpDataSourceFactory = DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true)
-            .setConnectTimeoutMs(60_000).setReadTimeoutMs(90_000).setDefaultRequestProperties(
+        httpDataSourceFactory = DefaultHttpDataSource.Factory()
+            .setAllowCrossProtocolRedirects(true)
+            .setConnectTimeoutMs(60_000)
+            .setReadTimeoutMs(90_000)
+            .setDefaultRequestProperties(
                 mapOf(
-                    "Origin" to "https://cinesrc.st"
+                    "Origin" to "https://cinesrc.st",
+                    "Referer" to "https://cinesrc.st/"
                 )
             )
     } else {
-
-        httpDataSourceFactory = DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true)
-            .setConnectTimeoutMs(60_000).setReadTimeoutMs(90_000)
+        httpDataSourceFactory = DefaultHttpDataSource.Factory()
+            .setAllowCrossProtocolRedirects(true)
+            .setConnectTimeoutMs(60_000)
+            .setReadTimeoutMs(90_000)
     }
 
     // Configure the Extractors Factory correctly
     val extractorsFactory = DefaultExtractorsFactory()
-        //Only pass SEI closed caption types here (CEA-608 / CEA-708)
         .setTsSubtitleFormats(
             com.google.common.collect.ImmutableList.of(
                 Format.Builder().setSampleMimeType(MimeTypes.APPLICATION_CEA608).build(),
@@ -60,45 +64,52 @@ fun buildDefaultExoPlayer(
             )
         )
 
-
     val mediaSourceFactory = DefaultMediaSourceFactory(httpDataSourceFactory, extractorsFactory)
 
     val mediaItemBuilder = MediaItem.Builder().setUri(stream)
 
-    if (!subtitleUrl.isNullOrBlank()) {
+    // Force MimeType to M3U8 if mediaType is "movie" or URL contains "m3u8"
+    if (mediaType.equals("movie", ignoreCase = true) || stream.contains("m3u8", ignoreCase = true)) {
+        mediaItemBuilder.setMimeType(MimeTypes.APPLICATION_M3U8)
+    }
 
+    if (!subtitleUrl.isNullOrBlank()) {
         val mimeType = when {
             subtitleUrl.endsWith(".vtt", ignoreCase = true) -> MimeTypes.TEXT_VTT
-
             subtitleUrl.endsWith(".srt", ignoreCase = true) -> MimeTypes.APPLICATION_SUBRIP
-
             else -> null
         }
 
         mimeType?.let {
             mediaItemBuilder.setSubtitleConfigurations(
                 listOf(
-                    MediaItem.SubtitleConfiguration.Builder(subtitleUrl.toUri()).setMimeType(it)
-                        .setLanguage("en").setLabel("English")
-                        .setSelectionFlags(C.SELECTION_FLAG_DEFAULT).build()
+                    MediaItem.SubtitleConfiguration.Builder(subtitleUrl.toUri())
+                        .setMimeType(it)
+                        .setLanguage("en")
+                        .setLabel("English")
+                        .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                        .build()
                 )
             )
         }
     }
 
-
     val videoMetaHelper = VideoMetaHelper()
 
-    return ExoPlayer.Builder(context, renderersFactory).setLoadControl(loadControl)
-        .setMediaSourceFactory(mediaSourceFactory).build().apply {
+    return ExoPlayer.Builder(context, renderersFactory)
+        .setLoadControl(loadControl)
+        .setMediaSourceFactory(mediaSourceFactory)
+        .build().apply {
 
             trackSelectionParameters =
-                trackSelectionParameters.buildUpon().setForceHighestSupportedBitrate(true)
-                    .setPreferredAudioLanguage("en").setPreferredTextLanguage("en")
-                    .setSelectUndeterminedTextLanguage(true).build()
+                trackSelectionParameters.buildUpon()
+                    .setForceHighestSupportedBitrate(true)
+                    .setPreferredAudioLanguage("en")
+                    .setPreferredTextLanguage("en")
+                    .setSelectUndeterminedTextLanguage(true)
+                    .build()
 
             addListener(object : Player.Listener {
-
                 override fun onPlaybackStateChanged(state: Int) {
                     onBuffering(state)
                 }

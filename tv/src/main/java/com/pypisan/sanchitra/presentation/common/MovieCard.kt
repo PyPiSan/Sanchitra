@@ -9,6 +9,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -64,6 +66,7 @@ fun MovieCard(
 fun MovieGlassCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    aspectRatio: Float = 2f / 3f,
     title: @Composable () -> Unit = {},
     image: @Composable BoxScope.() -> Unit,
 ) {
@@ -119,9 +122,10 @@ fun MovieGlassCard(
                     focusedScale = 1.04f
                 )
             ) {
-                // NO fillMaxSize() here -> allows image to dictate flexible height!
+                // FIXED ASPECT RATIO: Locks outer cell height so grid rows NEVER jump!
                 Box(
                     modifier = Modifier
+                        .aspectRatio(aspectRatio)
                         .background(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
@@ -130,10 +134,12 @@ fun MovieGlassCard(
                                 )
                             )
                         )
-                        .padding(safePadding)
                 ) {
+                    // Inner image shrinks INWARD without expanding grid row bounds
                     Box(
                         modifier = Modifier
+                            .fillMaxSize()
+                            .padding(safePadding)
                             .clip(RoundedCornerShape(innerCornerRadius.coerceAtLeast(0.dp))),
                         content = image
                     )

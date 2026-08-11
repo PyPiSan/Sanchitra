@@ -20,9 +20,7 @@ import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.pypisan.sanchitra.data.entities.Videos
-import com.pypisan.sanchitra.data.entities.Channel
 import com.pypisan.sanchitra.data.entities.IPTVChannel
-import com.pypisan.sanchitra.data.models.TrendingChannel
 import com.pypisan.sanchitra.data.util.StringConstants
 
 @Composable
@@ -30,7 +28,7 @@ fun PosterImage(
     video: Videos,
     modifier: Modifier = Modifier,
 ) {
-    AsyncImage(
+    SubcomposeAsyncImage(
         modifier = modifier,
         model = ImageRequest.Builder(LocalContext.current)
             .crossfade(true)
@@ -44,7 +42,8 @@ fun PosterImage(
 
 @Composable
 fun PosterImageChannel(
-    channel: Channel,
+    logoUrl: String?,
+    name: String,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -61,17 +60,17 @@ fun PosterImageChannel(
     ) {
         SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(channel.logoUrl)
+                .data(logoUrl)
                 .crossfade(true)
                 .build(),
-            contentDescription = channel.name,
+            contentDescription = name,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(4.dp),
             contentScale = ContentScale.Fit,
             error = {
                 Text(
-                    text = channel.name,
+                    text = name,
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.White.copy(alpha = 0.8f),
                     textAlign = TextAlign.Center,
@@ -79,33 +78,6 @@ fun PosterImageChannel(
                     modifier = Modifier.padding(4.dp)
                 )
             }
-        )
-    }
-}
-@Composable
-fun PosterImageTrendingChannel(
-    channel: TrendingChannel,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF1E1E1E),
-                        Color(0xFF2C2C2C)
-                    )
-                )
-            )
-    ) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(channel.logoUrl)
-                .crossfade(true)
-                .build(),
-            contentDescription = channel.name,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit
         )
     }
 }
