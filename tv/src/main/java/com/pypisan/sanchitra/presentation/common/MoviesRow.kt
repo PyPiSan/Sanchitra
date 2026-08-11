@@ -2,12 +2,17 @@ package com.pypisan.sanchitra.presentation.common
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -36,6 +41,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,11 +76,9 @@ fun MoviesRow(
     onMovieFocused: (video: Videos) -> Unit = {},
     onMovieSelected: (video: Videos) -> Unit = {}
 ) {
-
     Column(
         modifier = modifier
     ) {
-
         if (title != null) {
             Text(
                 text = title,
@@ -82,25 +86,29 @@ fun MoviesRow(
                 modifier = Modifier.padding(
                     start = startPadding,
                     top = 16.dp,
-                    bottom = 16.dp
+                    bottom = 12.dp
                 )
             )
         }
 
         AnimatedContent(
             targetState = videoList,
-            label = ""
+            transitionSpec = {
+                // Crossfade without vertical height shifts on list updates
+                fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(220))
+            },
+            label = "MoviesRowContentAnimation"
         ) { movieState ->
-
             LazyRow(
                 contentPadding = PaddingValues(
                     start = startPadding,
                     end = endPadding,
+                    top = 12.dp,   // 1. Reserves top clearance for 1.04x focus scale
+                    bottom = 16.dp // 2. Reserves bottom clearance for 1.04x focus scale
                 ),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 modifier = Modifier.focusRestorer()
             ) {
-
                 itemsIndexed(
                     items = movieState,
                     key = { _, movie -> movie.id }
@@ -257,6 +265,7 @@ private fun MoviesGlassRowItem(
 
     MovieGlassCard(
         onClick = { onMovieSelected(video) },
+        aspectRatio = itemDirection.aspectRatio,
         title = {
             MoviesRowItemText(
                 showItemTitle = showItemTitle,
@@ -275,8 +284,7 @@ private fun MoviesGlassRowItem(
             .then(modifier)
     ) {
         MoviesRowItemImage(
-            modifier = Modifier
-                .aspectRatio(itemDirection.aspectRatio),
+            modifier = Modifier.fillMaxSize(),
             showIndexOverImage = showIndexOverImage,
             video = video,
             index = index
@@ -375,20 +383,25 @@ private fun MoviesRowItemText(
     modifier: Modifier = Modifier
 ) {
     if (showItemTitle) {
-        val movieNameAlpha by animateFloatAsState(
+        val channelNameAlpha by animateFloatAsState(
             targetValue = if (isItemFocused) 1f else 0f,
-            label = "",
+            animationSpec = tween(durationMillis = 200),
+            label = "ChannelTitleAlpha",
         )
+
         Text(
             text = video.title,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.SemiBold
             ),
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             modifier = modifier
-                .alpha(movieNameAlpha)
                 .fillMaxWidth()
-                .padding(top = 10.dp),
+                .padding(top = 8.dp)
+                .graphicsLayer {
+                    alpha = channelNameAlpha
+                },
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )

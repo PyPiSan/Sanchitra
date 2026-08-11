@@ -109,7 +109,7 @@ fun TrailerDialog(
                         // Listen for initial ready event
                         setOnPreparedListener { mp ->
                             isLoading = false
-                            mp.isLooping = true
+                            mp.isLooping = false
 
                             // Listen for buffering events during playback
                             mp.setOnInfoListener { _, what, _ ->

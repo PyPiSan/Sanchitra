@@ -1,6 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.home
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -40,7 +42,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.pypisan.sanchitra.data.models.TrendingChannel
 import com.pypisan.sanchitra.presentation.common.ChannelCard
-import com.pypisan.sanchitra.presentation.common.PosterImageTrendingChannel
+import com.pypisan.sanchitra.presentation.common.PosterImageChannel
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 
@@ -168,8 +170,9 @@ private fun ChannelRowItemImage(
     modifier: Modifier = Modifier,
 ) {
     Box(contentAlignment = Alignment.CenterStart) {
-        PosterImageTrendingChannel(
-            channel = channel,
+        PosterImageChannel(
+            logoUrl = channel.logoUrl,
+            name = channel.name,
             modifier = modifier
                 .fillMaxWidth()
                 .drawWithContent {
@@ -211,18 +214,23 @@ private fun ChannelRowItemText(
     if (showItemTitle) {
         val channelNameAlpha by animateFloatAsState(
             targetValue = if (isItemFocused) 1f else 0f,
-            label = "",
+            animationSpec = tween(durationMillis = 200),
+            label = "ChannelTitleAlpha",
         )
+
         Text(
             text = channel.name,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.SemiBold
             ),
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             modifier = modifier
-                .alpha(channelNameAlpha)
                 .fillMaxWidth()
-                .padding(top = 8.dp),
+                .padding(top = 8.dp)
+                .graphicsLayer {
+                    alpha = channelNameAlpha
+                },
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

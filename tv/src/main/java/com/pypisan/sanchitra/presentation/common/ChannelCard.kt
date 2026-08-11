@@ -11,6 +11,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -33,14 +35,13 @@ import androidx.tv.material3.Surface
 fun ChannelCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    aspectRatio: Float = 16f / 9f,
     title: @Composable () -> Unit = {},
     image: @Composable BoxScope.() -> Unit,
 ) {
-    // Shared interaction source for synchronized focus
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
-    // Glass inner margin on focus
     val innerImagePadding by animateDpAsState(
         targetValue = if (isFocused) 6.dp else 0.dp,
         animationSpec = spring(
@@ -67,14 +68,14 @@ fun ChannelCard(
                 interactionSource = interactionSource,
                 shape = ClickableSurfaceDefaults.shape(SanchitraCardShape),
                 colors = ClickableSurfaceDefaults.colors(
-                    containerColor = Color.Transparent, // Pure clear unfocused (no grey)
-                    focusedContainerColor = Color.White.copy(alpha = 0.15f) // Glass frame when focused
+                    containerColor = Color.Transparent,
+                    focusedContainerColor = Color.White.copy(alpha = 0.15f)
                 ),
                 border = ClickableSurfaceDefaults.border(
                     focusedBorder = Border(
                         border = BorderStroke(
                             width = SanchitraBorderWidth,
-                            color = Color.White // Crisp solid white outline
+                            color = Color.White
                         ),
                         shape = SanchitraCardShape
                     )
@@ -92,6 +93,7 @@ fun ChannelCard(
             ) {
                 Box(
                     modifier = Modifier
+                        .aspectRatio(aspectRatio)
                         .background(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
@@ -100,10 +102,11 @@ fun ChannelCard(
                                 )
                             )
                         )
-                        .padding(safePadding)
                 ) {
                     Box(
                         modifier = Modifier
+                            .fillMaxSize()
+                            .padding(safePadding)
                             .clip(RoundedCornerShape(innerCornerRadius.coerceAtLeast(0.dp))),
                         content = image
                     )
@@ -112,3 +115,4 @@ fun ChannelCard(
         }
     )
 }
+
