@@ -1,5 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.profile
-import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
+
+import com.pypisan.sanchitra.presentation.theme.SanchitraCardShape
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -73,6 +74,6 @@ private fun HelpAndSupportSectionItem(
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
             focusedContentColor = MaterialTheme.colorScheme.surfaceVariant
         ),
-        shape = ListItemDefaults.shape(shape = JetStreamCardShape)
+        shape = ListItemDefaults.shape(shape = SanchitraCardShape)
     )
 }

@@ -3,13 +3,21 @@ package com.pypisan.sanchitra.presentation.common
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.entities.Channel
@@ -42,26 +50,38 @@ fun PosterImageChannel(
     Box(
         modifier = modifier
             .background(
-                Brush.verticalGradient(
+                brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF1E1E1E),
-                        Color(0xFF2C2C2C)
+                        Color.White.copy(alpha = 0.06f),
+                        Color.White.copy(alpha = 0.02f)
                     )
                 )
-            )
+            ),
+        contentAlignment = Alignment.Center
     ) {
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(channel.logoUrl)
                 .crossfade(true)
                 .build(),
             contentDescription = channel.name,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp),
+            contentScale = ContentScale.Fit,
+            error = {
+                Text(
+                    text = channel.name,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.White.copy(alpha = 0.8f),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(4.dp)
+                )
+            }
         )
     }
 }
-
 @Composable
 fun PosterImageTrendingChannel(
     channel: TrendingChannel,

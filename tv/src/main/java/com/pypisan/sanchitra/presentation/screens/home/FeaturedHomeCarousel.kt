@@ -1,7 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.home
 
-import com.pypisan.sanchitra.presentation.theme.JetStreamBorderWidth
-import com.pypisan.sanchitra.presentation.theme.JetStreamButtonShape
+import com.pypisan.sanchitra.presentation.theme.SanchitraBorderWidth
+import com.pypisan.sanchitra.presentation.theme.SanchitraButtonShape
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -116,7 +116,7 @@ fun FeaturedHomeCarousel(
                 start = padding.start, end = padding.start, top = padding.top
             )
             .border(
-                width = JetStreamBorderWidth,
+                width = SanchitraBorderWidth,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
                 shape = ShapeDefaults.Medium,
             )
@@ -262,7 +262,7 @@ private fun WatchNowButton() {
         onClick = {},
         modifier = Modifier.padding(top = 8.dp),
         contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-        shape = ButtonDefaults.shape(shape = JetStreamButtonShape),
+        shape = ButtonDefaults.shape(shape = SanchitraButtonShape),
         colors = ButtonDefaults.colors(
             containerColor = MaterialTheme.colorScheme.onSurface,
             contentColor = MaterialTheme.colorScheme.surface,

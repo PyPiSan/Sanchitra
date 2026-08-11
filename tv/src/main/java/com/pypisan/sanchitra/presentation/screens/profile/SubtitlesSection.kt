@@ -1,5 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.profile
-import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
+
+import com.pypisan.sanchitra.presentation.theme.SanchitraCardShape
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -48,7 +49,7 @@ fun SubtitlesSection(
                 colors = ListItemDefaults.colors(
                     containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
                 ),
-                shape = ListItemDefaults.shape(shape = JetStreamCardShape)
+                shape = ListItemDefaults.shape(shape = SanchitraCardShape)
             )
             ListItem(
                 modifier = Modifier.padding(top = 16.dp),
@@ -69,7 +70,7 @@ fun SubtitlesSection(
                 colors = ListItemDefaults.colors(
                     containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
                 ),
-                shape = ListItemDefaults.shape(shape = JetStreamCardShape)
+                shape = ListItemDefaults.shape(shape = SanchitraCardShape)
             )
         }
     }

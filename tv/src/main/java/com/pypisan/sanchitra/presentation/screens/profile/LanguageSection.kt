@@ -1,7 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.profile
 
 import androidx.compose.foundation.layout.PaddingValues
-import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
+import com.pypisan.sanchitra.presentation.theme.SanchitraCardShape
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -69,7 +69,7 @@ fun LanguageSection(
                             .surfaceColorAtElevation(4.dp)
                     ),
                     shape = ListItemDefaults.shape(
-                        shape = JetStreamCardShape
+                        shape = SanchitraCardShape
                     )
                 )
             }

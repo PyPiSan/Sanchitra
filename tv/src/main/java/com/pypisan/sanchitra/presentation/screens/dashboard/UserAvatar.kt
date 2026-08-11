@@ -1,6 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.dashboard
 
-import com.pypisan.sanchitra.presentation.theme.JetStreamBorderWidth
+import com.pypisan.sanchitra.presentation.theme.SanchitraBorderWidth
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.CircleShape
@@ -30,14 +30,14 @@ fun UserAvatar(
         border = SelectableSurfaceDefaults.border(
             focusedBorder = Border(
                 border = BorderStroke(
-                    width = JetStreamBorderWidth,
+                    width = SanchitraBorderWidth,
                     color = MaterialTheme.colorScheme.onSurface
                 ),
                 shape = CircleShape
             ),
             selectedBorder = Border(
                 border = BorderStroke(
-                    width = JetStreamBorderWidth,
+                    width = SanchitraBorderWidth,
                     color = MaterialTheme.colorScheme.primary
                 ),
                 shape = CircleShape

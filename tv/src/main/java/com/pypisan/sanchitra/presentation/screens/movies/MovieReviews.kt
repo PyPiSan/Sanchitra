@@ -1,6 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.movies
 
-import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
+import com.pypisan.sanchitra.presentation.theme.SanchitraCardShape
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -80,10 +80,10 @@ private fun Review(
                     width = ReviewItemOutlineWidth,
                     color = MaterialTheme.colorScheme.onSurface
                 ),
-                shape = JetStreamCardShape
+                shape = SanchitraCardShape
             )
         ),
-        shape = ClickableSurfaceDefaults.shape(shape = JetStreamCardShape),
+        shape = ClickableSurfaceDefaults.shape(shape = SanchitraCardShape),
         colors = ClickableSurfaceDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             pressedContainerColor = MaterialTheme.colorScheme.surface,

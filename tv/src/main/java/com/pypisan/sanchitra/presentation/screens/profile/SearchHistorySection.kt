@@ -1,5 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.profile
-import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
+
+
+import com.pypisan.sanchitra.presentation.theme.SanchitraCardShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,7 +46,7 @@ fun SearchHistorySection() {
                             style = MaterialTheme.typography.titleMedium
                         )
                     },
-                    shape = ListItemDefaults.shape(shape = JetStreamCardShape)
+                    shape = ListItemDefaults.shape(shape = SanchitraCardShape)
                 )
             }
         }

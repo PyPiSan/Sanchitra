@@ -110,7 +110,7 @@ fun MoviesRow(
                         { onMovieSelected(movie) }
                     }
 
-                    MoviesRowItem(
+                    MoviesGlassRowItem(
                         modifier = Modifier
                             .onFocusChanged {
                                 if (it.isFocused) {
@@ -244,6 +244,48 @@ fun ImmersiveListMoviesRow(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
+private fun MoviesGlassRowItem(
+    index: Int,
+    video: Videos,
+    onMovieSelected: (Videos) -> Unit,
+    showItemTitle: Boolean,
+    showIndexOverImage: Boolean,
+    modifier: Modifier = Modifier,
+    itemDirection: ItemDirection = ItemDirection.Vertical,
+) {
+    var isFocused by remember { mutableStateOf(false) }
+
+    MovieGlassCard(
+        onClick = { onMovieSelected(video) },
+        title = {
+            MoviesRowItemText(
+                showItemTitle = showItemTitle,
+                isItemFocused = isFocused,
+                video = video
+            )
+        },
+        modifier = Modifier
+            .width(200.dp)
+            .onFocusChanged {
+                isFocused = it.isFocused
+            }
+            .focusProperties {
+                left = if (index == 0) FocusRequester.Cancel else FocusRequester.Default
+            }
+            .then(modifier)
+    ) {
+        MoviesRowItemImage(
+            modifier = Modifier
+                .aspectRatio(itemDirection.aspectRatio),
+            showIndexOverImage = showIndexOverImage,
+            video = video,
+            index = index
+        )
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
 private fun MoviesRowItem(
     index: Int,
     video: Videos,
@@ -265,7 +307,7 @@ private fun MoviesRowItem(
             )
         },
         modifier = Modifier
-            .width(200.dp)
+            .width(240.dp)
             .onFocusChanged {
                 isFocused = it.isFocused
             }
@@ -346,7 +388,7 @@ private fun MoviesRowItemText(
             modifier = modifier
                 .alpha(movieNameAlpha)
                 .fillMaxWidth()
-                .padding(top = 4.dp),
+                .padding(top = 10.dp),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )

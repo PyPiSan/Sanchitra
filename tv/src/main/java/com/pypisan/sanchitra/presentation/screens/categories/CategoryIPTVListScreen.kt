@@ -1,6 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.categories
 
-import com.pypisan.sanchitra.presentation.theme.JetStreamBottomListPadding
+import com.pypisan.sanchitra.presentation.theme.SanchitraBottomListPadding
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Column
@@ -118,7 +118,7 @@ private fun CategoryDetails(
             state = gridState,
             columns = GridCells.Adaptive(minSize = 220.dp),
             modifier = Modifier.fillMaxWidth().weight(1f),
-            contentPadding = PaddingValues(JetStreamBottomListPadding)
+            contentPadding = PaddingValues(SanchitraBottomListPadding)
         ) {
             itemsIndexed(
                 categoryChannels, key = { _, channel -> channel.id }) { index, iptvChannel ->

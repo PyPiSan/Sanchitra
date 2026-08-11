@@ -1,6 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.search
 
-import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
+import com.pypisan.sanchitra.presentation.theme.SanchitraCardShape
 import android.view.KeyEvent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
@@ -105,7 +105,7 @@ fun SearchResult(
     ) {
         item {
             Surface(
-                shape = ClickableSurfaceDefaults.shape(shape = JetStreamCardShape),
+                shape = ClickableSurfaceDefaults.shape(shape = SanchitraCardShape),
                 scale = ClickableSurfaceDefaults.scale(focusedScale = 1f),
                 colors = ClickableSurfaceDefaults.colors(
                     containerColor = MaterialTheme.colorScheme.inverseOnSurface,
@@ -124,7 +124,7 @@ fun SearchResult(
                                 label = ""
                             ).value
                         ),
-                        shape = JetStreamCardShape
+                        shape = SanchitraCardShape
                     )
                 ),
                 tonalElevation = 2.dp,
