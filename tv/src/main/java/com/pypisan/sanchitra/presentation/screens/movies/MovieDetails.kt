@@ -1,6 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.movies
 
-import com.pypisan.sanchitra.presentation.theme.JetStreamButtonShape
+import com.pypisan.sanchitra.presentation.theme.SanchitraButtonShape
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -166,7 +166,7 @@ private fun MovieActionButtons(
         Button(
             onClick = onWatchClick,
             contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-            shape = ButtonDefaults.shape(shape = JetStreamButtonShape)
+            shape = ButtonDefaults.shape(shape = SanchitraButtonShape)
         ) {
             Icon(
                 imageVector = Icons.Outlined.PlayArrow,
@@ -184,7 +184,7 @@ private fun MovieActionButtons(
             Button(
                 onClick = onTrailerClick,
                 contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-                shape = ButtonDefaults.shape(shape = JetStreamButtonShape)
+                shape = ButtonDefaults.shape(shape = SanchitraButtonShape)
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Movie,
@@ -209,7 +209,7 @@ private fun MovieDescription(description: String) {
             fontWeight = FontWeight.Normal
         ),
         modifier = Modifier.padding(top = 8.dp),
-        maxLines = 3
+        maxLines = 5
     )
 }
 

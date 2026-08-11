@@ -1,5 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.profile
-import com.pypisan.sanchitra.presentation.theme.JetStreamButtonShape
+
+import com.pypisan.sanchitra.presentation.theme.SanchitraButtonShape
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.widthIn
@@ -37,7 +38,7 @@ fun AccountsSectionDialogButton(
         modifier = modifier
             .focusable(enabled = false)
             .focusRequester(focusRequester),
-        shape = ButtonDefaults.shape(shape = JetStreamButtonShape),
+        shape = ButtonDefaults.shape(shape = SanchitraButtonShape),
         colors = ButtonDefaults.colors(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.15f),
             focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -48,7 +49,7 @@ fun AccountsSectionDialogButton(
         border = ButtonDefaults.border(
             border = Border(
                 border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.border),
-                shape = JetStreamButtonShape
+                shape = SanchitraButtonShape
             )
         ),
     ) {

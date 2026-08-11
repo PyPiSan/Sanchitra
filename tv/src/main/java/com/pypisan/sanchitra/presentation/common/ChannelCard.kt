@@ -1,17 +1,34 @@
 package com.pypisan.sanchitra.presentation.common
 
-import com.pypisan.sanchitra.presentation.theme.JetStreamBorderWidth
-import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import com.pypisan.sanchitra.presentation.theme.SanchitraBorderWidth
+import com.pypisan.sanchitra.presentation.theme.SanchitraCardShape
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
-import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.ExperimentalTvMaterial3Api
+import androidx.tv.material3.Glow
 import androidx.tv.material3.StandardCardContainer
 import androidx.tv.material3.Surface
 
+@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun ChannelCard(
     onClick: () -> Unit,
@@ -19,25 +36,79 @@ fun ChannelCard(
     title: @Composable () -> Unit = {},
     image: @Composable BoxScope.() -> Unit,
 ) {
+    // Shared interaction source for synchronized focus
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    // Glass inner margin on focus
+    val innerImagePadding by animateDpAsState(
+        targetValue = if (isFocused) 6.dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "ChannelImagePadding"
+    )
+
+    val safePadding = innerImagePadding.coerceAtLeast(0.dp)
+
+    val innerCornerRadius by animateDpAsState(
+        targetValue = if (isFocused) 8.dp else 12.dp,
+        label = "InnerCornerRadius"
+    )
+
     StandardCardContainer(
         modifier = modifier,
-        title = title,
+        title = { title() },
+        interactionSource = interactionSource,
         imageCard = {
             Surface(
                 onClick = onClick,
-                shape = ClickableSurfaceDefaults.shape(JetStreamCardShape),
+                interactionSource = interactionSource,
+                shape = ClickableSurfaceDefaults.shape(SanchitraCardShape),
+                colors = ClickableSurfaceDefaults.colors(
+                    containerColor = Color.Transparent, // Pure clear unfocused (no grey)
+                    focusedContainerColor = Color.White.copy(alpha = 0.15f) // Glass frame when focused
+                ),
                 border = ClickableSurfaceDefaults.border(
                     focusedBorder = Border(
                         border = BorderStroke(
-                            width = JetStreamBorderWidth,
-                            color = MaterialTheme.colorScheme.onSurface
+                            width = SanchitraBorderWidth,
+                            color = Color.White // Crisp solid white outline
                         ),
-                        shape = JetStreamCardShape
+                        shape = SanchitraCardShape
                     )
                 ),
-                scale = ClickableSurfaceDefaults.scale(focusedScale = 1f),
-                content = image
-            )
-        },
+                glow = ClickableSurfaceDefaults.glow(
+                    focusedGlow = Glow(
+                        elevationColor = Color.White.copy(alpha = 0.5f),
+                        elevation = 12.dp
+                    )
+                ),
+                scale = ClickableSurfaceDefaults.scale(
+                    scale = 1f,
+                    focusedScale = 1.04f
+                )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.White.copy(alpha = if (isFocused) 0.15f else 0.0f),
+                                    Color.White.copy(alpha = if (isFocused) 0.03f else 0.0f)
+                                )
+                            )
+                        )
+                        .padding(safePadding)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(innerCornerRadius.coerceAtLeast(0.dp))),
+                        content = image
+                    )
+                }
+            }
+        }
     )
 }

@@ -1,7 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.livetv
 
 
-import com.pypisan.sanchitra.presentation.theme.JetStreamBorderWidth
+import com.pypisan.sanchitra.presentation.theme.SanchitraBorderWidth
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
@@ -82,7 +82,7 @@ private fun ChannelListItem(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        Spacer(modifier = Modifier.height(JetStreamBorderWidth))
+        Spacer(modifier = Modifier.height(SanchitraBorderWidth))
 
         var isFocused by remember { mutableStateOf(false) }
         CompactCard(
@@ -95,7 +95,7 @@ private fun ChannelListItem(
             border = CardDefaults.border(
                 focusedBorder = Border(
                     border = BorderStroke(
-                        width = JetStreamBorderWidth, color = MaterialTheme.colorScheme.onSurface
+                        width = SanchitraBorderWidth, color = MaterialTheme.colorScheme.onSurface
                     )
                 )
             ),

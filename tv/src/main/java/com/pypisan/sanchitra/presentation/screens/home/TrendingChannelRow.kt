@@ -66,8 +66,6 @@ fun TrendingChannelRow(
     showIndexOverImage: Boolean = false,
     goToTVPlayer: (id: Int) -> Unit,
     onChannelFocused: (Int) -> Unit,
-    isActive: Boolean = false,
-    lastFocusedChannelId: Int? = null,
 ) {
 
     Column(
@@ -141,7 +139,7 @@ private fun TrendingChannelRowItem(
             )
         },
         modifier = Modifier
-            .width(220.dp)
+            .width(240.dp)
             .onFocusChanged {
                 isFocused = it.isFocused
             }
@@ -224,7 +222,7 @@ private fun ChannelRowItemText(
             modifier = modifier
                 .alpha(channelNameAlpha)
                 .fillMaxWidth()
-                .padding(top = 4.dp),
+                .padding(top = 8.dp),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

@@ -1,6 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.movies
 
-import com.pypisan.sanchitra.presentation.theme.JetStreamBorderWidth
+import com.pypisan.sanchitra.presentation.theme.SanchitraBorderWidth
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
@@ -89,7 +89,7 @@ private fun MovieListItem(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        Spacer(modifier = Modifier.height(JetStreamBorderWidth))
+        Spacer(modifier = Modifier.height(SanchitraBorderWidth))
         var isFocused by remember { mutableStateOf(false) }
 
         CompactCard(
@@ -103,7 +103,7 @@ private fun MovieListItem(
             scale = CardDefaults.scale(focusedScale = 1f),
             border = CardDefaults.border(
                 focusedBorder = Border(
-                    border = BorderStroke(width = JetStreamBorderWidth, color = MaterialTheme.colorScheme.onSurface)
+                    border = BorderStroke(width = SanchitraBorderWidth, color = MaterialTheme.colorScheme.onSurface)
                 )
             ),
             colors = CardDefaults.colors(

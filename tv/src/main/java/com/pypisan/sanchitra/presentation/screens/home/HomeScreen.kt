@@ -1,6 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.home
 
-
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.focusGroup
 import com.pypisan.sanchitra.presentation.common.Error
@@ -199,8 +198,6 @@ private fun Catalog(
                     modifier = Modifier.padding(top = 16.dp),
                     channels = channels,
                     title = category,
-                    isActive = focusedSection == "channel_$index",
-                    lastFocusedChannelId = lastFocusedChannelId,
                     onChannelFocused = {
                         focusedSection = "channel_$index"
                         focusedRowIndex = index + 3

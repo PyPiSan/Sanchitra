@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -47,6 +47,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -60,6 +61,7 @@ import androidx.compose.ui.zIndex
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
+import androidx.tv.material3.Glow
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -201,9 +203,8 @@ fun FeaturedGlassHomeCarousel(
                 if (i in channels.indices) {
                     val stackOffset = i - activeIndex
 
-                    // Diagonal Stack Peek: Card 2 peeks 36dp right and 12dp up
+                    // Card peeks right (width), NO vertical translation
                     val translateXPx = with(density) { (stackOffset * 42).dp.toPx() }
-                    val translateYPx = with(density) { (-stackOffset * 20).dp.toPx() }
 
                     val isFocusedCard = isStackFocused && stackOffset == 0
 
@@ -212,17 +213,22 @@ fun FeaturedGlassHomeCarousel(
                         animationSpec = cardSpringSpec,
                         label = "TranslateX"
                     )
-                    val translateY by animateFloatAsState(
-                        targetValue = translateYPx,
-                        animationSpec = cardSpringSpec,
-                        label = "TranslateY"
-                    )
 
-                    val targetScale = (1f - (stackOffset * 0.03f)) * (if (isFocusedCard) 1.02f else 1f)
-                    val scale by animateFloatAsState(
-                        targetValue = targetScale,
+                    // Width stays mostly full (or slightly reduced)
+                    val targetScaleX = (1f - (stackOffset * 0.02f)) * (if (isFocusedCard) 1.02f else 1f)
+
+                    // Height is reduced (e.g., 12% per offset: 100% -> 88% -> 76%)
+                    val targetScaleY = (1f - (stackOffset * 0.12f)) * (if (isFocusedCard) 1.02f else 1f)
+
+                    val scaleX by animateFloatAsState(
+                        targetValue = targetScaleX,
                         animationSpec = cardSpringSpec,
-                        label = "Scale"
+                        label = "ScaleX"
+                    )
+                    val scaleY by animateFloatAsState(
+                        targetValue = targetScaleY,
+                        animationSpec = cardSpringSpec,
+                        label = "ScaleY"
                     )
 
                     val cardAlpha by animateFloatAsState(
@@ -242,11 +248,14 @@ fun FeaturedGlassHomeCarousel(
                             .fillMaxWidth(widthFraction)
                             .zIndex((channels.size - stackOffset).toFloat())
                             .graphicsLayer {
-                                scaleX = scale
-                                scaleY = scale
-                                translationX = translateX
-                                translationY = translateY
-                                alpha = cardAlpha
+                                this.scaleX = scaleX
+                                this.scaleY = scaleY
+                                this.translationX = translateX
+                                this.translationY = 0f // No vertical shift -> stays centered vertically
+                                this.alpha = cardAlpha
+
+                                // Center origin shrinks height symmetrically from TOP AND BOTTOM
+                                this.transformOrigin = TransformOrigin(0.5f, 0.5f)
                             }
                     )
                 }
@@ -452,19 +461,31 @@ private fun GlassDotIndicator(
 @Composable
 private fun WatchNowButton() {
     Button(
-        onClick = {},
+        onClick =  {},
+        enabled = true,
         contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
         shape = ButtonDefaults.shape(shape = RoundedCornerShape(8.dp)),
         colors = ButtonDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.onSurface,
+            containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
             contentColor = MaterialTheme.colorScheme.surface,
-            focusedContentColor = MaterialTheme.colorScheme.surface,
+            focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+            focusedContentColor = MaterialTheme.colorScheme.surface
         ),
-        scale = ButtonDefaults.scale(scale = 1f)
+        scale = ButtonDefaults.scale(
+            scale = 1f,
+            focusedScale = 1.05f
+        ),
+        glow = ButtonDefaults.glow(
+            focusedGlow = Glow(
+                elevationColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                elevation = 12.dp // Corrected property
+            )
+        )
     ) {
         Icon(
-            imageVector = Icons.Outlined.PlayArrow,
+            imageVector = Icons.Filled.PlayArrow,
             contentDescription = null,
+            modifier = Modifier.size(ButtonDefaults.IconSize)
         )
         Spacer(Modifier.size(8.dp))
         Text(

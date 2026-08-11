@@ -1,6 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.profile
 
-import com.pypisan.sanchitra.presentation.theme.JetStreamCardShape
+import com.pypisan.sanchitra.presentation.theme.SanchitraCardShape
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -104,6 +104,6 @@ fun AccountsSectionDeleteDialog(
             }
         },
         containerColor = MaterialTheme.colorScheme.onSurface,
-        shape = JetStreamCardShape
+        shape = SanchitraCardShape
     )
 }
