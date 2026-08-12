@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
@@ -33,6 +35,8 @@ import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.data.util.findActivity
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
+import com.pypisan.sanchitra.storage.WatchProgress
+import com.pypisan.sanchitra.storage.WatchProgressManager
 
 object MovieDetailsScreen {
     const val MovieIdBundleKey = "movieId"
@@ -41,7 +45,7 @@ object MovieDetailsScreen {
 @Composable
 fun MovieDetailsScreen(
     isPlayerActive: Boolean,
-    openVideoPlayer: (metaId: String) -> Unit,
+    openVideoPlayer: (metaId: String, isContinue: Boolean) -> Unit,
     onBackPressed: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -49,6 +53,10 @@ fun MovieDetailsScreen(
 
     val sharedVideoVM: VideoSharedViewModel = hiltViewModel(activity)
     val video by sharedVideoVM.selectedVideo.collectAsStateWithLifecycle()
+
+    val manager = remember(context) { WatchProgressManager(context) }
+    val watchProgress by manager.getProgress(video?.id.toString())
+        .collectAsState(initial = null)
 
     DisposableEffect(Unit) {
         onDispose { sharedVideoVM.clearVideo() }
@@ -67,6 +75,7 @@ fun MovieDetailsScreen(
             else -> {
                 Details(
                     video = video!!,
+                    watchProgress = watchProgress,
                     isPlayerActive = isPlayerActive,
                     openVideoPlayer = openVideoPlayer,
                     onBackPressed = {
@@ -85,7 +94,8 @@ fun MovieDetailsScreen(
 private fun Details(
     modifier: Modifier = Modifier,
     video: Videos,
-    openVideoPlayer: (metaId: String) -> Unit,
+    watchProgress: WatchProgress?,
+    openVideoPlayer: (metaId: String, isContinue: Boolean) -> Unit,
     onBackPressed: () -> Unit,
     isPlayerActive: Boolean,
 ) {
@@ -99,6 +109,7 @@ private fun Details(
         item {
             MovieDetails(
                 video = video,
+                watchProgress = watchProgress,
                 openVideoPlayer = openVideoPlayer,
                 isPlayerActive =isPlayerActive
             )

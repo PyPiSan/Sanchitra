@@ -31,19 +31,27 @@ import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
 import com.pypisan.sanchitra.data.util.findActivity
 import com.pypisan.sanchitra.presentation.common.Loading
+import com.pypisan.sanchitra.storage.WatchProgressManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VideoPlayerScreen(
     metaId: String,
+    isContinue: Boolean,
     onBackPressed: () -> Unit,
     videoPlayerScreenViewModel: VideoPlayerScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val activity = context.findActivity()
 
-    LaunchedEffect(metaId) {
-        videoPlayerScreenViewModel.loadVideo(metaId)
+    LaunchedEffect(metaId, isContinue) {
+        videoPlayerScreenViewModel.loadVideo(metaId, isContinue)
     }
 
     DisposableEffect(Unit) {
@@ -63,7 +71,7 @@ fun VideoPlayerScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
             .focusRequester(focusRequester)
-            .focusProperties { onExit = { FocusRequester.Cancel } } // Traps D-Pad
+            .focusProperties { onExit = { FocusRequester.Cancel } }
             .focusGroup()
     ) {
         when (val s = uiState) {
@@ -84,6 +92,7 @@ fun VideoPlayerScreen(
                     licenseKey = s.videoDetail?.licenseKey,
                     licenseUrl = s.videoDetail?.licenseUrl,
                     subTitleUrl = s.videoDetail?.meta?.subtitleUrl,
+                    isContinue = s.isContinue,
                     onBackPressed = onBackPressed,
                     onVideoStarted = {
                         videoPlayerScreenViewModel.updateViewCount(s.videoDetail?.id)
@@ -105,6 +114,7 @@ fun VideoPlayerBuild(
     licenseKey: String? = "",
     licenseUrl: String? = "",
     subTitleUrl: String?,
+    isContinue: Boolean = false,
     onBackPressed: () -> Unit,
     onVideoStarted: () -> Unit
 ) {
@@ -112,20 +122,19 @@ fun VideoPlayerBuild(
 
     var isBuffering by rememberSaveable { mutableStateOf(false) }
 
-    var subtitles by remember {
-        mutableStateOf<List<SubtitleTrack>>(emptyList())
-    }
-    var audios by remember {
-        mutableStateOf<List<AudioTrack>>(emptyList())
-    }
-    var qualities by remember {
-        mutableStateOf<List<VideoQuality>>(emptyList())
-    }
+    var subtitles by remember { mutableStateOf<List<SubtitleTrack>>(emptyList()) }
+    var audios by remember { mutableStateOf<List<AudioTrack>>(emptyList()) }
+    var qualities by remember { mutableStateOf<List<VideoQuality>>(emptyList()) }
 
+    // Remember WatchProgressManager safely
+    val manager = remember(context) { WatchProgressManager(context.applicationContext) }
 
-    val renderersFactory = DefaultRenderersFactory(context).setEnableDecoderFallback(true)
-        .forceEnableMediaCodecAsynchronousQueueing()
-        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+    val renderersFactory = remember(context) {
+        DefaultRenderersFactory(context)
+            .setEnableDecoderFallback(true)
+            .forceEnableMediaCodecAsynchronousQueueing()
+            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+    }
 
     val exoPlayer = rememberPlayer(
         metaId ?: "",
@@ -150,17 +159,41 @@ fun VideoPlayerBuild(
                 )
             ) + it
         },
-
-        onAudiosChanged = {
-            audios = it
-        },
-
+        onAudiosChanged = { audios = it },
         onQualitiesChanged = { list ->
             qualities = list.filter { it.width >= 1280 }.sortedByDescending { it.height }
         },
         renderersFactory = renderersFactory
     )
 
+    // RESUME PLAYBACK & PERIODIC SAVE LOOP
+    LaunchedEffect(exoPlayer, metaId, isContinue) {
+        if (metaId.isNullOrBlank()) return@LaunchedEffect
+
+        if (isContinue) {
+            val savedProgress = manager.getProgress(metaId).firstOrNull()
+            if (savedProgress != null && savedProgress.timeMillis > 0) {
+                exoPlayer.seekTo(savedProgress.timeMillis)
+            }
+        } else {
+            manager.clearProgress(metaId)
+            exoPlayer.seekTo(0L)
+        }
+
+        // Periodically save progress every 5 seconds while video is playing
+        while (isActive) {
+            if (exoPlayer.isPlaying && exoPlayer.duration > 0) {
+                manager.saveProgress(
+                    id = metaId,
+                    timeMillis = exoPlayer.currentPosition,
+                    durationMillis = exoPlayer.duration
+                )
+            }
+            delay(5000L) // Wait 5 seconds before saving again
+        }
+    }
+
+    // EVENT LISTENERS & SAVE ON EXIT
     DisposableEffect(exoPlayer) {
         val listener = object : Player.Listener {
             var hasCountedView = false // Ensures we only hit the API once per video
@@ -172,12 +205,26 @@ fun VideoPlayerBuild(
             }
         }
         exoPlayer.addListener(listener)
+
         onDispose {
+            // Save final progress right when leaving the screen
+            if (!metaId.isNullOrBlank() && exoPlayer.duration > 0) {
+                val finalPosition = exoPlayer.currentPosition
+                val totalDuration = exoPlayer.duration
+
+                // Launch on background scope so it completes after screen closes
+                CoroutineScope(Dispatchers.IO).launch {
+                    manager.saveProgress(
+                        id = metaId,
+                        timeMillis = finalPosition,
+                        durationMillis = totalDuration
+                    )
+                }
+            }
             exoPlayer.removeListener(listener)
             exoPlayer.release()
         }
     }
-
 
     PlayerScreenContent(
         title = title ?: "",
@@ -189,9 +236,8 @@ fun VideoPlayerBuild(
         qualities = qualities,
         onBackPressed = onBackPressed,
         isBuffering = isBuffering,
-        onSubtitlesChanged = {
-            subtitles = it
-        })
+        onSubtitlesChanged = { subtitles = it }
+    )
 }
 
 @OptIn(UnstableApi::class)

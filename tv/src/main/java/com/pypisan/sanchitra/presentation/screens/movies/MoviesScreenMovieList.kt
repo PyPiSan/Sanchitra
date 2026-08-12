@@ -1,8 +1,11 @@
 package com.pypisan.sanchitra.presentation.screens.movies
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import com.pypisan.sanchitra.presentation.theme.SanchitraBorderWidth
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -20,8 +23,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -92,6 +98,16 @@ private fun MovieListItem(
         Spacer(modifier = Modifier.height(SanchitraBorderWidth))
         var isFocused by remember { mutableStateOf(false) }
 
+        // Smooth glass light sweep progression on focus (0.0 -> 1.0)
+        val lightSweepProgress by animateFloatAsState(
+            targetValue = if (isFocused) 1f else 0f,
+            animationSpec = tween(
+                durationMillis = 400,
+                easing = LinearOutSlowInEasing
+            ),
+            label = "MovieItemLightSweep"
+        )
+
         CompactCard(
             modifier = modifier
                 .width(itemWidth)
@@ -100,10 +116,17 @@ private fun MovieListItem(
                 .onFocusChanged {
                     isFocused = it.isFocused || it.hasFocus
                 },
-            scale = CardDefaults.scale(focusedScale = 1f),
+
+            scale = CardDefaults.scale(
+                scale = 1f,
+                focusedScale = 1.05f
+            ),
             border = CardDefaults.border(
                 focusedBorder = Border(
-                    border = BorderStroke(width = SanchitraBorderWidth, color = MaterialTheme.colorScheme.onSurface)
+                    border = BorderStroke(
+                        width = SanchitraBorderWidth,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 )
             ),
             colors = CardDefaults.colors(
@@ -112,13 +135,46 @@ private fun MovieListItem(
             ),
             onClick = { onMovieClick(video) },
             image = {
-                val contentAlpha by animateFloatAsState(targetValue = if (isFocused) 1f else 0.5f, label = "")
-                AsyncImage(
-                    model = video.meta.banner,
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha }
+                val contentAlpha by animateFloatAsState(
+                    targetValue = if (isFocused) 1f else 0.5f,
+                    label = "ContentAlpha"
                 )
+
+                Box(modifier = Modifier.fillMaxSize()) {
+                    AsyncImage(
+                        model = video.meta.banner,
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer { alpha = contentAlpha }
+                    )
+
+                    // Glass Light Sweep Overlay
+                    if (isFocused) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .drawWithContent {
+                                    drawContent()
+
+                                    val sweepOffset = lightSweepProgress * (size.width * 2.5f) - size.width
+
+                                    drawRect(
+                                        brush = Brush.linearGradient(
+                                            colors = listOf(
+                                                Color.Transparent,
+                                                Color.White.copy(alpha = 0.35f),
+                                                Color.Transparent
+                                            ),
+                                            start = Offset(sweepOffset, 0f),
+                                            end = Offset(sweepOffset + size.width * 0.6f, size.height)
+                                        )
+                                    )
+                                }
+                        )
+                    }
+                }
             },
             title = {
                 Column {
@@ -126,7 +182,9 @@ private fun MovieListItem(
                         text = video.meta.description.takeIf { it.isNotBlank() } ?: video.title,
                         maxLines = 2,
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Normal),
-                        modifier = Modifier.graphicsLayer { alpha = 0.6f }.padding(start = 24.dp, end = 24.dp),
+                        modifier = Modifier
+                            .graphicsLayer { alpha = 0.6f }
+                            .padding(start = 24.dp, end = 24.dp),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(

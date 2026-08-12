@@ -1,11 +1,7 @@
 package com.pypisan.sanchitra.presentation.common
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,11 +15,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -35,9 +29,6 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -55,9 +46,9 @@ import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 enum class ItemDirection(val aspectRatio: Float) {
-    Vertical(10.5f / 16f),
-    Horizontal(16f / 9f);
+    Vertical(10.5f / 16f), Horizontal(16f / 9f);
 }
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MoviesRow(
@@ -67,8 +58,7 @@ fun MoviesRow(
     endPadding: Dp = rememberChildPadding().end,
     title: String? = null,
     titleStyle: TextStyle = MaterialTheme.typography.headlineLarge.copy(
-        fontWeight = FontWeight.Medium,
-        fontSize = 30.sp
+        fontWeight = FontWeight.Medium, fontSize = 30.sp
     ),
     videoList: List<Videos>,
     showItemTitle: Boolean = true,
@@ -83,59 +73,43 @@ fun MoviesRow(
             Text(
                 text = title,
                 style = titleStyle,
-                modifier = Modifier.padding(
-                    start = startPadding,
-                    top = 16.dp,
-                    bottom = 12.dp
-                )
+                modifier = Modifier
+                    .alpha(1f)
+                    .padding(start = startPadding, top = 16.dp, bottom = 16.dp)
             )
         }
+        LazyRow(
+            contentPadding = PaddingValues(
+                start = startPadding,
+                end = endPadding,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            modifier = Modifier.focusRestorer()
+        ) {
+            itemsIndexed(
+                videoList, key = { _, movie -> movie.id }) { index, movie ->
 
-        AnimatedContent(
-            targetState = videoList,
-            transitionSpec = {
-                // Crossfade without vertical height shifts on list updates
-                fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(220))
-            },
-            label = "MoviesRowContentAnimation"
-        ) { movieState ->
-            LazyRow(
-                contentPadding = PaddingValues(
-                    start = startPadding,
-                    end = endPadding,
-                    top = 12.dp,   // 1. Reserves top clearance for 1.04x focus scale
-                    bottom = 16.dp // 2. Reserves bottom clearance for 1.04x focus scale
-                ),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                modifier = Modifier.focusRestorer()
-            ) {
-                itemsIndexed(
-                    items = movieState,
-                    key = { _, movie -> movie.id }
-                ) { index, movie ->
-
-                    val onCardClicked = remember(movie.id) {
-                        { onMovieSelected(movie) }
-                    }
-
-                    MoviesGlassRowItem(
-                        modifier = Modifier
-                            .onFocusChanged {
-                                if (it.isFocused) {
-                                    onMovieFocused(movie)
-                                }
-                            }
-                            .focusProperties {
-                                left = if (index == 0) FocusRequester.Cancel else FocusRequester.Default
-                            },
-                        index = index,
-                        itemDirection = itemDirection,
-                        onMovieSelected = { onCardClicked() },
-                        video = movie,
-                        showItemTitle = showItemTitle,
-                        showIndexOverImage = showIndexOverImage
-                    )
+                val onCardClicked = remember(movie.id) {
+                    { onMovieSelected(movie) }
                 }
+
+                MoviesGlassRowItem(
+                    modifier = Modifier
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                onMovieFocused(movie)
+                            }
+                        }
+                        .focusProperties {
+                            left = if (index == 0) FocusRequester.Cancel else FocusRequester.Default
+                        },
+                    index = index,
+                    itemDirection = itemDirection,
+                    onMovieSelected = { onCardClicked() },
+                    video = movie,
+                    showItemTitle = showItemTitle,
+                    showIndexOverImage = showIndexOverImage
+                )
             }
         }
     }
@@ -144,56 +118,21 @@ fun MoviesRow(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ImmersiveListMoviesRow(
-    movieList:  List<Videos>,
+    movieList: List<Videos>,
     modifier: Modifier = Modifier,
     itemDirection: ItemDirection = ItemDirection.Vertical,
     startPadding: Dp = rememberChildPadding().start,
     endPadding: Dp = rememberChildPadding().end,
     title: String? = null,
     titleStyle: TextStyle = MaterialTheme.typography.headlineLarge.copy(
-        fontWeight = FontWeight.Medium,
-        fontSize = 30.sp
+        fontWeight = FontWeight.Medium, fontSize = 30.sp
     ),
     showItemTitle: Boolean = true,
     showIndexOverImage: Boolean = false,
-    isActive: Boolean = false,
-    lastFocusedMovieId: Int? = null,
     onMovieSelected: (Videos) -> Unit = {},
     onMovieFocused: (Videos) -> Unit = {}
 ) {
     val (lazyRow) = remember { FocusRequester.createRefs() }
-
-    val focusRequesters = remember(movieList) {
-        movieList.associate { it.id to FocusRequester() }
-    }
-
-    val latestIsActive by rememberUpdatedState(isActive)
-    val latestMovieId by rememberUpdatedState(lastFocusedMovieId)
-    val latestMovieList by rememberUpdatedState(movieList)
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME && latestIsActive) {
-                try {
-                    if (latestMovieId != null && focusRequesters.containsKey(latestMovieId)) {
-                        focusRequesters[latestMovieId]?.requestFocus()
-                    } else {
-                        focusRequesters[latestMovieList.firstOrNull()?.id]?.requestFocus()
-                    }
-                } catch (e: Exception) {
-                    // Ignore gracefully
-                }
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
 
     Column(
         modifier = modifier.focusGroup()
@@ -204,48 +143,41 @@ fun ImmersiveListMoviesRow(
                 style = titleStyle,
                 modifier = Modifier
                     .alpha(1f)
-                    .padding(start = startPadding)
-                    .padding(vertical = 16.dp)
+                    .padding(start = startPadding, top = 16.dp, bottom = 16.dp)
             )
         }
-        AnimatedContent(
-            targetState = movieList,
-            label = "",
-        ) { movieState ->
-            LazyRow(
-                contentPadding = PaddingValues(start = startPadding, end = endPadding),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                modifier = Modifier
-                    .focusRequester(lazyRow)
-                    .focusRestorer()
-            ) {
-                itemsIndexed(
-                    movieState,
-                    key = { _, movie ->
-                        movie.id
-                    }
-                ) { index, movie ->
+        LazyRow(
+            contentPadding = PaddingValues(start = startPadding, end = endPadding),
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            modifier = Modifier
+                .focusRequester(lazyRow)
+                .focusRestorer()
+        ) {
+            itemsIndexed(
+                movieList, key = { _, movie ->
+                    movie.id
+                }) { index, movie ->
 
-                    MoviesRowItem(
-                        modifier = Modifier
-                            .weight(1f)
-                            .onFocusChanged {
-                                if (it.isFocused) {
-                                    onMovieFocused(movie)
-                                }
-                            },
-                        index = index,
-                        itemDirection = itemDirection,
-                        onMovieSelected = {
-                            lazyRow.saveFocusedChild()
-                            onMovieSelected(it)
+                MoviesRowItem(
+                    modifier = Modifier
+                        .weight(1f)
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                onMovieFocused(movie)
+                            }
                         },
-                        video = movie,
-                        showItemTitle = showItemTitle,
-                        showIndexOverImage = showIndexOverImage
-                    )
-                }
+                    index = index,
+                    itemDirection = itemDirection,
+                    onMovieSelected = {
+                        lazyRow.saveFocusedChild()
+                        onMovieSelected(it)
+                    },
+                    video = movie,
+                    showItemTitle = showItemTitle,
+                    showIndexOverImage = showIndexOverImage
+                )
             }
+
         }
     }
 }
@@ -268,9 +200,7 @@ private fun MoviesGlassRowItem(
         aspectRatio = itemDirection.aspectRatio,
         title = {
             MoviesRowItemText(
-                showItemTitle = showItemTitle,
-                isItemFocused = isFocused,
-                video = video
+                showItemTitle = showItemTitle, isItemFocused = isFocused, video = video
             )
         },
         modifier = Modifier
@@ -281,8 +211,7 @@ private fun MoviesGlassRowItem(
             .focusProperties {
                 left = if (index == 0) FocusRequester.Cancel else FocusRequester.Default
             }
-            .then(modifier)
-    ) {
+            .then(modifier)) {
         MoviesRowItemImage(
             modifier = Modifier.fillMaxSize(),
             showIndexOverImage = showIndexOverImage,
@@ -306,15 +235,11 @@ private fun MoviesRowItem(
     var isFocused by remember { mutableStateOf(false) }
 
     MovieCard(
-        onClick = { onMovieSelected(video) },
-        title = {
-            MoviesRowItemText(
-                showItemTitle = showItemTitle,
-                isItemFocused = isFocused,
-                video = video
-            )
-        },
-        modifier = Modifier
+        onClick = { onMovieSelected(video) }, title = {
+        MoviesRowItemText(
+            showItemTitle = showItemTitle, isItemFocused = isFocused, video = video
+        )
+    }, modifier = Modifier
             .width(240.dp)
             .onFocusChanged {
                 isFocused = it.isFocused
@@ -322,11 +247,9 @@ private fun MoviesRowItem(
             .focusProperties {
                 left = if (index == 0) FocusRequester.Cancel else FocusRequester.Default
             }
-            .then(modifier)
-    ) {
-        MoviesRowItemImage(
-            modifier = Modifier
-                .aspectRatio(itemDirection.aspectRatio),
+            .then(modifier)) {
+        MoviesRowItemImageImmersive(
+            modifier = Modifier.aspectRatio(itemDirection.aspectRatio),
             showIndexOverImage = showIndexOverImage,
             video = video,
             index = index
@@ -335,7 +258,7 @@ private fun MoviesRowItem(
 }
 
 @Composable
-private fun MoviesRowItemImage(
+private fun MoviesRowItemImageImmersive(
     video: Videos,
     showIndexOverImage: Boolean,
     index: Int,
@@ -343,7 +266,8 @@ private fun MoviesRowItemImage(
 ) {
     Box(contentAlignment = Alignment.CenterStart) {
         PosterImage(
-            video = video,
+            title = video.title,
+            image = video.meta.banner,
             modifier = modifier
                 .fillMaxWidth()
                 .drawWithContent {
@@ -361,19 +285,56 @@ private fun MoviesRowItemImage(
             Text(
                 modifier = Modifier.padding(16.dp),
                 text = "#${index.inc()}",
-                style = MaterialTheme.typography.displayLarge
-                    .copy(
-                        shadow = Shadow(
-                            offset = Offset(0.5f, 0.5f),
-                            blurRadius = 5f
-                        ),
-                        color = Color.White
-                    ),
+                style = MaterialTheme.typography.displayLarge.copy(
+                    shadow = Shadow(
+                        offset = Offset(0.5f, 0.5f), blurRadius = 5f
+                    ), color = Color.White
+                ),
                 fontWeight = FontWeight.SemiBold
             )
         }
     }
 }
+
+@Composable
+private fun MoviesRowItemImage(
+    video: Videos,
+    showIndexOverImage: Boolean,
+    index: Int,
+    modifier: Modifier = Modifier,
+) {
+    Box(contentAlignment = Alignment.CenterStart) {
+        PosterImage(
+            title = video.title,
+            image = video.image,
+            modifier = modifier
+                .fillMaxWidth()
+                .drawWithContent {
+                    drawContent()
+                    if (showIndexOverImage) {
+                        drawRect(
+                            color = Color.Black.copy(
+                                alpha = 0.1f
+                            )
+                        )
+                    }
+                },
+        )
+        if (showIndexOverImage) {
+            Text(
+                modifier = Modifier.padding(16.dp),
+                text = "#${index.inc()}",
+                style = MaterialTheme.typography.displayLarge.copy(
+                    shadow = Shadow(
+                        offset = Offset(0.5f, 0.5f), blurRadius = 5f
+                    ), color = Color.White
+                ),
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
 
 @Composable
 private fun MoviesRowItemText(
@@ -398,7 +359,7 @@ private fun MoviesRowItemText(
             textAlign = TextAlign.Center,
             modifier = modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp)
+                .padding(top = 10.dp)
                 .graphicsLayer {
                     alpha = channelNameAlpha
                 },
