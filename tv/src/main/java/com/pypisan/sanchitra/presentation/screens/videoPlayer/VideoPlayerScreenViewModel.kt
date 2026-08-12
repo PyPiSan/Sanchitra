@@ -25,7 +25,7 @@ class VideoPlayerScreenViewModel @Inject constructor(
 
     private var videoJob: Job? = null
 
-    fun loadVideo(id: String) {
+    fun loadVideo(id: String, isContinue: Boolean = false) {
         _uiState.value = VideoPlayerScreenUiState.Loading
 
         val movieId = id.toIntOrNull()
@@ -40,7 +40,10 @@ class VideoPlayerScreenViewModel @Inject constructor(
                 .filterNotNull()
                 .catch { _uiState.value = VideoPlayerScreenUiState.Error }
                 .collect { details ->
-                    _uiState.value = VideoPlayerScreenUiState.Done(details)
+                    _uiState.value = VideoPlayerScreenUiState.Done(
+                        videoDetail = details,
+                        isContinue = isContinue
+                    )
                 }
         }
     }
@@ -65,5 +68,8 @@ class VideoPlayerScreenViewModel @Inject constructor(
 sealed class VideoPlayerScreenUiState {
     data object Loading : VideoPlayerScreenUiState()
     data object Error : VideoPlayerScreenUiState()
-    data class Done(val videoDetail: Videos?) : VideoPlayerScreenUiState()
+    data class Done(
+        val videoDetail: Videos?,
+        val isContinue: Boolean = false
+    ) : VideoPlayerScreenUiState()
 }

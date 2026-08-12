@@ -16,25 +16,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.entities.IPTVChannel
 import com.pypisan.sanchitra.data.util.StringConstants
 
 @Composable
 fun PosterImage(
-    video: Videos,
+    title: String,
+    image: String?,
     modifier: Modifier = Modifier,
 ) {
     SubcomposeAsyncImage(
         modifier = modifier,
         model = ImageRequest.Builder(LocalContext.current)
             .crossfade(true)
-            .data(video.image)
+            .data(image)
             .build(),
-        contentDescription = StringConstants.Composable.ContentDescription.moviePoster(video.title),
+        contentDescription = StringConstants.Composable.ContentDescription.moviePoster(title),
         contentScale = ContentScale.Crop
     )
 }
@@ -98,7 +97,7 @@ fun PosterImageIPTVChannel(
                 )
             )
     ) {
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(iptvChannel.logo)
                 .crossfade(true)

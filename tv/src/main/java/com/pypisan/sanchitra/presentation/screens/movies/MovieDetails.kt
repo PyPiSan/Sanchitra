@@ -1,6 +1,6 @@
 package com.pypisan.sanchitra.presentation.screens.movies
 
-import com.pypisan.sanchitra.presentation.theme.SanchitraButtonShape
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,9 +16,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,14 +33,18 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.tv.material3.Border
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
+import androidx.tv.material3.ExperimentalTvMaterial3Api
+import androidx.tv.material3.Glow
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -46,6 +52,7 @@ import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.util.toHrMinFormat
+import com.pypisan.sanchitra.storage.WatchProgress
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -53,8 +60,8 @@ import kotlinx.coroutines.launch
 fun MovieDetails(
     video: Videos,
     isPlayerActive: Boolean,
-    hasHistory: Boolean = false,
-    openVideoPlayer: (metaId: String) -> Unit
+    watchProgress: WatchProgress?,
+    openVideoPlayer: (metaId: String, isContinue: Boolean) -> Unit
 ) {
     val childPadding = rememberChildPadding()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
@@ -68,6 +75,7 @@ fun MovieDetails(
 
     // Store surface color to use consistently across all layers
     val surfaceColor = MaterialTheme.colorScheme.surface
+    val hasHistory = watchProgress != null && watchProgress.timeMillis > 0
 
     Box(
         modifier = Modifier
@@ -126,8 +134,9 @@ fun MovieDetails(
                 MovieActionButtons(
                     hasTrailerLink = !video.meta.trailer.isNullOrEmpty(),
                     hasHistory = hasHistory,
-                    onWatchClick = { openVideoPlayer(video.id.toString()) },
+                    onWatchNowClick = { openVideoPlayer(video.id.toString(), false) },
                     onTrailerClick = { showTrailerDialog = true },
+                    onContinueWatchingClick = {openVideoPlayer(video.id.toString(), true) },
                     modifier = Modifier.onFocusChanged {
                         if (it.isFocused) {
                             coroutineScope.launch {
@@ -153,49 +162,45 @@ fun MovieDetails(
 private fun MovieActionButtons(
     hasTrailerLink: Boolean,
     hasHistory: Boolean,
-    onWatchClick: () -> Unit,
+    onWatchNowClick: () -> Unit,
+    onContinueWatchingClick: () -> Unit,
     onTrailerClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Column(
         modifier = modifier.padding(top = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Button 1: Watch Now / Continue Watching
-        Button(
-            onClick = onWatchClick,
-            contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-            shape = ButtonDefaults.shape(shape = SanchitraButtonShape)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Outlined.PlayArrow,
-                contentDescription = null
+            CommonButton(
+                modifier = Modifier,
+                onButtonClick = onWatchNowClick,
+                imageVectorIcon = if (!hasHistory) Icons.Outlined.PlayArrow else Icons.Outlined.Replay,
+                buttonText = if (!hasHistory) "Watch Now" else "Start Over"
             )
-            Spacer(Modifier.size(8.dp))
-            Text(
-                text = if (hasHistory) "Continue Watching" else "Watch Now",
-                style = MaterialTheme.typography.titleSmall
-            )
-        }
 
-        // Button 2: Watch Trailer
-        if (hasTrailerLink) {
-            Button(
-                onClick = onTrailerClick,
-                contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-                shape = ButtonDefaults.shape(shape = SanchitraButtonShape)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Movie,
-                    contentDescription = null
-                )
-                Spacer(Modifier.size(8.dp))
-                Text(
-                    text = stringResource(R.string.watch_trailer),
-                    style = MaterialTheme.typography.titleSmall
+            // 2. Watch Trailer
+            if (hasTrailerLink) {
+                CommonButton(
+                    modifier = Modifier,
+                    onButtonClick = onTrailerClick,
+                    imageVectorIcon = Icons.Outlined.Movie,
+                    buttonText = stringResource(R.string.watch_trailer)
                 )
             }
+        }
+
+        if (hasHistory) {
+            CommonButton(
+                modifier = Modifier,
+                onButtonClick = onContinueWatchingClick,
+                imageVectorIcon = Icons.Outlined.PlayArrow,
+                buttonText = "Continue Watching"
+            )
+
         }
     }
 }
@@ -236,4 +241,60 @@ private fun MovieLargeTitle(
         ),
         maxLines = 2
     )
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun CommonButton(
+    onButtonClick: () -> Unit,
+    imageVectorIcon: ImageVector,
+    buttonText: String,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onButtonClick,
+        modifier = modifier,
+        enabled = true,
+        contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+        shape = ButtonDefaults.shape(shape = RoundedCornerShape(8.dp)),
+        colors = ButtonDefaults.colors(
+            containerColor = Color.White.copy(alpha = 0.12f),
+            contentColor = Color.White,
+
+            focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+            focusedContentColor = MaterialTheme.colorScheme.surface
+        ),
+        border = ButtonDefaults.border(
+            border = Border(
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)),
+                shape = RoundedCornerShape(8.dp)
+            ),
+            focusedBorder = Border(
+                border = BorderStroke(1.5.dp, Color.White),
+                shape = RoundedCornerShape(8.dp)
+            )
+        ),
+        scale = ButtonDefaults.scale(
+            scale = 1f,
+            focusedScale = 1.05f
+        ),
+        glow = ButtonDefaults.glow(
+            glow = Glow.None,
+            focusedGlow = Glow(
+                elevationColor = Color.White.copy(alpha = 0.8f), // Intense glow on focus
+                elevation = 20.dp
+            )
+        )
+    ) {
+        Icon(
+            imageVector = imageVectorIcon,
+            contentDescription = null,
+            modifier = Modifier.size(ButtonDefaults.IconSize)
+        )
+        Spacer(Modifier.size(8.dp))
+        Text(
+            text = buttonText,
+            style = MaterialTheme.typography.titleSmall
+        )
+    }
 }

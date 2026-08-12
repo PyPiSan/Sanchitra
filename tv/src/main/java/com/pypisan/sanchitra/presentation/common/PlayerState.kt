@@ -12,7 +12,7 @@ sealed class PlayerState : Parcelable {
     data class TV(val channelId: String) : PlayerState()
 
     @Parcelize
-    data class Video(val metaId: String) : PlayerState()
+    data class Video(val metaId: String, val isContinue: Boolean = false) : PlayerState()
 
     @Parcelize
     data class IPTV(val channelId: String) : PlayerState()

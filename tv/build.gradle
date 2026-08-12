@@ -16,7 +16,7 @@ plugins {
 
 def versionMajor = 4
 def versionMinor = 2
-def versionPatch = 0
+def versionPatch = 1
 def buildType="alpha"
 
 def computedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
@@ -151,4 +151,7 @@ dependencies {
 
     // --- 10. for qr code
     implementation "io.github.alexzhirkevich:qrose:1.1.2"
+
+    //  DataStore
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
 }

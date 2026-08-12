@@ -75,9 +75,6 @@ fun App(
                         openMovieDetailsScreen = { _ ->
                             isDetailsOpen = true
                         },
-                        openVideoPlayer = { metaID ->
-                            activePlayer = PlayerState.Video(metaID.toString())
-                        },
                         openTVPlayer = { channelId ->
                             activePlayer = PlayerState.TV(channelId.toString())
                         },
@@ -102,7 +99,9 @@ fun App(
             ) {
                 MovieDetailsScreen(
                     isPlayerActive = activePlayer != PlayerState.Idle,
-                    openVideoPlayer = { metaID -> activePlayer = PlayerState.Video(metaID) },
+                    openVideoPlayer = { metaID, isContinue ->
+                        activePlayer = PlayerState.Video(metaId = metaID, isContinue = isContinue)
+                    },
                     onBackPressed = { isDetailsOpen = false }
                 )
             }
@@ -118,7 +117,7 @@ fun App(
                         onDismissRequest = { activePlayer = PlayerState.Idle },
                         properties = DialogProperties(
                             dismissOnBackPress = true,
-                            usePlatformDefaultWidth = false // 🚨 Forces Full-Screen TV Overlay
+                            usePlatformDefaultWidth = false
                         )
                     ) {
                         TVPlayerScreen(
@@ -140,6 +139,7 @@ fun App(
                     ) {
                         VideoPlayerScreen(
                             metaId = state.metaId,
+                            isContinue = state.isContinue,
                             onBackPressed = { activePlayer = PlayerState.Idle }
                         )
                     }

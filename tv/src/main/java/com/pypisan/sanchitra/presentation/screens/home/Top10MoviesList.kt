@@ -129,8 +129,6 @@ private fun ImmersiveList(
                 title = sectionTitle,
                 showItemTitle = !isListFocused,
                 showIndexOverImage = true,
-                isActive = isActive,
-                lastFocusedMovieId = lastFocusedMovieId,
                 onMovieSelected = onMovieClick,
                 onMovieFocused = onMovieFocused,
                 modifier = Modifier.onFocusChanged(onFocusChanged)
@@ -156,7 +154,10 @@ private fun Background(
             label = "posterUriCrossfade",
 
         ) {
-            PosterImage(video = it, modifier = Modifier.fillMaxSize())
+            PosterImage(
+                title = it.title,
+                image = it.meta.banner,
+                modifier = Modifier.fillMaxSize())
         }
     }
 }
