@@ -20,51 +20,57 @@ import kotlinx.coroutines.delay
 fun VideoPlayerSeeker(
     player: Player,
     modifier: Modifier = Modifier,
-    onSeek: (Float) -> Unit = {
-        player.seekTo(player.duration.times(it).toLong())
+    onSeek: (Float) -> Unit = { progress ->
+        val targetMs = (player.duration * progress).toLong()
+        player.seekTo(targetMs)
     },
     onShowControls: () -> Unit = {},
 ) {
-    val contentDuration = player.contentDuration.milliseconds
+    val contentDurationMs = player.contentDuration.coerceAtLeast(0L)
+    val contentDuration = contentDurationMs.milliseconds
 
     var currentPositionMs by remember(player) { mutableLongStateOf(0L) }
-    val currentPosition = currentPositionMs.milliseconds
 
-
-    LaunchedEffect(Unit) {
+    // Fast 200ms position listener
+    LaunchedEffect(player) {
         while (true) {
-            delay(300)
-            currentPositionMs = player.currentPosition
+            currentPositionMs = player.currentPosition.coerceAtLeast(0L)
+            delay(200)
         }
     }
 
-    val contentProgressString =
-        currentPosition.toComponents { h, m, s, _ ->
-            if (h > 0) {
-                "$h:${m.padStartWith0()}:${s.padStartWith0()}"
-            } else {
-                "${m.padStartWith0()}:${s.padStartWith0()}"
-            }
+    val currentProgress = remember(currentPositionMs, contentDurationMs) {
+        if (contentDurationMs > 0) {
+            (currentPositionMs.toFloat() / contentDurationMs.toFloat()).coerceIn(0f, 1f)
+        } else 0f
+    }
+
+    val contentProgressString = remember(currentPositionMs) {
+        currentPositionMs.milliseconds.toComponents { h, m, s, _ ->
+            if (h > 0) "$h:${m.padStartWith0()}:${s.padStartWith0()}"
+            else "${m.padStartWith0()}:${s.padStartWith0()}"
         }
-    val contentDurationString =
+    }
+
+    val contentDurationString = remember(contentDurationMs) {
         contentDuration.toComponents { h, m, s, _ ->
-            if (h > 0) {
-                "$h:${m.padStartWith0()}:${s.padStartWith0()}"
-            } else {
-                "${m.padStartWith0()}:${s.padStartWith0()}"
-            }
+            if (h > 0) "$h:${m.padStartWith0()}:${s.padStartWith0()}"
+            else "${m.padStartWith0()}:${s.padStartWith0()}"
         }
+    }
 
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
         VideoPlayerControllerText(text = contentProgressString)
+
         VideoPlayerControllerIndicator(
-            progress = (currentPosition / contentDuration).toFloat(),
+            progress = currentProgress,
             onSeek = onSeek,
             onShowControls = onShowControls
         )
+
         VideoPlayerControllerText(text = contentDurationString)
     }
 }

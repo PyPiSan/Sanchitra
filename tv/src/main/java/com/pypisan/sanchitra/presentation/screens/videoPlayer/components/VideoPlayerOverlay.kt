@@ -17,18 +17,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.pypisan.sanchitra.presentation.common.GradientProgressIndicator
 
 @Composable
 fun VideoPlayerOverlay(
@@ -37,7 +35,7 @@ fun VideoPlayerOverlay(
     isError: Boolean = false,
     errorMessage: String = "Something went wrong",
     isBuffering: Boolean = false,
-    isSubtitleDrawerVisible: Boolean = false,
+    isDrawerVisible: Boolean = false,
     isControlsVisible: Boolean = true,
     showControls: () -> Unit = {},
     onRetry: () -> Unit = {},
@@ -62,7 +60,7 @@ fun VideoPlayerOverlay(
 
         // Background overlay when controls visible
         AnimatedVisibility(
-            visible = isControlsVisible && !isError && !isBuffering && !isSubtitleDrawerVisible,
+            visible = isControlsVisible && !isError && !isBuffering && !isDrawerVisible,
             enter = fadeIn(),
             exit = fadeOut()
         ) {
@@ -86,7 +84,7 @@ fun VideoPlayerOverlay(
             // CONTROLS
             AnimatedVisibility(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                visible = isControlsVisible && !isError && !isBuffering && !isSubtitleDrawerVisible,
+                visible = isControlsVisible && !isError && !isBuffering && !isDrawerVisible,
                 enter = slideInVertically { it },
                 exit = slideOutVertically { it }
             )  {
@@ -112,7 +110,7 @@ fun VideoPlayerOverlay(
                     .background(Color.Black.copy(alpha = 0.4f)),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = Color.White)
+                GradientProgressIndicator()
             }
         }
 

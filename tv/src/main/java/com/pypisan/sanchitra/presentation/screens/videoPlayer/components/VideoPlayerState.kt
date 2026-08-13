@@ -24,7 +24,7 @@ class VideoPlayerState(
 
     fun showControls(isPlaying: Boolean = true) {
         if (isPlaying) {
-            updateControlVisibility(seconds = 4)
+            updateControlVisibility(seconds = 5)
         } else {
             updateControlVisibility(seconds = Int.MAX_VALUE)
         }
@@ -49,7 +49,7 @@ class VideoPlayerState(
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun rememberVideoPlayerState(
-    @IntRange(from = 0) hideSeconds: Int = 2
+    @IntRange(from = 0) hideSeconds: Int = 5
 ): VideoPlayerState {
     return remember {
         VideoPlayerState(

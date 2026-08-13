@@ -55,6 +55,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -66,6 +67,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.pypisan.sanchitra.data.models.TrendingChannel
 import com.pypisan.sanchitra.utils.Padding
 
@@ -264,7 +266,6 @@ fun FeaturedGlassHomeCarousel(
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun GlassStackCard(
     channel: TrendingChannel,
@@ -274,6 +275,8 @@ private fun GlassStackCard(
     showIndicator: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     Box(
         modifier = modifier
     ) {
@@ -285,7 +288,7 @@ private fun GlassStackCard(
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = 0.28f), // High specular reflection top-left
+                            Color.White.copy(alpha = 0.28f),
                             Color.White.copy(alpha = 0.10f),
                             Color.Black.copy(alpha = 0.80f)
                         ),
@@ -306,14 +309,27 @@ private fun GlassStackCard(
                     shape = AmorphousGlassShape
                 )
         ) {
-            // Inner Image with 12dp Margin to reveal the Amorphous Glass Frame around it!
+            // Inner Image with Base Background (Prevents Transparency while loading!)
             AsyncImage(
-                model = channel.bannerUrl,
+                model = remember(channel.bannerUrl) {
+                    ImageRequest.Builder(context)
+                        .data(channel.bannerUrl)
+                        .crossfade(300) // Smooth fade-in when loaded
+                        .build()
+                },
                 contentDescription = channel.name,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(8.dp)
                     .clip(AmorphousImageShape)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF2A2A36), // Dark Slate Gray
+                                Color(0xFF14141C)  // Dark Obsidian
+                            )
+                        )
+                    )
                     .drawWithContent {
                         drawContent()
                         // Dark bottom overlay for text contrast
@@ -327,7 +343,7 @@ private fun GlassStackCard(
                             )
                         )
                     },
-                contentScale = ContentScale.FillWidth // Applied FillWidth
+                contentScale = ContentScale.FillWidth
             )
 
             // Text & Action Overlay Details
@@ -383,20 +399,19 @@ private fun GlassStackCard(
             }
         }
 
-        // Bold Electric Focus Outline wrapping the outer Amorphous Frame
+        // Bold Electric Focus Outline
         if (isFocused) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .zIndex(999f)
-                    // Clip ensures 100% pixel-perfect match to AmorphousGlassShape
                     .clip(AmorphousGlassShape)
                     .border(
                         width = 3.5.dp,
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                Color.White,                      // High-gloss specular top-left
-                                Color(0xFFB2EBF2),                // Frosted Ice-Cyan Sheen
+                                Color.White,
+                                Color(0xFFB2EBF2),
                                 Color.White.copy(alpha = 0.9f)
                             )
                         ),

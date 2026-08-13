@@ -136,11 +136,6 @@ fun TVPlayerBuild(
 
     val audioSink = DefaultAudioSink.Builder(context).setEnableFloatOutput(true).build()
 
-//    val renderersFactory = DefaultRenderersFactory(context)
-//        .setEnableDecoderFallback(true)
-//        .forceEnableMediaCodecAsynchronousQueueing()
-//        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
-
     // Custom RenderersFactory using our optimized audioSink
     val renderersFactory = object : DefaultRenderersFactory(context) {
         init {
@@ -195,7 +190,7 @@ fun TVPlayerBuild(
         },
 
         onQualitiesChanged = { list ->
-            qualities = list.filter { it.height >= 720 }.sortedByDescending { it.height }
+            qualities = list.filter { it.height >= 480 }.sortedByDescending { it.height }
         },
         renderersFactory = renderersFactory
     )
