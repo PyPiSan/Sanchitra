@@ -1,6 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer
 
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.Format
@@ -72,7 +71,7 @@ class VideoMetaHelper {
                         1 -> " Mono"
                         else -> ""
                     }
-                    val codec = getAudioCodec(format)
+//                    val codec = getAudioCodec(format)
 
 //                    val bitrate = if (format.bitrate != Format.NO_VALUE) {
 //                        " ${(format.bitrate / 1000)} kbps"
@@ -80,7 +79,7 @@ class VideoMetaHelper {
 //                        ""
 //                    }
 
-                    val label = "$readableLabel • $codec$channelString"
+                    val label = "$readableLabel • $channelString"
 
                     list.add(
                         AudioTrack(
@@ -176,18 +175,18 @@ class VideoMetaHelper {
         return "$type (${height}p)"
     }
 
-    fun getAudioCodec(format: Format): String {
-        return when {
-            format.sampleMimeType?.contains("eac3", ignoreCase = true) == true -> "E-AC3"
-            format.sampleMimeType?.contains("ac3", ignoreCase = true) == true -> "AC-3"
-            format.sampleMimeType?.contains("aac", ignoreCase = true) == true -> "AAC"
-            format.sampleMimeType?.contains("mpeg", ignoreCase = true) == true -> "MP2"
-            format.sampleMimeType?.contains("opus", ignoreCase = true) == true -> "Opus"
-            format.sampleMimeType?.contains("vorbis", ignoreCase = true) == true -> "Vorbis"
-            format.sampleMimeType?.contains("flac", ignoreCase = true) == true -> "FLAC"
-            format.sampleMimeType?.contains("pcm", ignoreCase = true) == true -> "PCM"
-            !format.codecs.isNullOrBlank() -> format.codecs!!
-            else -> "Unknown"
-        }
-    }
+//    fun getAudioCodec(format: Format): String {
+//        return when {
+//            format.sampleMimeType?.contains("eac3", ignoreCase = true) == true -> "E-AC3"
+//            format.sampleMimeType?.contains("ac3", ignoreCase = true) == true -> "AC-3"
+//            format.sampleMimeType?.contains("aac", ignoreCase = true) == true -> "AAC"
+//            format.sampleMimeType?.contains("mpeg", ignoreCase = true) == true -> "MP2"
+//            format.sampleMimeType?.contains("opus", ignoreCase = true) == true -> "Opus"
+//            format.sampleMimeType?.contains("vorbis", ignoreCase = true) == true -> "Vorbis"
+//            format.sampleMimeType?.contains("flac", ignoreCase = true) == true -> "FLAC"
+//            format.sampleMimeType?.contains("pcm", ignoreCase = true) == true -> "PCM"
+//            !format.codecs.isNullOrBlank() -> format.codecs!!
+//            else -> "Unknown"
+//        }
+//    }
 }

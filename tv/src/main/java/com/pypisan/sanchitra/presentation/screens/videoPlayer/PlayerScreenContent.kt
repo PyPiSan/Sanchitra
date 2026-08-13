@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -60,6 +62,7 @@ import com.pypisan.sanchitra.data.entities.VideoQuality
 import com.pypisan.sanchitra.data.models.EPGResponse
 import com.pypisan.sanchitra.data.util.prepareEPGProgramData
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.AudioTrackDrawer
+import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.MediaMetadataBadges
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.NowAiringDialog
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SeekController
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleOverlay
@@ -164,7 +167,6 @@ fun PlayerScreenContent(
             }
 
             override fun onVideoSizeChanged(videoSize: VideoSize) {
-
                 if (videoSize.width > 0 && videoSize.height > 0) {
                     val ratio =
                         (videoSize.width * videoSize.pixelWidthHeightRatio) / videoSize.height.toFloat()
@@ -299,7 +301,7 @@ fun PlayerScreenContent(
                 exoPlayer.play()
             },
             isBuffering = isBuffering,
-            isSubtitleDrawerVisible = showSubtitleDrawer || showQualityDrawer || showAudioQualityDrawer || showNowAiring,
+            isDrawerVisible = showSubtitleDrawer || showQualityDrawer || showAudioQualityDrawer || showNowAiring,
             controls = {
                 VideoPlayerControls(
                     player = exoPlayer,
@@ -323,6 +325,16 @@ fun PlayerScreenContent(
                     })
             })
 
+        MediaMetadataBadges(
+            visible = videoPlayerState.isControlsVisible && !isBuffering,
+            hasSubtitles = subtitles.any { it.trackIndex != -1 },
+            audios = audios,
+            qualities = qualities,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 36.dp, end = 48.dp)
+        )
+
         SubtitleDrawer(visible = showSubtitleDrawer, subtitles = subtitles, onDismiss = {
             showSubtitleDrawer = false
             exoPlayer.play()
@@ -343,6 +355,8 @@ fun PlayerScreenContent(
             showSubtitleDrawer = false
             exoPlayer.playWhenReady = true
             exoPlayer.prepare()
+        }, onShowControls = {
+            videoPlayerState.showControls()
         })
 
         AudioTrackDrawer(visible = showAudioQualityDrawer, audioTracks = audios, onDismiss = {
@@ -363,6 +377,8 @@ fun PlayerScreenContent(
             }
             showAudioQualityDrawer = false
             exoPlayer.playWhenReady = true
+        }, onShowControls = {
+            videoPlayerState.showControls()
         })
 
         VideoQualityDrawer(visible = showQualityDrawer, qualities = qualities, onDismiss = {
@@ -386,6 +402,8 @@ fun PlayerScreenContent(
             }
             showQualityDrawer = false
             exoPlayer.playWhenReady = true
+        }, onShowControls = {
+            videoPlayerState.showControls()
         })
 
         if (showNowAiring && epgPrograms.isNotEmpty()) {

@@ -27,6 +27,15 @@ val DarkRed = Color(0xFF330000)
 val BrightRed = Color(0xFFFF0000)
 val GradientColors = listOf(DarkRed, BrightRed)
 val TrackBackgroundColor = Color.White.copy(alpha = 0.2f)
+val PrimaryAccentColor = Color(0xFF90A4AE)
+
+val rotationGradientColors = listOf(
+    Color(0xFF4285F4), // Blue
+    Color(0xFFEA4335), // Red
+    Color(0xFFFBBC05), // Yellow
+    Color(0xFF34A853), // Green
+    Color(0xFF4285F4)  // Blue (ends smoothly where it starts)
+)
 
 val ourColors = listOf(
     Coral,
