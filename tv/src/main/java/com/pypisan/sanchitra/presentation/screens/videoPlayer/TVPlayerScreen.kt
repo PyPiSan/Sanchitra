@@ -216,6 +216,7 @@ fun TVPlayerBuild(
 
     PlayerScreenContent(
         title = channel.name,
+        posterUrl = channel.logoUrl,
         epg,
         exoPlayer = exoPlayer,
         subtitles = subtitles,

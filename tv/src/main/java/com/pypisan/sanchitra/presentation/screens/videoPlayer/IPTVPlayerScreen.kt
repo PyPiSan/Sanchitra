@@ -174,6 +174,7 @@ fun IPTVPlayerBuild(
 
     PlayerScreenContent(
         title = iptvChannel.name,
+        posterUrl = iptvChannel.logo,
         epg,
         exoPlayer = exoPlayer,
         subtitles = subtitles,
