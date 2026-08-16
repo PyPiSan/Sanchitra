@@ -18,7 +18,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import com.pypisan.sanchitra.data.entities.IPTVChannel
 import com.pypisan.sanchitra.data.util.StringConstants
 
 @Composable
@@ -77,34 +76,6 @@ fun PosterImageChannel(
                     modifier = Modifier.padding(4.dp)
                 )
             }
-        )
-    }
-}
-
-@Composable
-fun PosterImageIPTVChannel(
-    iptvChannel: IPTVChannel,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF1E1E1E),
-                        Color(0xFF2C2C2C)
-                    )
-                )
-            )
-    ) {
-        SubcomposeAsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(iptvChannel.logo)
-                .crossfade(true)
-                .build(),
-            contentDescription = iptvChannel.name,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit
         )
     }
 }

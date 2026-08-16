@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import javax.inject.Inject
 import kotlin.collections.emptyList
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.hours
 
 class HomeRepositoryImpl @Inject constructor(
@@ -26,39 +27,21 @@ class HomeRepositoryImpl @Inject constructor(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-//    private val liveChannelTrendingFlow: StateFlow<TrendingResponse> = flow {
-//        val response = api.getTrending()
-//        if (response.isSuccessful) {
-//            emit(
-//                response.body()?.toTrendingResponse()
-//                    ?: TrendingResponse(emptyList())
-//            )
-//        } else {
-//            emit(TrendingResponse(emptyList()))
-//        }
-//    }.catch {
-//        emit(TrendingResponse(emptyList()))
-//    }.stateIn(
-//        scope = scope,
-//        started = SharingStarted.Eagerly,
-//        initialValue = TrendingResponse(emptyList())
-//    )
-
     private val liveChannelTrendingFlow: StateFlow<TrendingResponse> = flow {
         while (currentCoroutineContext().isActive) {
             try {
                 val response = api.getTrending()
 
-                emit(
-                    if (response.isSuccessful) {
-                        response.body()?.toTrendingResponse()
-                            ?: TrendingResponse(emptyList())
-                    } else {
-                        TrendingResponse(emptyList())
+                if (response.isSuccessful) {
+                    val newTrending = response.body()?.toTrendingResponse()
+                    if (newTrending != null && newTrending.data.isNotEmpty()) {
+                        emit(newTrending)
                     }
-                )
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                emit(TrendingResponse(emptyList()))
+                // Log error if needed; previous value is automatically retained
             }
 
             delay(1.hours)

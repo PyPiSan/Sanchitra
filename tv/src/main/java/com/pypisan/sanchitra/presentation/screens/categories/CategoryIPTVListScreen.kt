@@ -32,10 +32,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.pypisan.sanchitra.data.entities.IPTVChannel
+import com.pypisan.sanchitra.presentation.common.ChannelCard
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.presentation.common.MovieCard
-import com.pypisan.sanchitra.presentation.common.PosterImageIPTVChannel
+import com.pypisan.sanchitra.presentation.common.PosterImageChannel
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
 object CategoryIPTVListScreen {
@@ -44,7 +45,7 @@ object CategoryIPTVListScreen {
 
 @Composable
 fun CategoryIPTVListScreen(
-    isPlayerActive: Boolean, // Receive the state here
+    isPlayerActive: Boolean,
     onBackPressed: () -> Unit,
     onChannelSelected: (iptvChannelId: String) -> Unit,
     categoryIPTVListScreenViewModel: CategoryIPTVListScreenViewModel = hiltViewModel()
@@ -64,7 +65,7 @@ fun CategoryIPTVListScreen(
             CategoryDetails(
                 categoryName = s.categoryName,
                 categoryChannels = s.channels,
-                isPlayerActive = isPlayerActive, // Pass it down
+                isPlayerActive = isPlayerActive,
                 onBackPressed = onBackPressed,
                 onChannelSelected = onChannelSelected
             )
@@ -76,7 +77,7 @@ fun CategoryIPTVListScreen(
 private fun CategoryDetails(
     categoryChannels: List<IPTVChannel>,
     categoryName: String,
-    isPlayerActive: Boolean, // Receive the state here
+    isPlayerActive: Boolean,
     onBackPressed: () -> Unit,
     onChannelSelected: (iptvChannelId: String) -> Unit,
     modifier: Modifier = Modifier
@@ -122,12 +123,11 @@ private fun CategoryDetails(
         ) {
             itemsIndexed(
                 categoryChannels, key = { _, channel -> channel.id }) { index, iptvChannel ->
-                MovieCard(
+                ChannelCard(
                     onClick = {
                         onChannelSelected(iptvChannel.id)
                     },
                     modifier = Modifier
-                        .aspectRatio(16 / 9f)
                         .padding(8.dp)
                         .focusRequester(focusRequesters[index])
                         .onFocusChanged {
@@ -135,9 +135,12 @@ private fun CategoryDetails(
                                 lastFocusedIndex = index
                             }
                         },
-                ) {
-                    PosterImageIPTVChannel(
-                        iptvChannel = iptvChannel, modifier = Modifier.fillMaxSize()
+                    )
+                {
+                    PosterImageChannel(
+                        logoUrl = iptvChannel.logo,
+                        name = iptvChannel.name,
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }
