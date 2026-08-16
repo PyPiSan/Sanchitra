@@ -228,6 +228,7 @@ fun VideoPlayerBuild(
 
     PlayerScreenContent(
         title = title ?: "",
+        posterUrl = null,
         epgResponse = null,
         isMovie = true,
         exoPlayer = exoPlayer,

@@ -37,6 +37,7 @@ import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.Tracks
 import androidx.media3.common.VideoSize
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
@@ -64,6 +65,7 @@ import com.pypisan.sanchitra.data.util.prepareEPGProgramData
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.AudioTrackDrawer
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.MediaMetadataBadges
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.NowAiringDialog
+import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.RadioPosterOverlay
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SeekController
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleOverlay
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoQualityDrawer
@@ -75,6 +77,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun PlayerScreenContent(
     title: String,
+    posterUrl: String?,
     epgResponse: EPGResponse?,
     isMovie: Boolean = false,
     exoPlayer: ExoPlayer,
@@ -109,6 +112,8 @@ fun PlayerScreenContent(
     var errorValue by rememberSaveable { mutableStateOf("Something Went Wrong") }
     var hasSuccessfullyPlayedOnce by remember { mutableStateOf(false) }
     val maxRetries = 3
+
+    var isAudioOnly by remember { mutableStateOf(false) }
 
 //    val doubleClickHandler = remember {
 //        DoubleClickHandler()
@@ -160,6 +165,12 @@ fun PlayerScreenContent(
     //    Player Listener for Error and Buffer
     DisposableEffect(exoPlayer) {
         val listener = object : Player.Listener {
+
+            override fun onTracksChanged(tracks: Tracks) {
+                val hasVideo = tracks.isTypeSelected(C.TRACK_TYPE_VIDEO)
+                val hasAudio = tracks.isTypeSelected(C.TRACK_TYPE_AUDIO)
+                isAudioOnly = !hasVideo && hasAudio
+            }
 
             override fun onRenderedFirstFrame() {
                 super.onRenderedFirstFrame()
@@ -278,6 +289,15 @@ fun PlayerScreenContent(
                 Modifier.fillMaxSize()
             }
         )
+
+        if (isAudioOnly) {
+            RadioPosterOverlay(
+                title = title,
+                posterUrl = posterUrl,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
 
         VideoPlayerOverlay(
             modifier = Modifier.align(Alignment.BottomCenter),
