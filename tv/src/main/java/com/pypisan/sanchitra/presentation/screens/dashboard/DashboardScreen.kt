@@ -40,7 +40,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.presentation.Screens
 import com.pypisan.sanchitra.presentation.screens.categories.CategoriesScreen
 import com.pypisan.sanchitra.presentation.screens.movies.MoviesScreen
@@ -80,9 +79,11 @@ fun DashboardScreen(
     var isTopBarFocused by remember { mutableStateOf(false) }
 
     var currentDestination: String? by remember { mutableStateOf(null) }
+
     val currentTopBarSelectedTabIndex by remember(currentDestination) {
         derivedStateOf {
-            currentDestination?.let { TopBarTabs.indexOf(Screens.valueOf(it)) } ?: 0
+            val index = TopBarTabs.indexOfFirst { it() == currentDestination }
+            if (index >= 0) index else 0
         }
     }
 
@@ -104,13 +105,26 @@ fun DashboardScreen(
         // 2. On second back press, bring focus back to the first displayed tab
         // 3. On third back press, exit the app
         onBackPressed = {
+            // Guarantee the index is at least 1 (the first Tab) and never 0 (Profile/Avatar)
+            val tabRequesterIndex = if (currentTopBarSelectedTabIndex >= 0) {
+                currentTopBarSelectedTabIndex + 1
+            } else {
+                1 // Default to first tab (Home) instead of Avatar
+            }
             if (!isTopBarVisible) {
+                // If top bar is hidden, make it visible and focus active tab
                 isTopBarVisible = true
-                TopBarFocusRequesters[currentTopBarSelectedTabIndex + 1].requestFocus()
-            } else if (currentTopBarSelectedTabIndex == 0) onBackPressed()
-            else if (!isTopBarFocused) {
-                TopBarFocusRequesters[currentTopBarSelectedTabIndex + 1].requestFocus()
-            } else TopBarFocusRequesters[1].requestFocus()
+                TopBarFocusRequesters.getOrNull(tabRequesterIndex)?.requestFocus()
+            } else if (!isTopBarFocused) {
+                // If focus is inside the screen content, move focus to active tab
+                TopBarFocusRequesters.getOrNull(tabRequesterIndex)?.requestFocus()
+            } else if (currentTopBarSelectedTabIndex > 0) {
+                // If TopBar is ALREADY focused, but we are NOT on the first tab, move to the first tab
+                TopBarFocusRequesters.getOrNull(1)?.requestFocus()
+            } else {
+                // If TopBar is ALREADY focused AND we are on the first tab, exit/system back
+                onBackPressed()
+            }
         }
     ) {
         // We do not want to focus the TopBar everytime we come back from another screen e.g.

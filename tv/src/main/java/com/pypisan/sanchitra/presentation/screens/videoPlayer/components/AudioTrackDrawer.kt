@@ -20,6 +20,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -56,7 +57,6 @@ fun AudioTrackDrawer(
             onDismiss()
         }
     }
-
     // Autofocus the currently selected audio track (or fallback to index 0)
     val selectedIndex = remember(audioTracks) {
         val idx = audioTracks.indexOfFirst { it.isSelected }
@@ -64,12 +64,19 @@ fun AudioTrackDrawer(
     }
     val focusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
+    val lazyListState = rememberLazyListState()
 
     // Heartbeat loop: Keeps parent player controls alive while drawer is open
     LaunchedEffect(visible) {
         if (visible) {
+            if (selectedIndex in audioTracks.indices) {
+                lazyListState.scrollToItem(selectedIndex)
+            }
             delay(100)
-            focusRequester.requestFocus()
+            try {
+                focusRequester.requestFocus()
+            } catch (_: Exception) {}
+
             while (true) {
                 onShowControls()
                 delay(2000)
@@ -112,7 +119,7 @@ fun AudioTrackDrawer(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = {} // Prevents clicking inside drawer from closing it
+                        onClick = {}
                     )
                     .background(
                         brush = Brush.horizontalGradient(
@@ -169,8 +176,17 @@ fun AudioTrackDrawer(
                 Spacer(modifier = Modifier.height(28.dp))
 
                 LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(bottom = 40.dp)
+                    contentPadding = PaddingValues(
+                        top = 16.dp,
+                        bottom = 32.dp,
+                        start = 4.dp,
+                        end = 4.dp
+                    )
                 ) {
                     itemsIndexed(
                         items = audioTracks,

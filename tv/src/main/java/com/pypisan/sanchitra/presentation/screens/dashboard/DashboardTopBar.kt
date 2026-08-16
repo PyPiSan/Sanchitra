@@ -149,8 +149,6 @@ fun DashboardTopBar(
         }
     }
 }
-
-//Use for brand logo
 @Composable
 private fun SanchitraLogo(
     modifier: Modifier = Modifier
