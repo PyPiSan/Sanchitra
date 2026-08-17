@@ -82,8 +82,7 @@ fun DashboardScreen(
 
     val currentTopBarSelectedTabIndex by remember(currentDestination) {
         derivedStateOf {
-            val index = TopBarTabs.indexOfFirst { it() == currentDestination }
-            if (index >= 0) index else 0
+            currentDestination?.let { TopBarTabs.indexOf(Screens.valueOf(it)) } ?: 0
         }
     }
 
@@ -109,7 +108,7 @@ fun DashboardScreen(
             val tabRequesterIndex = if (currentTopBarSelectedTabIndex >= 0) {
                 currentTopBarSelectedTabIndex + 1
             } else {
-                1 // Default to first tab (Home) instead of Avatar
+                0 // Default to Avatar
             }
             if (!isTopBarVisible) {
                 // If top bar is hidden, make it visible and focus active tab

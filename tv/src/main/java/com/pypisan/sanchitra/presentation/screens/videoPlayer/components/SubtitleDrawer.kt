@@ -54,6 +54,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,8 +72,11 @@ fun SubtitleDrawer(
     onSubtitleSelected: (SubtitleTrack) -> Unit,
     onShowControls: () -> Unit = {}
 ) {
+
+    val focusManager = LocalFocusManager.current
     if (visible) {
         BackHandler {
+            focusManager.clearFocus(force = true)
             onDismiss()
         }
     }
@@ -107,10 +111,10 @@ fun SubtitleDrawer(
         visible = visible, enter = slideInHorizontally(
             initialOffsetX = { it },
             animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing)
-        ) + fadeIn(tween(300)), exit = slideOutHorizontally(
+        ) + fadeIn(tween(500)), exit = slideOutHorizontally(
             targetOffsetX = { it },
-            animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing)
-        ) + fadeOut(tween(300))
+            animationSpec = tween(durationMillis = 550, easing = FastOutSlowInEasing)
+        ) + fadeOut(tween(500))
     ) {
         Box(
             modifier = Modifier
@@ -259,7 +263,7 @@ fun SubtitleDrawer(
                                     indication = null
                                 ) {
                                     coroutineScope.launch {
-                                        delay(150)
+                                        delay(350)
                                         onSubtitleSelected(item)
                                     }
                                 }
