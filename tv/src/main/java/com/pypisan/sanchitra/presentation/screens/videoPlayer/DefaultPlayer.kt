@@ -34,7 +34,7 @@ fun buildDefaultExoPlayer(
 ): ExoPlayer {
 
     val loadControl =
-        DefaultLoadControl.Builder().setBufferDurationsMs(30000, 60000, 3000, 2000).build()
+        DefaultLoadControl.Builder().setBufferDurationsMs(60000, 90000, 5000, 5000).build()
     val httpDataSourceFactory: DefaultHttpDataSource.Factory
 
     if (mediaType.equals("movie", ignoreCase = true)) {

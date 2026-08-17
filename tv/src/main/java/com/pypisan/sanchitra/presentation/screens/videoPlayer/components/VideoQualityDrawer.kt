@@ -53,6 +53,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,8 +72,12 @@ fun VideoQualityDrawer(
     onQualitySelected: (VideoQuality) -> Unit,
     onShowControls: () -> Unit = {}
 ) {
+
+
+    val focusManager = LocalFocusManager.current
     if (visible) {
         BackHandler {
+            focusManager.clearFocus(force = true)
             onDismiss()
         }
     }
@@ -108,10 +113,10 @@ fun VideoQualityDrawer(
         visible = visible, enter = slideInHorizontally(
             initialOffsetX = { it },
             animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing)
-        ) + fadeIn(tween(300)), exit = slideOutHorizontally(
+        ) + fadeIn(tween(500)), exit = slideOutHorizontally(
             targetOffsetX = { it },
-            animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing)
-        ) + fadeOut(tween(300))
+            animationSpec = tween(durationMillis = 550, easing = FastOutSlowInEasing)
+        ) + fadeOut(tween(500))
     ) {
         // Background Scrim (Click outside to close)
         Box(
@@ -266,7 +271,7 @@ fun VideoQualityDrawer(
                                     indication = null
                                 ) {
                                     coroutineScope.launch {
-                                        delay(150) // Brief visual feedback before closing
+                                        delay(350) // Brief visual feedback before closing
                                         onQualitySelected(item)
                                     }
                                 }
