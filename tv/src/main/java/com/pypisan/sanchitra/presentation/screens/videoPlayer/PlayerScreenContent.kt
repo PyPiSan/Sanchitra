@@ -267,8 +267,27 @@ fun PlayerScreenContent(
         })
 
     BackHandler {
-        exoPlayer.release()
-        onBackPressed()
+        when {
+            showAudioQualityDrawer -> {
+                showAudioQualityDrawer = false
+                exoPlayer.play()
+            }
+            showSubtitleDrawer -> {
+                showSubtitleDrawer = false
+                exoPlayer.play()
+            }
+            showQualityDrawer -> {
+                showQualityDrawer = false
+                exoPlayer.play()
+            }
+            showNowAiring -> {
+                showNowAiring = false
+                exoPlayer.play()
+            }
+            else -> {
+                onBackPressed()
+            }
+        }
     }
 
     Box(

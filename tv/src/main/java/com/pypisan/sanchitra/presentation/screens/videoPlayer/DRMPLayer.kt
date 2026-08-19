@@ -23,6 +23,7 @@ import androidx.media3.exoplayer.drm.LocalMediaDrmCallback
 import androidx.media3.exoplayer.drm.MediaDrmCallback
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.exoplayer.upstream.DefaultAllocator
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
@@ -50,7 +51,22 @@ fun buildDrmExoPlayer(
         .setMediaMetadata(MediaMetadata.Builder().setTitle(name).build()).build()
     val trackSelector = DefaultTrackSelector(context)
     val loadControl =
-        DefaultLoadControl.Builder().setBufferDurationsMs(60000, 90000, 3000, 2000).build()
+        DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                60_000,
+                60_000,
+                1_500,
+                3_500
+            )
+            .setPrioritizeTimeOverSizeThresholds(false)
+            .setAllocator(
+                DefaultAllocator(
+                    /* trimOnReset= */ true,
+                    /* individualAllocationSize= */ 64 * 1024, // Use standard 64KB segments
+                    /* initialAllocationCount= */ (24 * 1024 * 1024) / (64 * 1024)
+                )
+            )
+            .build()
     val videoMetaHelper = VideoMetaHelper()
 
     // 1. Declare dataSourceFactory OUTSIDE the 'when' block so we can modify it and use it later
@@ -199,8 +215,11 @@ fun buildDrmExoPlayer(
         }
     }
 
-    return ExoPlayer.Builder(context).setTrackSelector(trackSelector).setLoadControl(loadControl)
-        .setSeekForwardIncrementMs(10_000L).setSeekBackIncrementMs(10_000L).build().apply {
+    return ExoPlayer.Builder(context)
+        .setTrackSelector(trackSelector)
+        .setLoadControl(loadControl)
+        .setReleaseTimeoutMs(500)
+        .build().apply {
 
             trackSelectionParameters =
                 trackSelectionParameters.buildUpon().setForceHighestSupportedBitrate(true)

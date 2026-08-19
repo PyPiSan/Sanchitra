@@ -1,6 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer.components
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -43,7 +42,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,14 +52,12 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.utils.PrimaryAccentColor
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -73,20 +69,11 @@ fun SubtitleDrawer(
     onShowControls: () -> Unit = {}
 ) {
 
-    val focusManager = LocalFocusManager.current
-    if (visible) {
-        BackHandler {
-            focusManager.clearFocus(force = true)
-            onDismiss()
-        }
-    }
-
     val selectedIndex = remember(subtitles) {
         val idx = subtitles.indexOfFirst { it.isSelected }
         if (idx >= 0) idx else 0
     }
     val focusRequester = remember { FocusRequester() }
-    val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
     // Heartbeat loop
@@ -262,10 +249,7 @@ fun SubtitleDrawer(
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = null
                                 ) {
-                                    coroutineScope.launch {
-                                        delay(350)
-                                        onSubtitleSelected(item)
-                                    }
+                                    onSubtitleSelected(item)
                                 }
                                 .padding(horizontal = 20.dp, vertical = 16.dp),
                             verticalAlignment = Alignment.CenterVertically) {
