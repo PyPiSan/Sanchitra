@@ -19,6 +19,9 @@ import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
 import androidx.core.net.toUri
+import androidx.media3.exoplayer.upstream.DefaultAllocator
+import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
+import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
 
 @OptIn(UnstableApi::class)
 fun buildDefaultExoPlayer(
@@ -34,8 +37,31 @@ fun buildDefaultExoPlayer(
 ): ExoPlayer {
 
     val loadControl =
-        DefaultLoadControl.Builder().setBufferDurationsMs(60000, 90000, 5000, 5000).build()
+        DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                60_000,
+                60_000,
+                1_500,
+                3_500
+            )
+            .setPrioritizeTimeOverSizeThresholds(false)
+            .setAllocator(
+                DefaultAllocator(
+                    /* trimOnReset= */ true,
+                    /* individualAllocationSize= */ 64 * 1024, // Use standard 64KB segments
+                    /* initialAllocationCount= */ (24 * 1024 * 1024) / (64 * 1024)
+                )
+            )
+            .build()
     val httpDataSourceFactory: DefaultHttpDataSource.Factory
+
+    // 2. Build a rapid-fire background auto-retry mechanism
+    val bufferRetryPolicy = object : DefaultLoadErrorHandlingPolicy() {
+        // ELIMINATE BACK-OFF TIME: Retry when a chunk fails
+        override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long {
+            return 100L
+        }
+    }
 
     if (mediaType.equals("movie", ignoreCase = true)) {
         httpDataSourceFactory = DefaultHttpDataSource.Factory()
@@ -65,6 +91,7 @@ fun buildDefaultExoPlayer(
         )
 
     val mediaSourceFactory = DefaultMediaSourceFactory(httpDataSourceFactory, extractorsFactory)
+        .setLoadErrorHandlingPolicy(bufferRetryPolicy)
 
     val mediaItemBuilder = MediaItem.Builder().setUri(stream)
 
@@ -98,6 +125,7 @@ fun buildDefaultExoPlayer(
 
     return ExoPlayer.Builder(context, renderersFactory)
         .setLoadControl(loadControl)
+        .setReleaseTimeoutMs(500)
         .setMediaSourceFactory(mediaSourceFactory)
         .build().apply {
 

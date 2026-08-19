@@ -21,9 +21,7 @@ class VideoMetaHelper {
         player.currentTracks.groups.forEach { group ->
 
             if (group.type == C.TRACK_TYPE_TEXT) {
-
                 for (i in 0 until group.length) {
-
                     val format = group.getTrackFormat(i)
                     subtitles.add(
                         SubtitleTrack(
@@ -31,7 +29,6 @@ class VideoMetaHelper {
                             language = format.language,
                             group = group,
                             trackIndex = i,
-
                             // IMPORTANT
                             isSelected = group.isTrackSelected(i)
                         )
@@ -39,7 +36,6 @@ class VideoMetaHelper {
                 }
             }
         }
-
         return subtitles
     }
 
@@ -50,20 +46,14 @@ class VideoMetaHelper {
 
         // Loop through all track groups currently loaded in the player
         player.currentTracks.groups.forEach { group ->
-
             // We only care about AUDIO tracks here
             if (group.type == C.TRACK_TYPE_AUDIO) {
-
                 // Loop through every track inside this specific group
                 for (trackIndex in 0 until group.length) {
-
                     val format = group.getTrackFormat(trackIndex)
-
                     // Create a readable label (e.g. "English" instead of "en", or fallback to "Unknown")
                     val displayLanguage = format.language?.let { Locale(it).displayLanguage }
                     val readableLabel = format.label ?: displayLanguage ?: "Unknown Audio"
-
-                    // Optional: Append channel count (e.g., "English (5.1)" vs "English (Stereo)")
                     val channelString = when (format.channelCount) {
                         2 -> " Stereo"
                         6 -> " 5.1"
@@ -72,20 +62,23 @@ class VideoMetaHelper {
                         else -> ""
                     }
 //                    val codec = getAudioCodec(format)
-
 //                    val bitrate = if (format.bitrate != Format.NO_VALUE) {
 //                        " ${(format.bitrate / 1000)} kbps"
 //                    } else {
 //                        ""
 //                    }
-
-                    val label = "$readableLabel • $channelString"
+                    var label: String = "";
+                    label = if (channelString.isNotBlank()){
+                        "$readableLabel • $channelString"
+                    }else{
+                        readableLabel
+                    }
 
                     list.add(
                         AudioTrack(
                             group = group,
                             trackIndex = trackIndex,
-                            language = format.language ?: "Unknown",
+                            language = format.language ?: "Unknown Audio",
                             label = label,
                             isSelected = group.isTrackSelected(trackIndex)
                         )
@@ -114,15 +107,11 @@ class VideoMetaHelper {
     fun getVideoQualities(player: ExoPlayer): List<VideoQuality> {
 
         val qualities = mutableListOf<VideoQuality>()
-
         player.currentTracks.groups.forEachIndexed { groupIndex, group ->
-
             if (group.type == C.TRACK_TYPE_VIDEO) {
 
                 for (i in 0 until group.length) {
-
                     val format = group.getTrackFormat(i)
-
                     qualities.add(
                         VideoQuality(
                             label = qualityLabel(format.width, format.height),
@@ -137,7 +126,6 @@ class VideoMetaHelper {
                 }
             }
         }
-
         return qualities
     }
 

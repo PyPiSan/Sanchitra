@@ -1,6 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer.components
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -36,14 +35,12 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.utils.PrimaryAccentColor
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun AudioTrackDrawer(
@@ -53,20 +50,12 @@ fun AudioTrackDrawer(
     onTrackSelected: (AudioTrack) -> Unit,
     onShowControls: () -> Unit = {}
 ) {
-    val focusManager = LocalFocusManager.current
-    if (visible) {
-        BackHandler {
-            focusManager.clearFocus(force = true)
-            onDismiss()
-        }
-    }
     // Autofocus the currently selected audio track (or fallback to index 0)
     val selectedIndex = remember(audioTracks) {
         val idx = audioTracks.indexOfFirst { it.isSelected }
         if (idx >= 0) idx else 0
     }
     val focusRequester = remember { FocusRequester() }
-    val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
     // Heartbeat loop: Keeps parent player controls alive while drawer is open
@@ -247,10 +236,7 @@ fun AudioTrackDrawer(
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = null
                                 ) {
-                                    coroutineScope.launch {
-                                        delay(350) // Brief visual feedback before closing
-                                        onTrackSelected(item)
-                                    }
+                                    onTrackSelected(item)
                                 }
                                 .padding(horizontal = 20.dp, vertical = 16.dp),
                             verticalAlignment = Alignment.CenterVertically) {
