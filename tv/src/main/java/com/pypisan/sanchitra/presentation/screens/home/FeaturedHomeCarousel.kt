@@ -1,14 +1,8 @@
 package com.pypisan.sanchitra.presentation.screens.home
 
-import com.pypisan.sanchitra.presentation.theme.SanchitraBorderWidth
 import com.pypisan.sanchitra.presentation.theme.SanchitraButtonShape
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -20,24 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -45,14 +24,10 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
-import androidx.tv.material3.Carousel
 import androidx.tv.material3.CarouselDefaults
-import androidx.tv.material3.CarouselState
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
@@ -62,221 +37,219 @@ import coil.compose.AsyncImage
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.data.entities.TrendingChannel
 import com.pypisan.sanchitra.data.util.StringConstants
-import com.pypisan.sanchitra.utils.Padding
-import com.pypisan.sanchitra.utils.handleDPadKeyEvents
 
-@OptIn(ExperimentalTvMaterial3Api::class)
-val CarouselSaver =
-    Saver<CarouselState, Int>(save = { it.activeItemIndex }, restore = { CarouselState(it) })
+//@OptIn(ExperimentalTvMaterial3Api::class)
+//val CarouselSaver =
+//    Saver<CarouselState, Int>(save = { it.activeItemIndex }, restore = { CarouselState(it) })
 
-@OptIn(ExperimentalTvMaterial3Api::class)
-@Composable
-fun FeaturedHomeCarousel(
-    modifier: Modifier = Modifier,
-    channels: List<TrendingChannel>,
-    padding: Padding,
-    goToTVPlayer: (id: Int) -> Unit,
-    isActive: Boolean = false,
-    onCarouselFocused: () -> Unit = {}
-) {
-    val carouselState = rememberSaveable(saver = CarouselSaver) { CarouselState(0) }
-    var isCarouselFocused by remember { mutableStateOf(false) }
-    val alpha = if (isCarouselFocused) {
-        1f
-    } else {
-        0f
-    }
+//@OptIn(ExperimentalTvMaterial3Api::class)
+//@Composable
+//fun FeaturedHomeCarousel(
+//    modifier: Modifier = Modifier,
+//    channels: List<TrendingChannel>,
+//    padding: Padding,
+//    goToTVPlayer: (id: Int) -> Unit,
+//    isActive: Boolean = false,
+//    onCarouselFocused: () -> Unit = {}
+//) {
+//    val carouselState = rememberSaveable(saver = CarouselSaver) { CarouselState(0) }
+//    var isCarouselFocused by remember { mutableStateOf(false) }
+//    val alpha = if (isCarouselFocused) {
+//        1f
+//    } else {
+//        0f
+//    }
+//
+//    val focusRequester = remember { FocusRequester() }
+//
+//    val latestIsActive by rememberUpdatedState(isActive)
+//    val lifecycleOwner = LocalLifecycleOwner.current
+//
+//    DisposableEffect(lifecycleOwner) {
+//        val observer = LifecycleEventObserver { _, event ->
+//            if (event == Lifecycle.Event.ON_RESUME && latestIsActive) {
+//                try {
+//                    focusRequester.requestFocus()
+//                } catch (e: Exception) {
+//                    // Ignore gracefully
+//                }
+//            }
+//        }
+//
+//        lifecycleOwner.lifecycle.addObserver(observer)
+//
+//        onDispose {
+//            lifecycleOwner.lifecycle.removeObserver(observer)
+//        }
+//    }
+//
+//    Carousel(
+//        modifier = modifier
+//            .padding(
+//                start = padding.start, end = padding.start, top = padding.top
+//            )
+//            .border(
+//                width = SanchitraBorderWidth,
+//                color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
+//                shape = ShapeDefaults.Medium,
+//            )
+//            .clip(ShapeDefaults.Medium)
+//            .focusRequester(focusRequester)
+//            .onFocusChanged {
+//                isCarouselFocused = it.hasFocus
+//                if (it.hasFocus) {
+//                    onCarouselFocused()
+//                }
+//            }
+//            .semantics {
+//                contentDescription = StringConstants.Composable.ContentDescription.MoviesCarousel
+//            }
+//            .handleDPadKeyEvents(onEnter = {
+//                goToTVPlayer(channels[carouselState.activeItemIndex].id)
+//            }),
+//        itemCount = channels.size,
+//        carouselState = carouselState,
+//        carouselIndicator = {
+//            CarouselIndicator(
+//                itemCount = channels.size, activeItemIndex = carouselState.activeItemIndex
+//            )
+//        },
+//        contentTransformStartToEnd = fadeIn(tween(durationMillis = 1000)).togetherWith(
+//                fadeOut(
+//                    tween(durationMillis = 1000)
+//                )
+//            ),
+//        contentTransformEndToStart = fadeIn(tween(durationMillis = 1000)).togetherWith(
+//                fadeOut(
+//                    tween(durationMillis = 1000)
+//                )
+//            ),
+//        content = { index ->
+//            val channel = channels[index]
+//            CarouselItemBackground(channel = channel, modifier = Modifier.fillMaxSize())
+//            CarouselItemForeground(
+//                channel = channel,
+//                isCarouselFocused = isCarouselFocused,
+//                modifier = Modifier.fillMaxSize()
+//            )
+//        })
+//}
 
-    val focusRequester = remember { FocusRequester() }
+//@OptIn(ExperimentalTvMaterial3Api::class)
+//@Composable
+//private fun BoxScope.CarouselIndicator(
+//    itemCount: Int,
+//    activeItemIndex: Int,
+//    modifier: Modifier = Modifier
+//) {
+//    Box(
+//        modifier = modifier
+//            .padding(32.dp)
+//            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+//            .graphicsLayer {
+//                clip = true
+//                shape = ShapeDefaults.ExtraSmall
+//            }
+//            .align(Alignment.BottomEnd)) {
+//        CarouselDefaults.IndicatorRow(
+//            modifier = Modifier
+//                .align(Alignment.BottomEnd)
+//                .padding(8.dp),
+//            itemCount = itemCount,
+//            activeItemIndex = activeItemIndex,
+//        )
+//    }
+//}
 
-    val latestIsActive by rememberUpdatedState(isActive)
-    val lifecycleOwner = LocalLifecycleOwner.current
+//@Composable
+//private fun CarouselItemForeground(
+//    channel: TrendingChannel,
+//    modifier: Modifier = Modifier,
+//    isCarouselFocused: Boolean = false
+//) {
+//    Box(
+//        modifier = modifier, contentAlignment = Alignment.BottomStart
+//    ) {
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(32.dp),
+//            verticalArrangement = Arrangement.Bottom
+//        ) {
+//            Text(
+//                text = channel.name,
+//                style = MaterialTheme.typography.displayMedium.copy(
+//                    shadow = Shadow(
+//                        color = Color.Black.copy(alpha = 0.5f),
+//                        offset = Offset(x = 2f, y = 4f),
+//                        blurRadius = 2f
+//                    )
+//                ), maxLines = 1
+//            )
+//            Text(
+//                text = channel.description?.takeIf { it.isNotBlank() } ?: channel.name,
+//                style = MaterialTheme.typography.titleMedium.copy(
+//                    color = MaterialTheme.colorScheme.onSurface.copy(
+//                        alpha = 0.65f
+//                    ), shadow = Shadow(
+//                        color = Color.Black.copy(alpha = 0.5f),
+//                        offset = Offset(x = 2f, y = 4f),
+//                        blurRadius = 2f
+//                    )
+//                ), maxLines = 2,
+//                modifier = Modifier.padding(top = 8.dp)
+//            )
+//            AnimatedVisibility(
+//                visible = isCarouselFocused, content = {
+//                    WatchNowButton()
+//                })
+//        }
+//    }
+//}
 
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME && latestIsActive) {
-                try {
-                    focusRequester.requestFocus()
-                } catch (e: Exception) {
-                    // Ignore gracefully
-                }
-            }
-        }
+//@Composable
+//private fun CarouselItemBackground(
+//    channel: TrendingChannel,
+//    modifier: Modifier = Modifier
+//) {
+//    AsyncImage(
+//        model = channel.bannerUrl,
+//        contentDescription = StringConstants.Composable.ContentDescription.moviePoster(channel.name),
+//        modifier = modifier.drawWithContent {
+//                drawContent()
+//                drawRect(
+//                    Brush.verticalGradient(
+//                        colors = listOf(
+//                            Color.Transparent, Color.Black.copy(alpha = 0.5f)
+//                        )
+//                    )
+//                )
+//            },
+//        contentScale = ContentScale.Crop
+//    )
+//}
 
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
-    Carousel(
-        modifier = modifier
-            .padding(
-                start = padding.start, end = padding.start, top = padding.top
-            )
-            .border(
-                width = SanchitraBorderWidth,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
-                shape = ShapeDefaults.Medium,
-            )
-            .clip(ShapeDefaults.Medium)
-            .focusRequester(focusRequester)
-            .onFocusChanged {
-                isCarouselFocused = it.hasFocus
-                if (it.hasFocus) {
-                    onCarouselFocused()
-                }
-            }
-            .semantics {
-                contentDescription = StringConstants.Composable.ContentDescription.MoviesCarousel
-            }
-            .handleDPadKeyEvents(onEnter = {
-                goToTVPlayer(channels[carouselState.activeItemIndex].id)
-            }),
-        itemCount = channels.size,
-        carouselState = carouselState,
-        carouselIndicator = {
-            CarouselIndicator(
-                itemCount = channels.size, activeItemIndex = carouselState.activeItemIndex
-            )
-        },
-        contentTransformStartToEnd = fadeIn(tween(durationMillis = 1000)).togetherWith(
-                fadeOut(
-                    tween(durationMillis = 1000)
-                )
-            ),
-        contentTransformEndToStart = fadeIn(tween(durationMillis = 1000)).togetherWith(
-                fadeOut(
-                    tween(durationMillis = 1000)
-                )
-            ),
-        content = { index ->
-            val channel = channels[index]
-            CarouselItemBackground(channel = channel, modifier = Modifier.fillMaxSize())
-            CarouselItemForeground(
-                channel = channel,
-                isCarouselFocused = isCarouselFocused,
-                modifier = Modifier.fillMaxSize()
-            )
-        })
-}
-
-@OptIn(ExperimentalTvMaterial3Api::class)
-@Composable
-private fun BoxScope.CarouselIndicator(
-    itemCount: Int,
-    activeItemIndex: Int,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .padding(32.dp)
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-            .graphicsLayer {
-                clip = true
-                shape = ShapeDefaults.ExtraSmall
-            }
-            .align(Alignment.BottomEnd)) {
-        CarouselDefaults.IndicatorRow(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(8.dp),
-            itemCount = itemCount,
-            activeItemIndex = activeItemIndex,
-        )
-    }
-}
-
-@Composable
-private fun CarouselItemForeground(
-    channel: TrendingChannel,
-    modifier: Modifier = Modifier,
-    isCarouselFocused: Boolean = false
-) {
-    Box(
-        modifier = modifier, contentAlignment = Alignment.BottomStart
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            Text(
-                text = channel.name,
-                style = MaterialTheme.typography.displayMedium.copy(
-                    shadow = Shadow(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        offset = Offset(x = 2f, y = 4f),
-                        blurRadius = 2f
-                    )
-                ), maxLines = 1
-            )
-            Text(
-                text = channel.description?.takeIf { it.isNotBlank() } ?: channel.name,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = 0.65f
-                    ), shadow = Shadow(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        offset = Offset(x = 2f, y = 4f),
-                        blurRadius = 2f
-                    )
-                ), maxLines = 2,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-            AnimatedVisibility(
-                visible = isCarouselFocused, content = {
-                    WatchNowButton()
-                })
-        }
-    }
-}
-
-@Composable
-private fun CarouselItemBackground(
-    channel: TrendingChannel,
-    modifier: Modifier = Modifier
-) {
-    AsyncImage(
-        model = channel.bannerUrl,
-        contentDescription = StringConstants.Composable.ContentDescription.moviePoster(channel.name),
-        modifier = modifier.drawWithContent {
-                drawContent()
-                drawRect(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent, Color.Black.copy(alpha = 0.5f)
-                        )
-                    )
-                )
-            },
-        contentScale = ContentScale.Crop
-    )
-}
-
-@Composable
-private fun WatchNowButton() {
-    Button(
-        onClick = {},
-        modifier = Modifier.padding(top = 8.dp),
-        contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-        shape = ButtonDefaults.shape(shape = SanchitraButtonShape),
-        colors = ButtonDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.onSurface,
-            contentColor = MaterialTheme.colorScheme.surface,
-            focusedContentColor = MaterialTheme.colorScheme.surface,
-        ),
-        scale = ButtonDefaults.scale(scale = 1f)
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.PlayArrow,
-            contentDescription = null,
-        )
-        Spacer(Modifier.size(8.dp))
-        Text(
-            text = stringResource(R.string.watch_now), style = MaterialTheme.typography.titleSmall
-        )
-    }
-}
+//@Composable
+//private fun WatchNowButton() {
+//    Button(
+//        onClick = {},
+//        modifier = Modifier.padding(top = 8.dp),
+//        contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+//        shape = ButtonDefaults.shape(shape = SanchitraButtonShape),
+//        colors = ButtonDefaults.colors(
+//            containerColor = MaterialTheme.colorScheme.onSurface,
+//            contentColor = MaterialTheme.colorScheme.surface,
+//            focusedContentColor = MaterialTheme.colorScheme.surface,
+//        ),
+//        scale = ButtonDefaults.scale(scale = 1f)
+//    ) {
+//        Icon(
+//            imageVector = Icons.Outlined.PlayArrow,
+//            contentDescription = null,
+//        )
+//        Spacer(Modifier.size(8.dp))
+//        Text(
+//            text = stringResource(R.string.watch_now), style = MaterialTheme.typography.titleSmall
+//        )
+//    }
+//}
