@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.screens.auth.ProfileSelectionScreen

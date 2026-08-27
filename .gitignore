@@ -18,7 +18,6 @@ build/
 .cxx/
 
 # NDK & C++ Native Build Outputs
-.cxx/
 **/.cxx/
 .externalNativeBuild/
 **/.externalNativeBuild/

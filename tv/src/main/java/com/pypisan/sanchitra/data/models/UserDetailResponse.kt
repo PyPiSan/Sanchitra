@@ -1,8 +1,6 @@
 package com.pypisan.sanchitra.data.models
 
 import com.google.gson.annotations.SerializedName
-import com.pypisan.sanchitra.data.models.UserDetails
-import com.pypisan.sanchitra.data.models.UserProfiles
 
 data class UserDetailResponse(
     @SerializedName("id") val id: String,
