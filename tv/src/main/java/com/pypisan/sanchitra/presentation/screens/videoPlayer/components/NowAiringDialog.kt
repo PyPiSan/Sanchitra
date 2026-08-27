@@ -63,7 +63,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
-import com.pypisan.sanchitra.data.models.ProgramDisplayModel
+import com.pypisan.sanchitra.data.entities.ProgramDisplayModel
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

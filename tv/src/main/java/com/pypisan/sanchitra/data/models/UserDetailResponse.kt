@@ -1,15 +1,15 @@
 package com.pypisan.sanchitra.data.models
 
 import com.google.gson.annotations.SerializedName
-import com.pypisan.sanchitra.data.entities.UserDetails
-import com.pypisan.sanchitra.data.entities.UserProfiles
+import com.pypisan.sanchitra.data.models.UserDetails
+import com.pypisan.sanchitra.data.models.UserProfiles
 
 data class UserDetailResponse(
-    val id: String,
-    val username: String,
-    val email: String,
-    val mobile: String,
-    val country: String?,
+    @SerializedName("id") val id: String,
+    @SerializedName("username") val username: String,
+    @SerializedName("email") val email: String,
+    @SerializedName("mobile") val mobile: String,
+    @SerializedName("country") val country: String?,
     @SerializedName("first_name") val firstName: String,
     @SerializedName("last_name") val lastName: String,
     @SerializedName("is_active") val isActive: Boolean,
@@ -19,6 +19,6 @@ data class UserDetailResponse(
     @SerializedName("last_logout") val lastLogout: String,
     @SerializedName("inserted_on") val insertedOn: String,
     @SerializedName("updated_on") val updatedOn: String,
-    val profiles: List<UserProfiles>,
-    val details: UserDetails
+    @SerializedName("profiles") val profiles: List<UserProfiles>,
+    @SerializedName("details") val details: UserDetails
 )

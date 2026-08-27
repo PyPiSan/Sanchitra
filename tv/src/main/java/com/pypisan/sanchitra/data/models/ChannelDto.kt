@@ -12,7 +12,7 @@ data class ChannelDto(
 
     @SerializedName("stream_url") val streamUrl: String?,
 
-    val language: String?,
+    @SerializedName("language") val language: String?,
 
     @SerializedName("is_drm") val isDrm: Boolean?,
 

@@ -1,7 +1,10 @@
 package com.pypisan.sanchitra.utils
 
 import com.pypisan.sanchitra.api.RefreshTokenRequest
-import com.pypisan.sanchitra.data.entities.IPTVCategoryDto
+import com.pypisan.sanchitra.data.entities.AddProfileRequest
+import com.pypisan.sanchitra.data.entities.ChangePasswordRequest
+import com.pypisan.sanchitra.data.entities.UpdatePreferencesRequest
+import com.pypisan.sanchitra.data.models.IPTVCategoryDto
 import com.pypisan.sanchitra.data.models.ChannelDto
 import com.pypisan.sanchitra.data.models.CommonResponse
 import com.pypisan.sanchitra.data.models.DeviceLoginInitResponse
@@ -27,20 +30,20 @@ import retrofit2.http.Query
 
 interface APIService {
 
-    //   login init
+    //  login init
     @POST("users/device/login/init/")
     suspend fun initDeviceLogin(
         @Header("No-Auth") noAuth: Boolean = true
     ): Response<DeviceLoginInitResponse>
 
-    //    login status check
+    //  login status check
     @GET("users/device/login/status/")
     suspend fun checkLoginStatus(
         @Query("device_code") deviceCode: String,
         @Header("No-Auth") noAuth: Boolean = true
     ): Response<LoginStatusResponse>
 
-    //    get user details
+    //  get user details
     @GET("users/detail/")
     suspend fun getUserDetail(): Response<UserDetailResponse>
 
@@ -51,13 +54,30 @@ interface APIService {
     @GET("utility/languages/")
     suspend fun getLanguages(): Response<LanguageResponse>
 
-    //    logout
+    // logout
     @POST("users/logout/")
     suspend fun userLogout(): Response<CommonResponse>
 
-    //    delete
+    // delete
     @POST("users/delete/")
     suspend fun deleteUserAccount(): Response<CommonResponse>
+
+    //  Update preferences
+    @POST("users/update/preferences/")
+    suspend fun updatePreferences(
+        @Body request: UpdatePreferencesRequest
+    ): Response<CommonResponse>
+
+    //  Update password
+    @POST("users/update/password/")
+    suspend fun updatePassword(
+        @Body request: ChangePasswordRequest
+    ): Response<CommonResponse>
+
+    @POST("users/add/profile/")
+    suspend fun addProfile(
+        @Body request: AddProfileRequest
+    ): Response<CommonResponse>
 
 
     //    get TV channel list
@@ -79,7 +99,7 @@ interface APIService {
         @Query("channel_id") channelID: Int,
     ): Response<CommonResponse>
 
-    //    IPTV
+    //  IPTV
     @GET("iptv/category/list/")
     suspend fun getIPTVCategoryList(): Response<List<IPTVCategoryDto>>
 
@@ -107,7 +127,7 @@ interface APIService {
     ): Response<CommonResponse>
 
 
-    //    Home
+    //  Home
     @GET("home/trending/live/channels/")
     suspend fun getTrending(): Response<TrendingResponseDTO>
 

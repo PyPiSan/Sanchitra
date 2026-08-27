@@ -1,4 +1,5 @@
-package com.pypisan.sanchitra.data.models
+package com.pypisan.sanchitra.data.entities
+
 data class ProgramDisplayModel(
     val status: String,
     val title: String,

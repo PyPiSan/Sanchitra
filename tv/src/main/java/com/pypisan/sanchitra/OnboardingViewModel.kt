@@ -36,7 +36,7 @@ class OnboardingViewModel @Inject constructor(
     var authState by mutableStateOf<AuthState>(AuthState.Loading)
         private set
 
-    fun start(context: Context) {
+    fun start(context: Context, isSwitchProfile: Boolean = false) {
         viewModelScope.launch {
 
             val token = getToken(context)
@@ -45,6 +45,9 @@ class OnboardingViewModel @Inject constructor(
                 loadProfiles(context)
                 loadLanguages()
                 loadUserExtended()
+                if (isSwitchProfile) {
+                    authState = AuthState.ProfileSelection
+                }
                 return@launch
             }
 
@@ -85,11 +88,11 @@ class OnboardingViewModel @Inject constructor(
                     if (status?.success == true) {
 
                         saveToken(
-                            context, status.data.access_token
+                            context, status.data.accessToken
                         )
 
                         saveRefreshToken(
-                            context, status.data.refresh_token
+                            context, status.data.refreshToken
                         )
 
                         loadProfiles(context)

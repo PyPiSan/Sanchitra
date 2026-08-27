@@ -34,8 +34,8 @@ object AuthRefreshManager {
                         val body = response.body()!!
                         TokenManager.saveTokens(
                             context,
-                            body.data.access_token,
-                            body.data.refresh_token
+                            body.data.accessToken,
+                            body.data.refreshToken
                         )
                         lastRefreshResult = body
                         body

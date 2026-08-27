@@ -41,7 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.pypisan.sanchitra.data.entities.IPTVCategoryDto
+import com.pypisan.sanchitra.data.models.IPTVCategoryDto
 import com.pypisan.sanchitra.presentation.Screens
 import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.presentation.common.MovieCard

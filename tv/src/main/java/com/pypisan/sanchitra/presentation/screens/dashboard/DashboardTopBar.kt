@@ -71,7 +71,7 @@ fun DashboardTopBar(
         ) {
             UserAvatar(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(40.dp)
                     .focusRequester(focusRequesters[0])
                     .semantics {
                         contentDescription =

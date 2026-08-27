@@ -11,16 +11,27 @@ class AccountSectionViewModel @Inject constructor(
 ) : ViewModel() {
 
     suspend fun deleteAccount(): Boolean {
-
         val result = repo.userAccountDelete()
-
         return result != null && result.success
     }
 
     suspend fun userProfileLogout(): Boolean {
-
         val result = repo.userProfileLogout()
-
         return result != null && result.success
     }
+
+    suspend fun userPasswordUpdate(
+        currentPassword: String, newPassword: String
+    ): Boolean {
+        val result = repo.userPasswordChange(currentPassword, newPassword)
+        return result != null && result.success
+    }
+
+    suspend fun userAddNewProfile(
+        profileName: String, profilePicture: String?
+    ): Boolean {
+        val result = repo.userAddProfile(profileName, profilePicture)
+        return result != null && result.success
+    }
+
 }

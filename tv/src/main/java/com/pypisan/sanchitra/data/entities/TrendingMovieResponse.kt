@@ -1,6 +1,4 @@
-package com.pypisan.sanchitra.data.models
-
-import com.pypisan.sanchitra.data.entities.Videos
+package com.pypisan.sanchitra.data.entities
 
 data class TrendingMovieResponse(
     val data: List<TrendingMovieCategory>

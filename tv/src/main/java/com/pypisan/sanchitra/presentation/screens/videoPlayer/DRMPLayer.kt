@@ -15,6 +15,8 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.ResolvingDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.dash.DashMediaSource
+import androidx.media3.exoplayer.dash.manifest.DashManifestParser
 import androidx.media3.exoplayer.drm.DefaultDrmSessionManager
 import androidx.media3.exoplayer.drm.ExoMediaDrm
 import androidx.media3.exoplayer.drm.FrameworkMediaDrm
@@ -22,6 +24,7 @@ import androidx.media3.exoplayer.drm.HttpMediaDrmCallback
 import androidx.media3.exoplayer.drm.LocalMediaDrmCallback
 import androidx.media3.exoplayer.drm.MediaDrmCallback
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.upstream.DefaultAllocator
 import com.pypisan.sanchitra.data.entities.AudioTrack
@@ -99,6 +102,7 @@ fun buildDrmExoPlayer(
                   "type":"temporary"
                 }
             """.trimIndent()
+
             val drmCallback = LocalMediaDrmCallback(drmBody.toByteArray())
 
             DefaultDrmSessionManager.Builder().setPlayClearSamplesWithoutKeys(true)
@@ -209,9 +213,61 @@ fun buildDrmExoPlayer(
     }
 
     // 2. Feed our updated dataSourceFactory into the MediaSourceFactory
-    val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory).also { factory ->
-        drmSessionManager?.let { manager ->
-            factory.setDrmSessionManagerProvider { manager }
+//    val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory).also { factory ->
+//        drmSessionManager?.let { manager ->
+//            factory.setDrmSessionManagerProvider { manager }
+//        }
+//    }
+
+//    val dynamicKidUuid = "00000000-0000-0000-0000-00000066340a"
+    val dynamicKidUuid = "6653c05e-42fc-4fac-8f49-d7cbf99498fe"
+
+//    val mediaSourceFactory: MediaSource.Factory = if (name in listOf("Film4", "E4", "4seven", "Channel 4", "More4", "A&E")) {
+//        DashMediaSource.Factory(dataSourceFactory)
+//            .setManifestParser { uri, inputStream ->
+//                val xml = inputStream.bufferedReader().use { it.readText() }
+//                val fixedXml = xml.replace(
+//                    "<ContentProtection schemeIdUri=\"urn:mpeg:dash:mp4protection:2011\" value=\"cenc\" />",
+//                    "<ContentProtection schemeIdUri=\"urn:mpeg:dash:mp4protection:2011\" value=\"cenc\" cenc:default_KID=\"00000000-0000-0000-0000-00000066340a\" />"
+//                )
+//                DashManifestParser().parse(uri, fixedXml.byteInputStream())
+//            }
+//            .apply {
+//                drmSessionManager?.let { manager ->
+//                    setDrmSessionManagerProvider { manager }
+//                }
+//            }
+//    } else {
+//        DefaultMediaSourceFactory(dataSourceFactory).also { factory ->
+//            drmSessionManager?.let { manager ->
+//                factory.setDrmSessionManagerProvider { manager }
+//            }
+//        }
+//    }
+
+    val mediaSourceFactory: MediaSource.Factory = if (name in listOf("Film4", "E4", "4seven", "Channel 4", "More4", "A&E")) {
+        DashMediaSource.Factory(dataSourceFactory)
+            .setManifestParser { uri, inputStream ->
+                val xml = inputStream.bufferedReader().use { it.readText() }
+
+                // Regex matches ANY variations of whitespace, attribute order, or self-closing tags
+                val fixedXml = xml.replace(
+                    Regex("<ContentProtection[^>]*urn:mpeg:dash:mp4protection:2011[^>]*/>"),
+                    "<ContentProtection schemeIdUri=\"urn:mpeg:dash:mp4protection:2011\" value=\"cenc\" cenc:default_KID=\"$dynamicKidUuid\" xmlns:cenc=\"urn:mpeg:cenc:2013\" />"
+                )
+
+                DashManifestParser().parse(uri, fixedXml.byteInputStream())
+            }
+            .apply {
+                drmSessionManager?.let { manager ->
+                    setDrmSessionManagerProvider { manager }
+                }
+            }
+    } else {
+        DefaultMediaSourceFactory(dataSourceFactory).also { factory ->
+            drmSessionManager?.let { manager ->
+                factory.setDrmSessionManagerProvider { manager }
+            }
         }
     }
 

@@ -13,10 +13,6 @@
     <string name="budget">Budget</string>
     <string name="revenue">Revenue</string>
     <string name="reviews">Reviews</string>
-    <string name="delete_account_dialog_title">Delete account?</string>
-    <string name="delete_account_dialog_text">"By deactivating your account, you will no longer be able to sign in, your activity will be removed from Sanchitra and your profile preferences will go away.\n\nDo you wish to continue?\n"</string>
-    <string name="yes_delete_account">Yes, delete my account</string>
-    <string name="no_keep_it">No, keep it</string>
     <string name="search_screen_et_placeholder">Search for movies, shows and more…</string>
     <string name="top_10_movies_title">Top 10 Movies</string>
     <string name="profile_screen_listItem_icon_content_description">%s icon</string>
@@ -30,8 +26,8 @@
     <string name="ad">Ad</string>
     <string name="live">Live</string>
     <string name="message_loading">Loading…</string>
-    <string name="message_error">Wops, something went wrong…</string>
-    <string name="login_error">Wops, Login Failed…</string>
 <!--    New Strings-->
     <string name="login_instruction">Or go to %1$s and enter this code: </string>
+    <string name="error_title_default">Network Error</string>
+    <string name="action_retry">Try Again</string>
 </resources>

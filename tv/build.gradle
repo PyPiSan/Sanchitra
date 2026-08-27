@@ -12,11 +12,13 @@ plugins {
     id 'com.google.dagger.hilt.android' // Version is handled by top-level
     id 'com.google.devtools.ksp'
     id 'kotlin-parcelize'
+
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 def versionMajor = 4
-def versionMinor = 2
-def versionPatch = 5
+def versionMinor = 3
+def versionPatch = 0
 def buildType="alpha"
 
 def computedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
@@ -49,10 +51,16 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue "string", "app_version", "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
             signingConfig signingConfigs.debug
+        }
+        debug {
+            // Keep disabled in debug so builds remain fast
+            minifyEnabled false
+            shrinkResources false
         }
     }
     compileOptions {
@@ -129,7 +137,7 @@ dependencies {
     implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
     implementation "androidx.media3:media3-ui:$media3_version"
-    implementation "androidx.media3:media3-ui-compose:$media3_version" // This contains the state classes
+    implementation "androidx.media3:media3-ui-compose:$media3_version"
     implementation "androidx.media3:media3-common:$media3_version"
 
     // --- 7. Image Loading & UI Utilities ---
@@ -139,10 +147,10 @@ dependencies {
     implementation "androidx.palette:palette-ktx:1.0.0"
 
     // --- 8. Firebase, Ads & Google Services ---
-    implementation platform('com.google.firebase:firebase-bom:34.11.0')
+    implementation platform('com.google.firebase:firebase-bom:34.18.0')
     implementation 'com.google.firebase:firebase-analytics'
-    implementation "com.google.android.gms:play-services-ads:23.6.0"
-    implementation 'com.google.android.material:material:1.12.0'
+    implementation "com.google.android.gms:play-services-ads:25.4.0"
+    implementation 'com.google.android.material:material:1.14.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
 

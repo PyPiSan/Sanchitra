@@ -33,11 +33,12 @@ import androidx.tv.material3.MaterialTheme
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
-import com.pypisan.sanchitra.data.models.EPGResponse
+import com.pypisan.sanchitra.data.entities.EPGResponse
 import com.pypisan.sanchitra.data.entities.IPTVChannelDetail
 import com.pypisan.sanchitra.data.util.findActivity
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.common.Loading
+import com.pypisan.sanchitra.utils.AnalyticsTracker
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -51,6 +52,10 @@ fun IPTVPlayerScreen(
 
     LaunchedEffect(channelId) {
         iptvPlayerScreenViewModel.loadChannel(channelId)
+    }
+
+    LaunchedEffect("IPTVPlayerScreen") {
+        AnalyticsTracker.logScreenView("IPTVPlayerScreen")
     }
 
     DisposableEffect(Unit) {
