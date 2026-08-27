@@ -1,24 +1,25 @@
 package com.pypisan.sanchitra.data.models
 
-data class TrendingMovieResponseDTO (
-    val data: List<MovieCategorySectionDTO>
+import com.google.gson.annotations.SerializedName
+import com.pypisan.sanchitra.data.entities.TrendingMovieCategory
+import com.pypisan.sanchitra.data.entities.TrendingMovieResponse
+
+data class TrendingMovieResponseDTO(
+    @SerializedName("data") val data: List<MovieCategorySectionDTO>
 )
 
 data class MovieCategorySectionDTO(
-    val category: String,
-    val videos: List<VideoDTO>
+    @SerializedName("category") val category: String,
+    @SerializedName("videos") val videos: List<VideoDTO>
 )
 
 
 fun TrendingMovieResponseDTO.toTrendingMovieResponse(): TrendingMovieResponse {
     return TrendingMovieResponse(
-        data = data.map { it.TrendingMovieCategory() }
-    )
+        data = data.map { it.TrendingMovieCategory() })
 }
 
 fun MovieCategorySectionDTO.TrendingMovieCategory(): TrendingMovieCategory {
     return TrendingMovieCategory(
-        category = category,
-        videos = videos.map { it.toDomain() }
-    )
+        category = category, videos = videos.map { it.toDomain() })
 }

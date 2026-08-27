@@ -60,7 +60,7 @@ import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.remembe
 import com.pypisan.sanchitra.utils.handleDPadKeyEvents
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
-import com.pypisan.sanchitra.data.models.EPGResponse
+import com.pypisan.sanchitra.data.entities.EPGResponse
 import com.pypisan.sanchitra.data.util.prepareEPGProgramData
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.AudioTrackDrawer
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.MediaMetadataBadges

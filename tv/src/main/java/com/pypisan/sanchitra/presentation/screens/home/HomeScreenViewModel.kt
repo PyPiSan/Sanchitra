@@ -3,7 +3,7 @@ package com.pypisan.sanchitra.presentation.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pypisan.sanchitra.data.entities.Videos
-import com.pypisan.sanchitra.data.models.TrendingChannel
+import com.pypisan.sanchitra.data.entities.TrendingChannel
 import com.pypisan.sanchitra.data.repositories.HomeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

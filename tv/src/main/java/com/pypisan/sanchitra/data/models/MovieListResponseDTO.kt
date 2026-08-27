@@ -5,55 +5,39 @@ import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.entities.VideoMeta
 
 data class MovieListResponseDTO(
-    val videos: Map<String, List<VideoDTO>>
+    @SerializedName("videos") val videos: Map<String, List<VideoDTO>>
 )
 
 data class VideoDTO(
-    val id: Int,
-    val filename: String?,
-    val title: String,
-    val image: String,
-    val logo: String?,
-    val resolution: String?,
-    val categories: List<String> = emptyList(),
-    val duration: Int,
-
+    @SerializedName("id") val id: Int,
+    @SerializedName("filename") val filename: String?,
+    @SerializedName("title") val title: String,
+    @SerializedName("image") val image: String,
+    @SerializedName("logo") val logo: String?,
+    @SerializedName("resolution") val resolution: String?,
+    @SerializedName("categories") val categories: List<String> = emptyList(),
+    @SerializedName("duration") val duration: Int,
     @SerializedName("languages") val languages: List<String> = emptyList(),
-
     @SerializedName("streaming_url") val streamingUrl: String,
-
     @SerializedName("license_key") val licenseKey: String,
-
     @SerializedName("license_url") val licenseUrl: String,
-
     @SerializedName("download_url") val downloadUrl: String?,
-
     @SerializedName("is_active") val isActive: Boolean? = null,
-
     @SerializedName("is_web") val isWeb: Boolean? = null,
-
     @SerializedName("is_drm") val isDrm: Boolean? = null,
-
     @SerializedName("is_app") val isApp: Boolean? = null,
-
-    val meta: MetaDto
+    @SerializedName("meta") val meta: MetaDto
 )
 
 data class MetaDto(
-    val banner: String? = null,
-    val description: String,
-    val trailer: String? = null,
-
+    @SerializedName("banner") val banner: String? = null,
+    @SerializedName("description") val description: String,
+    @SerializedName("trailer") val trailer: String? = null,
     @SerializedName("release_date") val releaseDate: String? = null,
-
     @SerializedName("imdb_rating") val imdbRating: String? = null,
-
     @SerializedName("rotten_tomatoes") val rottenTomatoes: String? = null,
-
     @SerializedName("budget") val budget: String? = null,
-
     @SerializedName("revenue") val revenue: String? = null,
-
     @SerializedName("subtitle_url") val subtitleUrl: String? = null,
 )
 

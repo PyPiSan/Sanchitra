@@ -32,6 +32,7 @@ import com.pypisan.sanchitra.data.entities.VideoQuality
 import com.pypisan.sanchitra.data.util.findActivity
 import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.storage.WatchProgressManager
+import com.pypisan.sanchitra.utils.AnalyticsTracker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -52,6 +53,10 @@ fun VideoPlayerScreen(
 
     LaunchedEffect(metaId, isContinue) {
         videoPlayerScreenViewModel.loadVideo(metaId, isContinue)
+    }
+
+    LaunchedEffect("MoviePlayerScreen") {
+        AnalyticsTracker.logScreenView("MoviePlayerScreen")
     }
 
     DisposableEffect(Unit) {

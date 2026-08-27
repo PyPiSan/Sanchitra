@@ -38,11 +38,12 @@ import androidx.tv.material3.MaterialTheme
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.data.entities.SubtitleTrack
 import com.pypisan.sanchitra.data.entities.VideoQuality
-import com.pypisan.sanchitra.data.models.EPGResponse
+import com.pypisan.sanchitra.data.entities.EPGResponse
 import com.pypisan.sanchitra.data.util.CustomDRMSessionManager.refreshHdneaToken
 import com.pypisan.sanchitra.data.util.HdneaTokenProvider
 import com.pypisan.sanchitra.data.util.extractCookie
 import com.pypisan.sanchitra.data.util.findActivity
+import com.pypisan.sanchitra.utils.AnalyticsTracker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -60,6 +61,10 @@ fun TVPlayerScreen(
 
     LaunchedEffect(channelId) {
         tvPlayerScreenViewModel.loadChannel(channelId)
+    }
+
+    LaunchedEffect("TVPlayerScreen") {
+        AnalyticsTracker.logScreenView("TVPlayerScreen")
     }
 
     DisposableEffect(Unit) {

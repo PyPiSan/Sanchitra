@@ -26,6 +26,7 @@ import com.pypisan.sanchitra.data.entities.Channel
 import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.presentation.screens.common.CommonErrorScreen
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
+import com.pypisan.sanchitra.utils.AnalyticsTracker
 
 
 @Composable
@@ -87,6 +88,10 @@ fun TVCatalog(
 
     LaunchedEffect(shouldShowTopBar) {
         onScroll(shouldShowTopBar)
+    }
+
+    LaunchedEffect("TVScreen") {
+        AnalyticsTracker.logScreenView("TVScreen")
     }
 
     LaunchedEffect(isTopBarVisible) {

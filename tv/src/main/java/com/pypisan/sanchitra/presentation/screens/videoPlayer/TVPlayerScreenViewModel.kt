@@ -7,7 +7,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pypisan.sanchitra.data.entities.Channel
-import com.pypisan.sanchitra.data.models.EPGResponse
+import com.pypisan.sanchitra.data.entities.EPGResponse
 import com.pypisan.sanchitra.data.repositories.EPGManager
 import com.pypisan.sanchitra.data.repositories.TVRepository
 import com.pypisan.sanchitra.data.repositories.TVRepositoryImpl

@@ -31,7 +31,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.state.PlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
-import com.pypisan.sanchitra.data.models.ProgramDisplayModel
+import com.pypisan.sanchitra.data.entities.ProgramDisplayModel
 import com.pypisan.sanchitra.data.util.StringConstants
 
 @OptIn(UnstableApi::class)

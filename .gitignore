@@ -38,6 +38,8 @@ local.properties
 /local.properties
 *.iml
 .DS_Store
+secrets.properties
+/secrets.properties
 
 # Android Studio & IntelliJ IDEA
 .idea/

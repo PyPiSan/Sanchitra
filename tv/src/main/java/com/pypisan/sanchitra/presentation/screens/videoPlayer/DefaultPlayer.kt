@@ -77,8 +77,8 @@ fun buildDefaultExoPlayer(
     } else {
         httpDataSourceFactory = DefaultHttpDataSource.Factory()
             .setAllowCrossProtocolRedirects(true)
-            .setConnectTimeoutMs(60_000)
-            .setReadTimeoutMs(90_000)
+            .setConnectTimeoutMs(30_000)
+            .setReadTimeoutMs(60_000)
     }
 
     // Configure the Extractors Factory correctly

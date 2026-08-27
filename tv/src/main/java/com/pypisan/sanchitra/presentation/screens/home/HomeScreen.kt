@@ -32,11 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pypisan.sanchitra.data.entities.Videos
-import com.pypisan.sanchitra.data.models.TrendingChannel
+import com.pypisan.sanchitra.data.entities.TrendingChannel
 import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.presentation.common.MoviesRow
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.presentation.screens.movies.VideoSharedViewModel
+import com.pypisan.sanchitra.utils.AnalyticsTracker
 
 @Composable
 fun HomeScreen(
@@ -121,6 +122,10 @@ private fun Catalog(
 
     LaunchedEffect(isTopBarVisible) {
         if (isTopBarVisible) lazyListState.animateScrollToItem(0)
+    }
+
+    LaunchedEffect("HomeScreen") {
+        AnalyticsTracker.logScreenView("HomeScreen")
     }
 
     LazyColumn(

@@ -4,8 +4,8 @@ object StringConstants {
 
     object API {
         const val TVURL = "https://media.pypisan.com/api/v1/"
-        const val UIURL = "https://sanchitra.pypisan.com/"
         const val VIDEOURL = "https://tv.pypisan.com/api/v1/"
+        const val UIURL = "https://sanchitra.pypisan.com/"
     }
 
     object Profile {
@@ -14,6 +14,7 @@ object StringConstants {
         var userProfileName: String? = null
         var userProfilePicture: String? = null
         var userSelectedLanguage: List<String> = emptyList()
+        var isSubtitleOn: Boolean = true
     }
 
     object ProfileExtended {
@@ -63,32 +64,59 @@ object StringConstants {
         fun reviewCount(count: String) = "$count reviews"
 
         object Placeholders {
+
+            const val Affirmative = "Yes"
+
+            const val Negative = "No"
+            const val ErrorMessage = "Wops, something went wrong…"
+
+            const val LoginError = "Timed out, please try again"
             const val AboutSectionTitle = "About Sanchitra"
             const val AboutSectionDescription =
                 "Welcome to Sanchitra! We are a new and" + " exciting streaming platform that offers a vast selection of movies," + " TV shows, and original content for you to enjoy. Our team is dedicated" + " to providing an intuitive and seamless streaming experience for all" + " users. With a simple and intuitive interface, you can easily find and" + " watch your favourite content in just a few clicks. We are constantly" + " updating and expanding our library, so there is always something new" + " to discover. We also offer personalised recommendations based on your" + " viewing history, so you can easily find new and exciting content to" + " enjoy. Thank you for choosing Sanchitra for all of your entertainment" + " needs. We hope you have a great time streaming!"
             const val AboutSectionAppVersionTitle = "Application Version"
-            const val LanguageSectionTitle = "Language"
+            const val LanguageSectionTitle = "Languages"
+            const val LanguageDialogSuccessTitle = "Language Updated"
+            const val LanguageDialogSuccessMessage =
+                "Your changes have been saved. They will only reflect when you logout and log in."
+            const val LanguageDialogFailedTitle = "Language Update Failed"
+            const val LanguageDialogFailedMessage =
+                "Unable to update language preferences. Please try again."
             const val SearchHistorySectionTitle = "Search history"
             const val SearchHistoryClearAll = "Clear All"
-            val SampleSearchHistory = listOf(
-                "The Light Knight",
-                "Iceberg",
-                "Jungle Gump",
-                "The Devil father",
-                "Space Wars",
-                "The Lion Queen"
-            )
+            const val NoSearchHistory = "No Search History"
             const val SubtitlesSectionTitle = "Settings"
             const val SubtitlesSectionSubtitlesItem = "Subtitles"
             const val SubtitlesSectionLanguageItem = "Subtitles Language"
             const val SubtitlesSectionLanguageValue = "English"
             const val AccountsSelectionSwitchAccountsTitle = "Switch profile"
+
+            const val AccountsSelectionSwitchAccountsMessage = "Are you sure you want to switch to another profile?"
             const val AccountsSelectionLogOut = "Log out"
+            const val AccountsSelectionLogOutCancel = "Cancel"
+            const val AccountsSelectionLogOutDescription = "Are you sure you want to logout from your account?"
+
+            const val AccountsSelectionLogOutFailed = "Failed to logout. Please try again."
             const val AccountsSelectionChangePasswordTitle = "Change password"
             const val AccountsSelectionChangePasswordValue = "••••••••••••••"
+
+            const val AccountsSelectionChangePasswordSuccess = "Password Updated Successfully. To login next time, use your new password"
+            const val AccountsSelectionChangePasswordFailed = "Failed to update password. Please check your current password and try again."
+
             const val AccountsSelectionAddNewProfile = "Add new profile"
+
+            const val AccountsSelectionAddNewProfileSuccess = "New profile Added Successfully, change profile to use new profile."
+
+            const val AccountsSelectionAddNewProfileFailed = "Failed to add new profile. Please try again."
             const val AccountsSelectionViewSubscriptionsTitle = "View subscriptions"
             const val AccountsSelectionDeleteAccountTitle = "Delete account"
+
+            const val AccountsSelectionDeleteAccountDescription =
+                "By deactivating your account, you will no longer be able to sign in, your activity will be removed from Sanchitra and your profile preferences will go away. " + "\n\nDo you wish to continue?"
+            const val AccountsSelectionDeleteAccountConfirm = "Yes, delete my account"
+            const val AccountsSelectionDeleteAccountCancel = "No, keep it"
+
+            const val AccountsSelectionDeleteAccountFailed = "Failed to delete account. Please try again."
             const val HelpAndSupportSectionTitle = "Help and Support"
             const val HelpAndSupportSectionListItemIconDescription = "select section"
             const val HelpAndSupportSectionFAQItem = "FAQ's"

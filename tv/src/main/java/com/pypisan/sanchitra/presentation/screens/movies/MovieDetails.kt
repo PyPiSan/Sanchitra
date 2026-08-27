@@ -22,6 +22,7 @@ import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +54,7 @@ import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.util.toHrMinFormat
 import com.pypisan.sanchitra.storage.WatchProgress
+import com.pypisan.sanchitra.utils.AnalyticsTracker
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -76,6 +78,11 @@ fun MovieDetails(
     // Store surface color to use consistently across all layers
     val surfaceColor = MaterialTheme.colorScheme.surface
     val hasHistory = watchProgress != null && watchProgress.timeMillis > 0
+
+
+    LaunchedEffect("MovieDetailScreen") {
+        AnalyticsTracker.logScreenView("MovieDetailScreen")
+    }
 
     Box(
         modifier = Modifier
