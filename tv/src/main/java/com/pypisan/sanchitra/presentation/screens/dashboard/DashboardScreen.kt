@@ -46,6 +46,7 @@ import com.pypisan.sanchitra.presentation.screens.movies.MoviesScreen
 import com.pypisan.sanchitra.presentation.screens.profile.ProfileScreen
 import com.pypisan.sanchitra.presentation.screens.home.HomeScreen
 import com.pypisan.sanchitra.presentation.screens.livetv.TVScreen
+import com.pypisan.sanchitra.presentation.screens.search.SearchScreen
 import com.pypisan.sanchitra.utils.Padding
 
 val ParentPadding = PaddingValues(vertical = 16.dp, horizontal = 58.dp)
@@ -271,9 +272,8 @@ private fun Body(
 //            )
 //        }
         composable(Screens.Search()) {
-//            SearchScreen(
-//                onMovieClick = { movie -> openMovieDetailsScreen(movie.id) },
-//                onScroll = updateTopBarVisibility
-//            )
+            SearchScreen(
+                onScroll = updateTopBarVisibility
+            )
         }
     }
