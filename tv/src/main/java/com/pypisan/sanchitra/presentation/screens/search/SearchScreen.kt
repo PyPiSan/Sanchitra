@@ -1,12 +1,15 @@
 package com.pypisan.sanchitra.presentation.screens.search
 
+import android.os.Build
 import com.pypisan.sanchitra.presentation.theme.SanchitraCardShape
 import android.view.KeyEvent
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -43,13 +46,14 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.pypisan.sanchitra.R
-import com.pypisan.sanchitra.data.entities.Channel
-import com.pypisan.sanchitra.data.entities.IPTVChannel
+import com.pypisan.sanchitra.data.entities.SearchResult
+import com.pypisan.sanchitra.presentation.common.Loading
+import com.pypisan.sanchitra.presentation.screens.common.CommonErrorScreen
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun SearchScreen(
-    onMovieClick: (channel: Channel) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     searchScreenViewModel: SearchScreenViewModel = hiltViewModel(),
 ) {
@@ -68,16 +72,24 @@ fun SearchScreen(
     }
 
     when (val s = searchState) {
-        is SearchState.Searching -> {
-            Text(text = "Searching...")
-        }
+        is SearchState.Searching -> Loading(modifier = Modifier.fillMaxSize())
 
         is SearchState.Done -> {
-            val iptvChannelList = s.iptvChannelList
-            SearchResult(
-                iptvChannelList = iptvChannelList,
+            SearchResultView(
+                lazyColumnState = lazyColumnState,
+                searchResult = s.searchResult,
                 searchChannels = searchScreenViewModel::query,
-                onChannelClick = onMovieClick
+            )
+        }
+        is SearchState.Error -> {
+            CommonErrorScreen(message = "")
+        }
+
+        is SearchState.Idle -> {
+            SearchResultView(
+                lazyColumnState = lazyColumnState,
+                searchResult = SearchResult(),
+                searchChannels = searchScreenViewModel::query,
             )
         }
     }
@@ -85,10 +97,9 @@ fun SearchScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun SearchResult(
-    iptvChannelList: List<IPTVChannel>,
+fun SearchResultView(
+    searchResult: SearchResult,
     searchChannels: (queryString: String) -> Unit,
-    onChannelClick: (channel: Channel) -> Unit,
     modifier: Modifier = Modifier,
     lazyColumnState: LazyListState = rememberLazyListState(),
 ) {
@@ -97,10 +108,11 @@ fun SearchResult(
     val tfFocusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val tfInteractionSource = remember { MutableInteractionSource() }
-
     val isTfFocused by tfInteractionSource.collectIsFocusedAsState()
+
+
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         state = lazyColumnState
     ) {
         item {
@@ -129,6 +141,7 @@ fun SearchResult(
                 ),
                 tonalElevation = 2.dp,
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(horizontal = childPadding.start)
                     .padding(top = 8.dp),
                 onClick = { tfFocusRequester.requestFocus() }
@@ -201,13 +214,29 @@ fun SearchResult(
             }
         }
 
-//        item {
-//            MoviesRow(
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .padding(top = childPadding.top * 2),
-//                movieList = movieList
-//            ) { selectedMovie -> onMovieClick(selectedMovie) }
-//        }
+        item {
+            SearchRow(
+                title = "Movies",
+                items = searchResult.videos,
+                key = { it.id },
+                itemTitle = { it.title },
+                itemImageUrl = { it.image.ifEmpty { it.logo } },
+                onItemClick = { selectedVideo ->
+                    // onMovieClick(selectedVideo.id)
+                }
+            )
+        }
+        item {
+            SearchRow(
+                title = "Channels",
+                items = searchResult.channels,
+                key = { it.id },
+                itemTitle = { it.name },
+                itemImageUrl = { it.logo },
+                onItemClick = { selectedChannel ->
+                    // onChannelClick(selectedChannel.id)
+                }
+            )
+        }
     }
 }

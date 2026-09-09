@@ -14,6 +14,7 @@ import com.pypisan.sanchitra.data.models.IPTVResponseDto
 import com.pypisan.sanchitra.data.models.LanguageResponse
 import com.pypisan.sanchitra.data.models.LoginStatusResponse
 import com.pypisan.sanchitra.data.models.MovieListResponseDTO
+import com.pypisan.sanchitra.data.models.SearchResultDTO
 import com.pypisan.sanchitra.data.models.TVResponse
 import com.pypisan.sanchitra.data.models.TrendingMovieResponseDTO
 import com.pypisan.sanchitra.data.models.TrendingResponseDTO
@@ -134,6 +135,10 @@ interface APIService {
     @GET("home/trending/movies/")
     suspend fun getTrendingMovies(): Response<TrendingMovieResponseDTO>
 
+    @GET("home/search/")
+    suspend fun getSearchResults(
+        @Query("query") query: String
+    ): Response<SearchResultDTO>
 }
 
 interface RefreshAPIService{

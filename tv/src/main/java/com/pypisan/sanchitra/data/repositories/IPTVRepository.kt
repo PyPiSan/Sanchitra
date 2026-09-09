@@ -8,8 +8,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface IPTVRepository {
     fun getIPTVChannelsByCategory(category: String): Flow<List<IPTVChannel>>
-
     fun getIPTVCategories(): Flow<List<IPTVCategoryDto>>
-
     suspend fun getIPTVChannelDetail(id: String): IPTVRepositoryImpl.ApiResult<IPTVChannelDetail>
 }
