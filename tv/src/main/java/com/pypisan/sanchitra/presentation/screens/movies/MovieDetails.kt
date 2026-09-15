@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Border
@@ -230,7 +231,13 @@ private fun MovieLargeTitle(
     movieTitle: String,
     modifier: Modifier = Modifier
 ) {
-    // Gold/Amber gradient (or replace with your brand colors)
+    // 1. Dynamically scale based on title length
+    val (fontSize, lineHeight) = when {
+        movieTitle.length <= 14 -> 46.sp to 52.sp
+        movieTitle.length <= 26 -> 38.sp to 44.sp
+        else -> 30.sp to 36.sp
+    }
+
     val titleGradient = Brush.horizontalGradient(
         colors = listOf(
             Color(0xFFFFD700), // Gold
@@ -241,12 +248,15 @@ private fun MovieLargeTitle(
 
     Text(
         text = movieTitle,
-        modifier = modifier,
-        style = MaterialTheme.typography.headlineLarge.copy(
+        modifier = modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.displaySmall.copy(
+            fontSize = fontSize,
+            lineHeight = lineHeight,
             fontWeight = FontWeight.Black,
             brush = titleGradient
         ),
-        maxLines = 2
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis
     )
 }
 

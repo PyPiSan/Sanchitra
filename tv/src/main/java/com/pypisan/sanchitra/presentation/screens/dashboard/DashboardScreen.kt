@@ -68,6 +68,7 @@ fun DashboardScreen(
     openCategoryIPTVList: (categoryName: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
     openTVPlayer: (channelId: Int) -> Unit,
+    openIPTVPlayer: (channelId: Int) -> Unit,
     isComingBackFromDifferentScreen: Boolean,
     resetIsComingBackFromDifferentScreen: () -> Unit,
     onBackPressed: () -> Unit
@@ -189,6 +190,7 @@ fun DashboardScreen(
             openCategoryIPTVList = openCategoryIPTVList,
             openMovieDetailsScreen = openMovieDetailsScreen,
             openTVPlayer = openTVPlayer,
+            openIPTVPlayer = openIPTVPlayer,
             updateTopBarVisibility = { isTopBarVisible = it },
             isTopBarVisible = isTopBarVisible,
             navController = navController,
@@ -222,6 +224,7 @@ private fun Body(
     openCategoryIPTVList: (categoryName: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
     openTVPlayer: (channelId: Int) -> Unit,
+    openIPTVPlayer: (channelId: Int) -> Unit,
     updateTopBarVisibility: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
@@ -273,7 +276,11 @@ private fun Body(
 //        }
         composable(Screens.Search()) {
             SearchScreen(
-                onScroll = updateTopBarVisibility
+                onMovieClick = { movie -> openMovieDetailsScreen(movie.id.toString())
+                },
+                goToIPTVPlayer = { channel -> openIPTVPlayer(channel) },
+                onScroll = updateTopBarVisibility,
+                isTopBarVisible = isTopBarVisible
             )
         }
     }

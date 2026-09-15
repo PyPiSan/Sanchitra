@@ -84,7 +84,7 @@ private fun Catalog(
     val lazyListState = rememberLazyListState()
     val childPadding = rememberChildPadding()
 
-    // 🎯 FOCUS FIX: Requester attached to Item 1 of MoviesRow
+    // FOCUS FIX: Requester attached to Item 1 of MoviesRow
     val firstMovieFocusRequester = remember { FocusRequester() }
 
     val density = LocalDensity.current
@@ -106,6 +106,7 @@ private fun Catalog(
     var immersiveListHasFocus by remember { mutableStateOf(false) }
 
     val groupedTrendingChannels = trendingHomeChannels.groupBy { it.category }
+
     val sharedVideoVM: VideoSharedViewModel =
         hiltViewModel(LocalContext.current as ComponentActivity)
 

@@ -52,10 +52,10 @@ data class SearchResponseVideoMetaDTO(
     @SerializedName("trailer") val trailer: String?,
     @SerializedName("subtitle_url") val subtitleUrl: String?,
     @SerializedName("release_date") val releaseDate: String?,
-    @SerializedName("imdb_rating") val imdbRating: Double?,
+    @SerializedName("imdb_rating") val imdbRating: String?,
     @SerializedName("rotten_tomatoes") val rottenTomatoes: String?,
-    @SerializedName("budget") val budget: Long?,
-    @SerializedName("revenue") val revenue: Long?
+    @SerializedName("budget") val budget: String?,
+    @SerializedName("revenue") val revenue: String?
 )
 
 
