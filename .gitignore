@@ -43,3 +43,6 @@ secrets.properties
 # Android Studio & IntelliJ IDEA
 .idea/
 /.idea/
+
+# Google Services
+google-services.json
