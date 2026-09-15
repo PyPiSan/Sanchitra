@@ -17,7 +17,7 @@ data class Videos(
 )
 
 data class VideoMeta(
-    val banner: String?,
+    val banner: String,
     val description: String,
     val trailer: String?,
     val releaseDate: String?,

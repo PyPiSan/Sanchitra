@@ -39,11 +39,11 @@ data class VideoItem(
 data class VideoItemMeta(
     val banner: String,
     val description: String,
-    val trailer: String,
+    val trailer: String?,
+    val releaseDate: String?,
     val subtitleUrl: String?,
-    val releaseDate: String,
-    val imdbRating: Double?,
+    val imdbRating: String?,
     val rottenTomatoes: String?,
-    val budget: Long?,
-    val revenue: Long?
+    val budget: String?,
+    val revenue: String?,
 )

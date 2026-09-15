@@ -102,6 +102,7 @@ private fun Details(
     val childPadding = rememberChildPadding()
 
     BackHandler(onBack = onBackPressed)
+
     LazyColumn(
         contentPadding = PaddingValues(bottom = 135.dp),
         modifier = modifier,

@@ -30,7 +30,7 @@ data class VideoDTO(
 )
 
 data class MetaDto(
-    @SerializedName("banner") val banner: String? = null,
+    @SerializedName("banner") val banner: String,
     @SerializedName("description") val description: String,
     @SerializedName("trailer") val trailer: String? = null,
     @SerializedName("release_date") val releaseDate: String? = null,
