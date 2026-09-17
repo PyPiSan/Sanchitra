@@ -58,6 +58,7 @@ import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.presentation.screens.common.CommonErrorScreen
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.presentation.screens.movies.VideoSharedViewModel
+import com.pypisan.sanchitra.storage.SearchHistoryManager
 import com.pypisan.sanchitra.utils.AnalyticsTracker
 import kotlinx.coroutines.delay
 
@@ -107,6 +108,7 @@ fun SearchResultView(
     isTopBarVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val lazyColumnState = rememberLazyListState()
     val shouldShowTopBar by remember {
         derivedStateOf {
@@ -131,8 +133,16 @@ fun SearchResultView(
     val childPadding = rememberChildPadding()
 
     var searchQuery by rememberSaveable { mutableStateOf("") }
-    // 👇 1. Track what was actually submitted to avoid triggering while typing
+
+    // Track what was actually submitted to avoid triggering while typing
     var searchedQuery by rememberSaveable { mutableStateOf("") }
+
+    // FIX ISSUE 1: Immediate loading state to prevent "No results found" flicker
+    var isSearchTriggered by rememberSaveable { mutableStateOf(false) }
+    val isActuallyLoading = isLoading || isSearchTriggered
+
+    // FIX ISSUE 2: Avoid duplicate history appends for the same search
+    var lastSavedQuery by rememberSaveable { mutableStateOf("") }
 
     val tfFocusRequester = remember { FocusRequester() }
     val searchBarFocusRequester = remember { FocusRequester() }
@@ -151,19 +161,44 @@ fun SearchResultView(
     var focusedSection by rememberSaveable { mutableStateOf("") }
     var lastFocusedId by rememberSaveable { mutableStateOf<Int?>(null) }
 
+    val historyManager = remember { SearchHistoryManager.getInstance(context) }
+
     val performSearch = {
         if (searchQuery.isNotBlank()) {
-            searchedQuery = searchQuery // 👈 2. Set only when search is actually clicked
+            searchedQuery = searchQuery
+            lastSavedQuery = "" // Reset so this new search can be recorded
+            isSearchTriggered = true // Triggers loader instantly
             keyboardController?.hide()
             searchBarFocusRequester.requestFocus()
             searchChannels(searchQuery)
         }
     }
 
-    LaunchedEffect(isLoading, searchResult) {
-        if (!isLoading) {
+    // Reset local trigger when ViewModel acknowledges loading or safety timeout
+    LaunchedEffect(isLoading) {
+        if (isLoading) {
+            isSearchTriggered = false
+        }
+    }
+
+    LaunchedEffect(isSearchTriggered) {
+        if (isSearchTriggered) {
+            delay(5000) // Fallback timeout in case of unexpected network failure
+            isSearchTriggered = false
+        }
+    }
+
+    // Handle results, focus, and save history ONLY when there are results
+    LaunchedEffect(isActuallyLoading, searchResult) {
+        if (!isActuallyLoading) {
             delay(100)
-            if (searchResult.videos.isNotEmpty() || searchResult.channels.isNotEmpty()) {
+            val hasResults = searchResult.videos.isNotEmpty() || searchResult.channels.isNotEmpty()
+            if (hasResults) {
+                // FIX ISSUE 2: Append ONLY when query has actual search results
+                if (searchedQuery.isNotBlank() && searchedQuery != lastSavedQuery) {
+                    historyManager.appendSearchHistory(searchedQuery)
+                    lastSavedQuery = searchedQuery
+                }
                 focusManager.moveFocus(FocusDirection.Down)
             } else if (searchedQuery.isNotBlank() && searchedQuery == searchQuery) {
                 try {
@@ -291,7 +326,8 @@ fun SearchResultView(
             }
         }
 
-        if (isLoading) {
+        // Shows loader immediately while loading
+        if (isActuallyLoading) {
             item {
                 Box(
                     modifier = Modifier
@@ -303,12 +339,9 @@ fun SearchResultView(
                 }
             }
         }
-        // Only show if search was ACTUALLY executed for this exact query
+        // Shows only when search finished and returned 0 results
         else if (
-            searchResult.videos.isEmpty() &&
-            searchResult.channels.isEmpty() &&
-            searchedQuery.isNotBlank() &&
-            searchedQuery == searchQuery
+            searchResult.videos.isEmpty() && searchResult.channels.isEmpty() && searchedQuery.isNotBlank() && searchedQuery == searchQuery
         ) {
             item {
                 Box(
@@ -332,7 +365,9 @@ fun SearchResultView(
                     }
                 }
             }
-        } else {
+        }
+        // 3. Results view (history appending was removed from here)
+        else {
             item {
                 SearchRow(
                     title = "Movies",
@@ -340,7 +375,7 @@ fun SearchResultView(
                     iptvItem = searchResult.channels,
                     itemType = "movies",
                     onItemClick = goToIPTVPlayer,
-                    onMovieClick= { video ->
+                    onMovieClick = { video ->
                         sharedVideoVM.setVideo(video)
                         onMovieClick(video)
                     },
@@ -357,7 +392,7 @@ fun SearchResultView(
                     iptvItem = searchResult.channels,
                     itemType = "iptv",
                     onItemClick = goToIPTVPlayer,
-                    onMovieClick= { video ->
+                    onMovieClick = { video ->
                         sharedVideoVM.setVideo(video)
                         onMovieClick(video)
                     },
