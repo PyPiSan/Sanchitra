@@ -467,13 +467,19 @@ private fun Modifier.dPadEvents(
     onLeft = {
         if (!videoPlayerState.isControlsVisible) {
             seekController.back()
-            pulseState.setType(VideoPlayerPulse.Type.BACK)
+            pulseState.show(
+                VideoPlayerPulse.Type.BACK,
+                seekController.accumulatedSeconds
+            )
         }
     },
     onRight = {
         if (!videoPlayerState.isControlsVisible) {
             seekController.forward()
-            pulseState.setType(VideoPlayerPulse.Type.FORWARD)
+            pulseState.show(
+                VideoPlayerPulse.Type.FORWARD,
+                seekController.accumulatedSeconds
+            )
         }
     },
     onUp = { videoPlayerState.showControls() },
@@ -481,4 +487,5 @@ private fun Modifier.dPadEvents(
     onEnter = {
         exoPlayer.pause()
         videoPlayerState.showControls()
-    })
+    }
+)
