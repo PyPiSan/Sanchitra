@@ -19,6 +19,7 @@ import com.google.firebase.analytics.analytics
 import com.pypisan.sanchitra.data.util.isEmulator
 import com.pypisan.sanchitra.presentation.App
 import com.pypisan.sanchitra.presentation.theme.SanchitraTheme
+import com.pypisan.sanchitra.utils.AnalyticsTracker
 import dagger.hilt.android.AndroidEntryPoint
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -36,6 +37,8 @@ class MainActivity : FragmentActivity() {
         val deviceType = if (isEmulator()) "emulator" else "real_device"
         firebaseAnalytics.setUserProperty("device_environment", deviceType)
 
+        AnalyticsTracker.initDeviceProperties(this)
+
         setContent {
             SanchitraTheme{
                 Box(
@@ -45,7 +48,9 @@ class MainActivity : FragmentActivity() {
                         LocalContentColor provides MaterialTheme.colorScheme.onSurface
                     ) {
                         App(
-                            onBackPressed = onBackPressedDispatcher::onBackPressed,
+                            onBackPressed = {
+                                finish() // Closes the activity and exits the app without looping!
+                            }
                         )
                     }
                 }

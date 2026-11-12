@@ -5,6 +5,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.compose' version '2.3.21'
 
     id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 
     // This MUST match the Kotlin version (2.3.21)
     id 'org.jetbrains.kotlin.plugin.serialization' version '2.3.21'
@@ -17,8 +18,8 @@ plugins {
 }
 
 def versionMajor = 4
-def versionMinor = 3
-def versionPatch = 0
+def versionMinor = 4
+def versionPatch = 2
 def buildType="alpha"
 
 def computedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
@@ -149,6 +150,7 @@ dependencies {
     // --- 8. Firebase, Ads & Google Services ---
     implementation platform('com.google.firebase:firebase-bom:34.18.0')
     implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-crashlytics'
     implementation "com.google.android.gms:play-services-ads:25.4.0"
     implementation 'com.google.android.material:material:1.14.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'

@@ -47,7 +47,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.drm.DrmSession
 import androidx.media3.exoplayer.drm.MediaDrmCallbackException
 import androidx.media3.ui.compose.PlayerSurface
-import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
+import androidx.media3.ui.compose.SURFACE_TYPE_SURFACE_VIEW
 import com.pypisan.sanchitra.data.entities.AudioTrack
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleDrawer
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoPlayerControls
@@ -69,6 +69,7 @@ import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.RadioPo
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SeekController
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.SubtitleOverlay
 import com.pypisan.sanchitra.presentation.screens.videoPlayer.components.VideoQualityDrawer
+import com.pypisan.sanchitra.utils.AnalyticsTracker
 import kotlinx.coroutines.delay
 
 
@@ -114,10 +115,6 @@ fun PlayerScreenContent(
     val maxRetries = 3
 
     var isAudioOnly by remember { mutableStateOf(false) }
-
-//    val doubleClickHandler = remember {
-//        DoubleClickHandler()
-//    }
 
     // to capture focus
     LaunchedEffect(videoPlayerState.isControlsVisible) {
@@ -227,9 +224,25 @@ fun PlayerScreenContent(
                         isErrored = true
                         errorValue = "Unexpected Error"
                     }
+                    AnalyticsTracker.logEvent(
+                        eventName = "player_error",
+                        params = mapOf(
+                            "error_code" to error.errorCodeName,
+                            "error_message" to (error.message ?: "unknown, has played once"),
+                            "channel_name" to title
+                        )
+                    )
                 } else {
                     // Optionally log this event here:
-                    Log.e("Player2", "Stream interrupted after playing, watchdog will retry $cause")
+//                    Log.e("Player2", "Stream interrupted after playing, watchdog will retry $cause")
+                    AnalyticsTracker.logEvent(
+                        eventName = "player_error",
+                        params = mapOf(
+                            "error_code" to error.errorCodeName,
+                            "error_message" to (error.message ?: "unknown"),
+                            "channel_name" to title
+                        )
+                    )
                 }
             }
 
@@ -300,7 +313,7 @@ fun PlayerScreenContent(
     ) {
 
         PlayerSurface(
-            player = exoPlayer, surfaceType = SURFACE_TYPE_TEXTURE_VIEW, modifier = if (isMovie) {
+            player = exoPlayer, surfaceType = SURFACE_TYPE_SURFACE_VIEW, modifier = if (isMovie) {
                 Modifier
                     .fillMaxWidth()
                     .aspectRatio(aspectRatio)

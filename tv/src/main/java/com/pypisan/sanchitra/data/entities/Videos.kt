@@ -7,6 +7,7 @@ data class Videos(
     val image: String,
     val logo: String?,
     val url: String,
+    val headers: Map<String, String>?,
     val drm: Boolean,
     val licenseKey: String?,
     val licenseUrl: String?,

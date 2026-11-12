@@ -210,6 +210,7 @@ fun rememberExoPlayer(
                 iptvChannel.streamUrl,
                 "iptv",
                 null,
+                null,
                 onBuffering,
                 onSubtitlesChanged,
                 onAudiosChanged,

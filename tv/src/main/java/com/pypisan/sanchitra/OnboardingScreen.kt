@@ -30,16 +30,21 @@ fun OnboardingScreen(
     val viewModel: OnboardingViewModel = hiltViewModel()
     val state = viewModel.authState
 
-    LaunchedEffect(Unit) {
-        viewModel.start(context)
-    }
-
-    LaunchedEffect(Unit) {
+    // 1. Single startup effect
+    LaunchedEffect(isSwitchProfile) {
         viewModel.start(context, isSwitchProfile = isSwitchProfile)
     }
 
-    LaunchedEffect("SplashScreen") {
-        AnalyticsTracker.logScreenView("SplashScreen")
+    // 2. Efficient state-driven analytics tracking
+    LaunchedEffect(state) {
+        val screenName = when (state) {
+            is AuthState.Loading -> "SplashScreen"
+            is AuthState.ProfileSelection -> "ProfileSelectionScreen"
+            is AuthState.QRLogin -> "QRLoginScreen"
+            is AuthState.Error -> "LoginErrorScreen"
+            is AuthState.ProfileSelected -> null
+        }
+        screenName?.let { AnalyticsTracker.logScreenView(it) }
     }
 
     Box(

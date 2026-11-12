@@ -213,37 +213,7 @@ fun buildDrmExoPlayer(
     }
 
     // 2. Feed our updated dataSourceFactory into the MediaSourceFactory
-//    val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory).also { factory ->
-//        drmSessionManager?.let { manager ->
-//            factory.setDrmSessionManagerProvider { manager }
-//        }
-//    }
-
-//    val dynamicKidUuid = "00000000-0000-0000-0000-00000066340a"
     val dynamicKidUuid = "6653c05e-42fc-4fac-8f49-d7cbf99498fe"
-
-//    val mediaSourceFactory: MediaSource.Factory = if (name in listOf("Film4", "E4", "4seven", "Channel 4", "More4", "A&E")) {
-//        DashMediaSource.Factory(dataSourceFactory)
-//            .setManifestParser { uri, inputStream ->
-//                val xml = inputStream.bufferedReader().use { it.readText() }
-//                val fixedXml = xml.replace(
-//                    "<ContentProtection schemeIdUri=\"urn:mpeg:dash:mp4protection:2011\" value=\"cenc\" />",
-//                    "<ContentProtection schemeIdUri=\"urn:mpeg:dash:mp4protection:2011\" value=\"cenc\" cenc:default_KID=\"00000000-0000-0000-0000-00000066340a\" />"
-//                )
-//                DashManifestParser().parse(uri, fixedXml.byteInputStream())
-//            }
-//            .apply {
-//                drmSessionManager?.let { manager ->
-//                    setDrmSessionManagerProvider { manager }
-//                }
-//            }
-//    } else {
-//        DefaultMediaSourceFactory(dataSourceFactory).also { factory ->
-//            drmSessionManager?.let { manager ->
-//                factory.setDrmSessionManagerProvider { manager }
-//            }
-//        }
-//    }
 
     val mediaSourceFactory: MediaSource.Factory = if (name in listOf("Film4", "E4", "4seven", "Channel 4", "More4", "A&E")) {
         DashMediaSource.Factory(dataSourceFactory)

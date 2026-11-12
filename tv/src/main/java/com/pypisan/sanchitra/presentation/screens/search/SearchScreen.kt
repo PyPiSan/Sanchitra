@@ -1,25 +1,46 @@
 package com.pypisan.sanchitra.presentation.screens.search
 
-import com.pypisan.sanchitra.presentation.theme.SanchitraCardShape
+import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.compose.animation.AnimatedVisibility
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -35,7 +56,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -47,6 +67,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
+import androidx.tv.material3.Icon
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
@@ -61,6 +82,7 @@ import com.pypisan.sanchitra.presentation.screens.movies.VideoSharedViewModel
 import com.pypisan.sanchitra.storage.SearchHistoryManager
 import com.pypisan.sanchitra.utils.AnalyticsTracker
 import kotlinx.coroutines.delay
+import java.util.Locale
 
 @Composable
 fun SearchScreen(
@@ -133,15 +155,14 @@ fun SearchResultView(
     val childPadding = rememberChildPadding()
 
     var searchQuery by rememberSaveable { mutableStateOf("") }
-
-    // Track what was actually submitted to avoid triggering while typing
     var searchedQuery by rememberSaveable { mutableStateOf("") }
 
-    // FIX ISSUE 1: Immediate loading state to prevent "No results found" flicker
     var isSearchTriggered by rememberSaveable { mutableStateOf(false) }
     val isActuallyLoading = isLoading || isSearchTriggered
 
-    // FIX ISSUE 2: Avoid duplicate history appends for the same search
+    // Only move focus down to results after an actual search, not on tab re-entry
+    var shouldMoveFocusToResults by remember { mutableStateOf(false) }
+
     var lastSavedQuery by rememberSaveable { mutableStateOf("") }
 
     val tfFocusRequester = remember { FocusRequester() }
@@ -150,31 +171,59 @@ fun SearchResultView(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    val tfInteractionSource = remember { MutableInteractionSource() }
-    val isTfFocused by tfInteractionSource.collectIsFocusedAsState()
-
-    val surfaceInteractionSource = remember { MutableInteractionSource() }
-    val isSurfaceFocused by surfaceInteractionSource.collectIsFocusedAsState()
-
-    val isSearchBoxFocused = isTfFocused || isSurfaceFocused
-
     var focusedSection by rememberSaveable { mutableStateOf("") }
     var lastFocusedId by rememberSaveable { mutableStateOf<Int?>(null) }
 
     val historyManager = remember { SearchHistoryManager.getInstance(context) }
 
-    val performSearch = {
-        if (searchQuery.isNotBlank()) {
-            searchedQuery = searchQuery
-            lastSavedQuery = "" // Reset so this new search can be recorded
-            isSearchTriggered = true // Triggers loader instantly
+    val performSearch: (String) -> Unit = { query ->
+        val trimmedQuery = query.trim()
+        if (trimmedQuery.isNotBlank()) {
+            searchQuery = trimmedQuery
+            searchedQuery = trimmedQuery
+            lastSavedQuery = ""
+            shouldMoveFocusToResults = true
+            isSearchTriggered = true
             keyboardController?.hide()
             searchBarFocusRequester.requestFocus()
-            searchChannels(searchQuery)
+            searchChannels(trimmedQuery)
         }
     }
 
-    // Reset local trigger when ViewModel acknowledges loading or safety timeout
+    val voiceSearchLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val spokenText = result.data
+                ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                ?.firstOrNull()
+                ?.trim()
+            if (!spokenText.isNullOrBlank()) {
+                performSearch(spokenText)
+            }
+        }
+    }
+
+    val launchVoiceSearch = {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to search movies & channels...")
+        }
+        try {
+            voiceSearchLauncher.launch(intent)
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(
+                context,
+                "Voice search is not supported on this device",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     LaunchedEffect(isLoading) {
         if (isLoading) {
             isSearchTriggered = false
@@ -183,24 +232,31 @@ fun SearchResultView(
 
     LaunchedEffect(isSearchTriggered) {
         if (isSearchTriggered) {
-            delay(5000) // Fallback timeout in case of unexpected network failure
+            delay(5000)
             isSearchTriggered = false
+            shouldMoveFocusToResults = false
         }
     }
 
-    // Handle results, focus, and save history ONLY when there are results
     LaunchedEffect(isActuallyLoading, searchResult) {
         if (!isActuallyLoading) {
             delay(100)
             val hasResults = searchResult.videos.isNotEmpty() || searchResult.channels.isNotEmpty()
             if (hasResults) {
-                // FIX ISSUE 2: Append ONLY when query has actual search results
                 if (searchedQuery.isNotBlank() && searchedQuery != lastSavedQuery) {
                     historyManager.appendSearchHistory(searchedQuery)
                     lastSavedQuery = searchedQuery
                 }
-                focusManager.moveFocus(FocusDirection.Down)
-            } else if (searchedQuery.isNotBlank() && searchedQuery == searchQuery) {
+                if (shouldMoveFocusToResults) {
+                    shouldMoveFocusToResults = false
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            } else if (
+                shouldMoveFocusToResults &&
+                searchedQuery.isNotBlank() &&
+                searchedQuery == searchQuery
+            ) {
+                shouldMoveFocusToResults = false
                 try {
                     searchBarFocusRequester.requestFocus()
                 } catch (_: Exception) {}
@@ -220,113 +276,25 @@ fun SearchResultView(
         contentPadding = PaddingValues(bottom = 80.dp),
     ) {
         item {
-            Surface(
-                shape = ClickableSurfaceDefaults.shape(shape = SanchitraCardShape),
-                scale = ClickableSurfaceDefaults.scale(focusedScale = 1f),
-                colors = ClickableSurfaceDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    focusedContentColor = MaterialTheme.colorScheme.onSurface
-                ),
-                border = ClickableSurfaceDefaults.border(
-                    border = Border(
-                        border = BorderStroke(
-                            width = if (isSearchBoxFocused) 2.dp else 1.dp,
-                            color = animateColorAsState(
-                                targetValue = if (isSearchBoxFocused) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.border,
-                                label = ""
-                            ).value
-                        ),
-                        shape = SanchitraCardShape
-                    ),
-                    focusedBorder = Border(
-                        border = BorderStroke(
-                            width = 2.dp,
-                            color = MaterialTheme.colorScheme.primary
-                        ),
-                        shape = SanchitraCardShape
-                    )
-                ),
-                tonalElevation = 2.dp,
-                interactionSource = surfaceInteractionSource,
+            ModernSearchBar(
+                searchQuery = searchQuery,
+                onQueryChange = { searchQuery = it },
+                onSearch = { performSearch(searchQuery) },
+                onVoiceClick = launchVoiceSearch,
+                onClearClick = {
+                    searchBarFocusRequester.requestFocus()
+                    searchQuery = ""
+                    searchedQuery = ""
+                },
+                searchBarFocusRequester = searchBarFocusRequester,
+                tfFocusRequester = tfFocusRequester,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = childPadding.start)
-                    .padding(top = 8.dp)
-                    .focusRequester(searchBarFocusRequester),
-                onClick = { tfFocusRequester.requestFocus() }
-            ) {
-                BasicTextField(
-                    value = searchQuery,
-                    onValueChange = { updatedQuery -> searchQuery = updatedQuery },
-                    decorationBox = { innerTextField ->
-                        Box(
-                            modifier = Modifier
-                                .padding(vertical = 16.dp)
-                                .padding(start = 20.dp),
-                        ) {
-                            innerTextField()
-                            if (searchQuery.isEmpty()) {
-                                Text(
-                                    modifier = Modifier.graphicsLayer { alpha = 0.6f },
-                                    text = stringResource(R.string.search_screen_et_placeholder),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = LocalContentColor.current
-                                )
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp, horizontal = 8.dp)
-                        .focusRequester(tfFocusRequester)
-                        .onKeyEvent { keyEvent ->
-                            if (keyEvent.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
-                                when (keyEvent.nativeKeyEvent.keyCode) {
-                                    KeyEvent.KEYCODE_DPAD_DOWN -> {
-                                        keyboardController?.hide()
-                                        focusManager.moveFocus(FocusDirection.Down)
-                                        return@onKeyEvent true
-                                    }
-                                    KeyEvent.KEYCODE_DPAD_UP -> {
-                                        focusManager.moveFocus(FocusDirection.Up)
-                                        return@onKeyEvent true
-                                    }
-                                    KeyEvent.KEYCODE_BACK -> {
-                                        keyboardController?.hide()
-                                        focusManager.moveFocus(FocusDirection.Exit)
-                                        return@onKeyEvent true
-                                    }
-                                    KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_DPAD_CENTER -> {
-                                        performSearch()
-                                        return@onKeyEvent true
-                                    }
-                                }
-                            }
-                            false
-                        },
-                    cursorBrush = Brush.verticalGradient(
-                        colors = listOf(LocalContentColor.current, LocalContentColor.current)
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        autoCorrectEnabled = false,
-                        imeAction = ImeAction.Search
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onSearch = { performSearch() }
-                    ),
-                    maxLines = 1,
-                    interactionSource = tfInteractionSource,
-                    textStyle = MaterialTheme.typography.titleSmall.copy(
-                        color = LocalContentColor.current
-                    )
-                )
-            }
+                    .padding(top = 12.dp, bottom = 8.dp)
+            )
         }
 
-        // Shows loader immediately while loading
         if (isActuallyLoading) {
             item {
                 Box(
@@ -338,10 +306,11 @@ fun SearchResultView(
                     Loading(modifier = Modifier.size(60.dp))
                 }
             }
-        }
-        // Shows only when search finished and returned 0 results
-        else if (
-            searchResult.videos.isEmpty() && searchResult.channels.isEmpty() && searchedQuery.isNotBlank() && searchedQuery == searchQuery
+        } else if (
+            searchResult.videos.isEmpty() &&
+            searchResult.channels.isEmpty() &&
+            searchedQuery.isNotBlank() &&
+            searchedQuery == searchQuery
         ) {
             item {
                 Box(
@@ -365,9 +334,7 @@ fun SearchResultView(
                     }
                 }
             }
-        }
-        // 3. Results view (history appending was removed from here)
-        else {
+        } else {
             item {
                 SearchRow(
                     title = "Movies",
@@ -400,6 +367,273 @@ fun SearchResultView(
                         focusedSection = "iptv"
                         lastFocusedId = it
                     }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModernSearchBar(
+    searchQuery: String,
+    onQueryChange: (String) -> Unit,
+    onSearch: () -> Unit,
+    onVoiceClick: () -> Unit,
+    onClearClick: () -> Unit,
+    searchBarFocusRequester: FocusRequester,
+    tfFocusRequester: FocusRequester,
+    modifier: Modifier = Modifier,
+) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    val tfInteractionSource = remember { MutableInteractionSource() }
+    val isTfFocused by tfInteractionSource.collectIsFocusedAsState()
+
+    val surfaceInteractionSource = remember { MutableInteractionSource() }
+    val isSurfaceFocused by surfaceInteractionSource.collectIsFocusedAsState()
+
+    val isSearchBoxFocused = isTfFocused || isSurfaceFocused
+
+    val searchIconTint by animateColorAsState(
+        targetValue = if (isSearchBoxFocused) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        label = "SearchIconTint"
+    )
+
+    val borderColor by animateColorAsState(
+        targetValue = if (isSearchBoxFocused) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f),
+        label = "SearchBorderColor"
+    )
+
+    val containerColor by animateColorAsState(
+        targetValue = if (isSearchBoxFocused) MaterialTheme.colorScheme.surface
+        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+        label = "SearchContainerColor"
+    )
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // 1. Pill Search Input
+        Surface(
+            shape = ClickableSurfaceDefaults.shape(shape = RoundedCornerShape(50)),
+            scale = ClickableSurfaceDefaults.scale(focusedScale = 1.01f),
+            colors = ClickableSurfaceDefaults.colors(
+                containerColor = containerColor,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                focusedContentColor = MaterialTheme.colorScheme.onSurface
+            ),
+            border = ClickableSurfaceDefaults.border(
+                border = Border(
+                    border = BorderStroke(
+                        width = if (isSearchBoxFocused) 2.dp else 1.dp,
+                        color = borderColor
+                    ),
+                    shape = RoundedCornerShape(50)
+                ),
+                focusedBorder = Border(
+                    border = BorderStroke(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    shape = RoundedCornerShape(50)
+                )
+            ),
+            tonalElevation = if (isSearchBoxFocused) 6.dp else 2.dp,
+            interactionSource = surfaceInteractionSource,
+            modifier = Modifier
+                .weight(1f)
+                .height(54.dp)
+                .focusRequester(searchBarFocusRequester),
+            onClick = { tfFocusRequester.requestFocus() }
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Search,
+                    contentDescription = "Search",
+                    tint = searchIconTint,
+                    modifier = Modifier.size(22.dp)
+                )
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = onQueryChange,
+                        decorationBox = { innerTextField ->
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                if (searchQuery.isEmpty()) {
+                                    Text(
+                                        text = stringResource(R.string.search_screen_et_placeholder),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = LocalContentColor.current.copy(alpha = 0.55f)
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(tfFocusRequester)
+                            .onKeyEvent { keyEvent ->
+                                if (keyEvent.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
+                                    when (keyEvent.nativeKeyEvent.keyCode) {
+                                        KeyEvent.KEYCODE_DPAD_DOWN -> {
+                                            keyboardController?.hide()
+                                            focusManager.moveFocus(FocusDirection.Down)
+                                            return@onKeyEvent true
+                                        }
+                                        KeyEvent.KEYCODE_DPAD_UP -> {
+                                            focusManager.moveFocus(FocusDirection.Up)
+                                            return@onKeyEvent true
+                                        }
+                                        KeyEvent.KEYCODE_BACK -> {
+                                            keyboardController?.hide()
+                                            focusManager.moveFocus(FocusDirection.Exit)
+                                            return@onKeyEvent true
+                                        }
+                                        KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_DPAD_CENTER -> {
+                                            onSearch()
+                                            return@onKeyEvent true
+                                        }
+                                    }
+                                }
+                                false
+                            },
+                        cursorBrush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primary
+                            )
+                        ),
+                        keyboardOptions = KeyboardOptions(
+                            autoCorrectEnabled = false,
+                            imeAction = ImeAction.Search
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onSearch = { onSearch() }
+                        ),
+                        singleLine = true,
+                        maxLines = 1,
+                        interactionSource = tfInteractionSource,
+                        textStyle = MaterialTheme.typography.titleSmall.copy(
+                            color = LocalContentColor.current
+                        )
+                    )
+                }
+
+                AnimatedVisibility(
+                    visible = isSurfaceFocused && !isTfFocused && searchQuery.isEmpty(),
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Text(
+                        text = "Press OK to type",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                shape = RoundedCornerShape(50)
+                            )
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
+        }
+
+        // 2. Clear Button (direct conditional instead of AnimatedVisibility for reliable TV focus)
+        if (searchQuery.isNotEmpty()) {
+            Surface(
+                shape = ClickableSurfaceDefaults.shape(shape = CircleShape),
+                scale = ClickableSurfaceDefaults.scale(focusedScale = 1.08f),
+                colors = ClickableSurfaceDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                    focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    focusedContentColor = MaterialTheme.colorScheme.surface
+                ),
+                border = ClickableSurfaceDefaults.border(
+                    border = Border(
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f)
+                        ),
+                        shape = CircleShape
+                    ),
+                    focusedBorder = Border(
+                        border = BorderStroke(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        ),
+                        shape = CircleShape
+                    )
+                ),
+                modifier = Modifier.size(54.dp),
+                onClick = onClearClick
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    Icon(
+                        imageVector = Icons.Rounded.Close,
+                        contentDescription = "Clear search",
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
+        }
+
+        // 3. Circular Voice Search Button
+        Surface(
+            shape = ClickableSurfaceDefaults.shape(shape = CircleShape),
+            scale = ClickableSurfaceDefaults.scale(focusedScale = 1.08f),
+            colors = ClickableSurfaceDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                focusedContainerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                focusedContentColor = MaterialTheme.colorScheme.onPrimary
+            ),
+            border = ClickableSurfaceDefaults.border(
+                border = Border(
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f)
+                    ),
+                    shape = CircleShape
+                ),
+                focusedBorder = Border(
+                    border = BorderStroke(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    ),
+                    shape = CircleShape
+                )
+            ),
+            tonalElevation = 4.dp,
+            modifier = Modifier.size(54.dp),
+            onClick = onVoiceClick
+        ) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                Icon(
+                    imageVector = Icons.Rounded.Mic,
+                    contentDescription = "Voice search",
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }

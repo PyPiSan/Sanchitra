@@ -19,6 +19,7 @@ data class VideoDTO(
     @SerializedName("duration") val duration: Int,
     @SerializedName("languages") val languages: List<String> = emptyList(),
     @SerializedName("streaming_url") val streamingUrl: String,
+    @SerializedName("headers") val headers: Map<String, String>? = null,
     @SerializedName("license_key") val licenseKey: String,
     @SerializedName("license_url") val licenseUrl: String,
     @SerializedName("download_url") val downloadUrl: String?,
@@ -45,6 +46,7 @@ fun VideoDTO.toDomain(): Videos {
     return Videos(
         id = id,
         url = streamingUrl,
+        headers = headers,
         drm = isDrm ?: false,
         licenseKey = licenseKey,
         licenseUrl = licenseUrl,

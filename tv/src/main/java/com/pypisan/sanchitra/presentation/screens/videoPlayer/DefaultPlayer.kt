@@ -28,6 +28,7 @@ fun buildDefaultExoPlayer(
     context: Context,
     stream: String,
     mediaType: String? = null,
+    headers: Map<String, String>? = null,
     subtitleUrl: String?,
     onBuffering: (Int) -> Unit,
     onSubtitlesChanged: (List<SubtitleTrack>) -> Unit,
@@ -53,7 +54,6 @@ fun buildDefaultExoPlayer(
                 )
             )
             .build()
-    val httpDataSourceFactory: DefaultHttpDataSource.Factory
 
     // 2. Build a rapid-fire background auto-retry mechanism
     val bufferRetryPolicy = object : DefaultLoadErrorHandlingPolicy() {
@@ -63,19 +63,17 @@ fun buildDefaultExoPlayer(
         }
     }
 
-    if (mediaType.equals("movie", ignoreCase = true)) {
-        httpDataSourceFactory = DefaultHttpDataSource.Factory()
+    val httpDataSourceFactory: DefaultHttpDataSource.Factory =
+        if (mediaType.equals("movie", ignoreCase = true)) {
+        DefaultHttpDataSource.Factory()
             .setAllowCrossProtocolRedirects(true)
             .setConnectTimeoutMs(60_000)
             .setReadTimeoutMs(90_000)
-            .setDefaultRequestProperties(
-                mapOf(
-                    "Origin" to "https://cinesrc.st",
-                    "Referer" to "https://cinesrc.st/"
-                )
-            )
+            .apply {
+                headers?.let { setDefaultRequestProperties(it) }
+            }
     } else {
-        httpDataSourceFactory = DefaultHttpDataSource.Factory()
+        DefaultHttpDataSource.Factory()
             .setAllowCrossProtocolRedirects(true)
             .setConnectTimeoutMs(30_000)
             .setReadTimeoutMs(60_000)

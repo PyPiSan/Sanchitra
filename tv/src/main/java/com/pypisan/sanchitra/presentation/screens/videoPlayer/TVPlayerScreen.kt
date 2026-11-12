@@ -253,6 +253,7 @@ fun rememberExoPlayer(
                 channel.streamUrl,
                 "tv",
                 null,
+                null,
                 onBuffering,
                 onSubtitlesChanged,
                 onAudiosChanged,

@@ -43,6 +43,7 @@ import com.pypisan.sanchitra.data.entities.VideoItem
 import com.pypisan.sanchitra.data.entities.VideoMeta
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.presentation.common.ItemDirection
+import com.pypisan.sanchitra.presentation.common.PosterImage
 import com.pypisan.sanchitra.presentation.common.PosterImageChannel
 import com.pypisan.sanchitra.presentation.common.SearchCard
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
@@ -57,8 +58,8 @@ fun SearchRow(
         fontSize = 30.sp,
         color = MaterialTheme.colorScheme.inverseOnSurface
     ),
-    movieItem:List<VideoItem>,
-    iptvItem:List<ChannelItem>,
+    movieItem: List<VideoItem>,
+    iptvItem: List<ChannelItem>,
     itemType: String,
     itemDirection: ItemDirection = ItemDirection.Horizontal,
     startPadding: Dp = rememberChildPadding().start,
@@ -85,10 +86,9 @@ fun SearchRow(
         LazyRow(
             contentPadding = PaddingValues(start = startPadding, end = endPadding),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
-            modifier = Modifier
-                .focusRestorer()
+            modifier = Modifier.focusRestorer()
         ) {
-            if(itemType == "iptv"){
+            if (itemType == "iptv") {
                 itemsIndexed(iptvItem, key = { _, channel -> channel.id }) { index, channel ->
 
                     val onCardClicked = remember(channel.id) {
@@ -97,64 +97,67 @@ fun SearchRow(
 
                     SearchRowItem(
                         id = channel.id,
-                        name= channel.name,
+                        name = channel.name,
                         itemType = "iptv",
                         logo = channel.logo,
                         onItemClicked = { onCardClicked() },
-                        modifier = Modifier
-                            .onFocusChanged {
-                                if (it.isFocused) {
-                                    onItemFocused(channel.id)
-                                }
-                            },
+                        modifier = Modifier.onFocusChanged {
+                            if (it.isFocused) {
+                                onItemFocused(channel.id)
+                            }
+                        },
                         index = index,
                         itemDirection = itemDirection,
                         showItemTitle = showItemTitle,
                         showIndexOverImage = showIndexOverImage,
                     )
                 }
-            } else{
+            } else {
                 itemsIndexed(movieItem, key = { _, videos -> videos.id }) { index, videos ->
 
                     val onCardClicked = remember(videos.id) {
-                        {onMovieClick(Videos(
-                            id = videos.id,
-                            title = videos.title,
-                            image = videos.image,
-                            logo = videos.logo,
-                            url = "",
-                            drm = false,
-                            licenseKey = "",
-                            licenseUrl = "",
-                            duration = videos.duration,
-                            meta = VideoMeta(
-                                banner = videos.meta.banner,
-                                description = videos.meta.description,
-                                trailer = videos.meta.trailer,
-                                releaseDate = videos.meta.releaseDate,
-                                subtitleUrl = videos.meta.subtitleUrl,
-                                imdbRating = videos.meta.imdbRating,
-                                rottenTomatoes = videos.meta.rottenTomatoes,
-                                budget = videos.meta.budget,
-                                revenue = videos.meta.revenue,
-                            ),
-                            categories = videos.categories,
-                            language = videos.languages
-                        ))}
+                        {
+                            onMovieClick(
+                                Videos(
+                                    id = videos.id,
+                                    title = videos.title,
+                                    image = videos.image,
+                                    logo = videos.logo,
+                                    url = "",
+                                    headers = null,
+                                    drm = false,
+                                    licenseKey = "",
+                                    licenseUrl = "",
+                                    duration = videos.duration,
+                                    meta = VideoMeta(
+                                        banner = videos.meta.banner,
+                                        description = videos.meta.description,
+                                        trailer = videos.meta.trailer,
+                                        releaseDate = videos.meta.releaseDate,
+                                        subtitleUrl = videos.meta.subtitleUrl,
+                                        imdbRating = videos.meta.imdbRating,
+                                        rottenTomatoes = videos.meta.rottenTomatoes,
+                                        budget = videos.meta.budget,
+                                        revenue = videos.meta.revenue,
+                                    ),
+                                    categories = videos.categories,
+                                    language = videos.languages
+                                )
+                            )
+                        }
                     }
 
                     SearchRowItem(
                         id = videos.id,
-                        name= videos.title,
+                        name = videos.title,
                         itemType = "movies",
                         logo = videos.meta.banner,
                         onItemClicked = onCardClicked,
-                        modifier = Modifier
-                            .onFocusChanged {
-                                if (it.isFocused) {
-                                    onItemFocused(videos.id)
-                                }
-                            },
+                        modifier = Modifier.onFocusChanged {
+                            if (it.isFocused) {
+                                onItemFocused(videos.id)
+                            }
+                        },
                         index = index,
                         itemDirection = itemDirection,
                         showItemTitle = showItemTitle,
@@ -184,15 +187,11 @@ private fun SearchRowItem(
     var isFocused by remember { mutableStateOf(false) }
 
     SearchCard(
-        onClick = onItemClicked,
-        title = {
-            SearchRowItemText(
-                showItemTitle = showItemTitle,
-                isItemFocused = isFocused,
-                name = name
-            )
-        },
-        modifier = Modifier
+        onClick = onItemClicked, title = {
+        SearchRowItemText(
+            showItemTitle = showItemTitle, isItemFocused = isFocused, name = name
+        )
+    }, modifier = Modifier
             .width(240.dp)
             .onFocusChanged {
                 isFocused = it.isFocused
@@ -200,16 +199,37 @@ private fun SearchRowItem(
             .focusProperties {
                 left = if (index == 0) FocusRequester.Cancel else FocusRequester.Default
             }
-            .then(modifier)
-    ) {
-        SearchRowItemImage(
-            modifier = Modifier
-                .fillMaxSize()
-                .aspectRatio(itemDirection.aspectRatio),
-            showIndexOverImage = showIndexOverImage,
-            name = name,
-            logoUrl = logo,
-        )
+            .then(modifier)) {
+        if (itemType == "iptv") {
+            SearchRowItemImage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .aspectRatio(itemDirection.aspectRatio),
+                showIndexOverImage = showIndexOverImage,
+                name = name,
+                logoUrl = logo,
+            )
+        } else {
+            Box(contentAlignment = Alignment.CenterStart) {
+                PosterImage(
+                    image = logo,
+                    title = name,
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .drawWithContent {
+                            drawContent()
+                            if (showIndexOverImage) {
+                                drawRect(
+                                    color = Color.Black.copy(
+                                        alpha = 0.1f
+                                    )
+                                )
+                            }
+                        },
+                )
+            }
+
+        }
     }
 }
 
@@ -243,10 +263,7 @@ private fun SearchRowItemImage(
 
 @Composable
 private fun SearchRowItemText(
-    showItemTitle: Boolean,
-    isItemFocused: Boolean,
-    name: String,
-    modifier: Modifier = Modifier
+    showItemTitle: Boolean, isItemFocused: Boolean, name: String, modifier: Modifier = Modifier
 ) {
     if (showItemTitle) {
         val nameAlpha by animateFloatAsState(

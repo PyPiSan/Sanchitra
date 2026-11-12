@@ -44,6 +44,7 @@ import com.pypisan.sanchitra.data.entities.Channel
 import com.pypisan.sanchitra.presentation.common.ChannelCard
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.presentation.common.PosterImageChannel
+import com.pypisan.sanchitra.presentation.common.onTvFocusSound
 
 enum class ItemDirection(val aspectRatio: Float) {
     Horizontal(16f / 9f);
@@ -138,6 +139,7 @@ private fun TVRowItem(
         },
         modifier = Modifier
             .width(240.dp)
+            .onTvFocusSound()
             .onFocusChanged {
                 isFocused = it.isFocused
             }

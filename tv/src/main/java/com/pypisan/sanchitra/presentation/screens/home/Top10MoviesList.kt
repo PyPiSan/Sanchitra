@@ -67,8 +67,6 @@ fun Top10MoviesList(
         movieList = movieList,
         sectionTitle = sectionTitle,
         onMovieClick = onMovieClick,
-        isActive = isActive,
-        lastFocusedMovieId = lastFocusedMovieId,
         onMovieFocused = {
             selectedMovie = it
             onMovieFocused(it)
@@ -95,8 +93,6 @@ private fun ImmersiveList(
     movieList: List<Videos>,
     sectionTitle: String?,
     onFocusChanged: (FocusState) -> Unit,
-    isActive: Boolean = false,
-    lastFocusedMovieId: Int? = null,
     onMovieFocused: (Videos) -> Unit,
     onMovieClick: (Videos) -> Unit,
 ) {
@@ -157,7 +153,8 @@ private fun Background(
             PosterImage(
                 title = it.title,
                 image = it.meta.banner,
-                modifier = Modifier.fillMaxSize())
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }
@@ -177,7 +174,8 @@ private fun MovieDescription(
             text = movie.meta.description,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
-            fontWeight = FontWeight.Light
+            fontWeight = FontWeight.Light,
+            maxLines = 5
         )
     }
 }
