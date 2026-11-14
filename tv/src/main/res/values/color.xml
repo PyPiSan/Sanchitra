@@ -29,5 +29,5 @@
     <color name="errorContainer">#93000A</color>
     <color name="onErrorContainer">#FFB4AB</color>
     <color name="border">#8E9099</color>
-<!--    <color name="ic_launcher_background">#1A1C1E</color>-->
+    <color name="ic_launcher_background">#690005</color>
 </resources>

@@ -14,7 +14,6 @@ import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.toSize
 
 @OptIn(ExperimentalFoundationApi::class)
-
 internal fun Modifier.bringIntoViewIfChildrenAreFocused(
     paddingValues: PaddingValues = PaddingValues()
 ): Modifier = composed(

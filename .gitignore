@@ -18,7 +18,6 @@ build/
 .cxx/
 
 # NDK & C++ Native Build Outputs
-.cxx/
 **/.cxx/
 .externalNativeBuild/
 **/.externalNativeBuild/
@@ -38,7 +37,12 @@ local.properties
 /local.properties
 *.iml
 .DS_Store
+secrets.properties
+/secrets.properties
 
 # Android Studio & IntelliJ IDEA
 .idea/
 /.idea/
+
+# Google Services
+google-services.json

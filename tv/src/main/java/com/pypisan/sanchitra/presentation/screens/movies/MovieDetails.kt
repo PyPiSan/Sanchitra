@@ -22,6 +22,7 @@ import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Border
@@ -53,6 +55,7 @@ import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import com.pypisan.sanchitra.data.entities.Videos
 import com.pypisan.sanchitra.data.util.toHrMinFormat
 import com.pypisan.sanchitra.storage.WatchProgress
+import com.pypisan.sanchitra.utils.AnalyticsTracker
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -76,6 +79,11 @@ fun MovieDetails(
     // Store surface color to use consistently across all layers
     val surfaceColor = MaterialTheme.colorScheme.surface
     val hasHistory = watchProgress != null && watchProgress.timeMillis > 0
+
+
+    LaunchedEffect("MovieDetailScreen") {
+        AnalyticsTracker.logScreenView("MovieDetailScreen")
+    }
 
     Box(
         modifier = Modifier
@@ -223,7 +231,13 @@ private fun MovieLargeTitle(
     movieTitle: String,
     modifier: Modifier = Modifier
 ) {
-    // Gold/Amber gradient (or replace with your brand colors)
+    // 1. Dynamically scale based on title length
+    val (fontSize, lineHeight) = when {
+        movieTitle.length <= 14 -> 46.sp to 52.sp
+        movieTitle.length <= 26 -> 38.sp to 44.sp
+        else -> 30.sp to 36.sp
+    }
+
     val titleGradient = Brush.horizontalGradient(
         colors = listOf(
             Color(0xFFFFD700), // Gold
@@ -234,12 +248,15 @@ private fun MovieLargeTitle(
 
     Text(
         text = movieTitle,
-        modifier = modifier,
-        style = MaterialTheme.typography.headlineLarge.copy(
+        modifier = modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.displaySmall.copy(
+            fontSize = fontSize,
+            lineHeight = lineHeight,
             fontWeight = FontWeight.Black,
             brush = titleGradient
         ),
-        maxLines = 2
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis
     )
 }
 

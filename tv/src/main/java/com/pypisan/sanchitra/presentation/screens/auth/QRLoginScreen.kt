@@ -1,6 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.auth
 
 import androidx.annotation.OptIn
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -36,6 +39,7 @@ import coil.compose.AsyncImage
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.data.util.StringConstants.API.UIURL
 import com.pypisan.sanchitra.data.util.GenerateQR
+import com.pypisan.sanchitra.data.util.StringConstants
 
 
 @OptIn(UnstableApi::class)
@@ -43,7 +47,8 @@ import com.pypisan.sanchitra.data.util.GenerateQR
 fun QRLoginScreen(
     loginURL: String,
     loginCode: String,
-    backgroundUrl: String
+    backgroundUrl: String,
+    onContinueWithoutLogin: () -> Unit
 ) {
     // Generate QR
     var isVideoReady by remember { mutableStateOf(false) }
@@ -78,7 +83,7 @@ fun QRLoginScreen(
         // 🔹 Placeholder (shown first)
         if (!isVideoReady) {
             AsyncImage(
-                model = "https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/sanchitra%2Ftv_qr.jpg",
+                model = StringConstants.API.QR_IMAGE,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.FillBounds
@@ -178,6 +183,20 @@ fun QRLoginScreen(
                         )
                     )
                 )
+
+                OutlinedButton(
+                    onClick = { onContinueWithoutLogin() }, // Replace with your callback/navigation
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = "Continue without login",
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    )
+                }
             }
         }
     }

@@ -32,6 +32,7 @@ import com.pypisan.sanchitra.data.entities.VideoQuality
 import com.pypisan.sanchitra.data.util.findActivity
 import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.storage.WatchProgressManager
+import com.pypisan.sanchitra.utils.AnalyticsTracker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -52,6 +53,10 @@ fun VideoPlayerScreen(
 
     LaunchedEffect(metaId, isContinue) {
         videoPlayerScreenViewModel.loadVideo(metaId, isContinue)
+    }
+
+    LaunchedEffect("MoviePlayerScreen") {
+        AnalyticsTracker.logScreenView("MoviePlayerScreen")
     }
 
     DisposableEffect(Unit) {
@@ -88,6 +93,7 @@ fun VideoPlayerScreen(
                     metaId = s.videoDetail?.id.toString(),
                     title = s.videoDetail?.title,
                     streamUrl = s.videoDetail?.url,
+                    headers = s.videoDetail?.headers,
                     drm = s.videoDetail?.drm,
                     licenseKey = s.videoDetail?.licenseKey,
                     licenseUrl = s.videoDetail?.licenseUrl,
@@ -110,6 +116,7 @@ fun VideoPlayerBuild(
     metaId: String? = "",
     title: String?,
     streamUrl: String? = "",
+    headers : Map<String, String>? = null,
     drm: Boolean? = false,
     licenseKey: String? = "",
     licenseUrl: String? = "",
@@ -139,8 +146,10 @@ fun VideoPlayerBuild(
     val exoPlayer = rememberPlayer(
         metaId ?: "",
         title ?: "",
+
         context,
         streamUrl ?: "",
+        headers,
         subTitleUrl,
         drm ?: false,
         licenseKey,
@@ -248,6 +257,7 @@ fun rememberPlayer(
     title: String,
     context: Context,
     streamUrl: String,
+    headers: Map<String, String>?,
     subTitleUrl: String?,
     drm: Boolean,
     licenseKey: String? = "",
@@ -264,6 +274,7 @@ fun rememberPlayer(
                 context,
                 streamUrl,
                 "movie",
+                headers,
                 subTitleUrl,
                 onBuffering,
                 onSubtitlesChanged,

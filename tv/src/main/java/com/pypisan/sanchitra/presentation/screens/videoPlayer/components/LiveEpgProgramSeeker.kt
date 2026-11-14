@@ -21,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.pypisan.sanchitra.data.models.ProgramDisplayModel
+import com.pypisan.sanchitra.data.entities.ProgramDisplayModel
 import com.pypisan.sanchitra.R
 import com.pypisan.sanchitra.utils.BrightRed
 import com.pypisan.sanchitra.utils.GradientColors

@@ -68,7 +68,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.pypisan.sanchitra.data.models.TrendingChannel
+import com.pypisan.sanchitra.data.entities.TrendingChannel
 import com.pypisan.sanchitra.utils.Padding
 
 

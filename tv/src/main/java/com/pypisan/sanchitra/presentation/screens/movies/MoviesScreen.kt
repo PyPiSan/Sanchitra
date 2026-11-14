@@ -30,6 +30,7 @@ import com.pypisan.sanchitra.presentation.common.Loading
 import com.pypisan.sanchitra.presentation.common.MoviesRow
 import com.pypisan.sanchitra.presentation.screens.common.CommonErrorScreen
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
+import com.pypisan.sanchitra.utils.AnalyticsTracker
 
 @Composable
 fun MoviesScreen(
@@ -95,6 +96,10 @@ private fun Catalog(
 
     LaunchedEffect(Unit) {
         lazyListState.scrollToItem(focusedRowIndex)
+    }
+
+    LaunchedEffect("MoviesScreen") {
+        AnalyticsTracker.logScreenView("MoviesScreen")
     }
 
     LaunchedEffect(shouldShowTopBar) {

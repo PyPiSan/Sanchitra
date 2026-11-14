@@ -2,8 +2,8 @@ package com.pypisan.sanchitra.data.util
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.pypisan.sanchitra.data.models.EPGResponse
-import com.pypisan.sanchitra.data.models.ProgramDisplayModel
+import com.pypisan.sanchitra.data.entities.EPGResponse
+import com.pypisan.sanchitra.data.entities.ProgramDisplayModel
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

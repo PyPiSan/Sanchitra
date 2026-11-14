@@ -15,9 +15,9 @@ enum class Screens(
     Home(isTabItem = true),
     TV(isTabItem = true),
     Categories(isTabItem = true),
-    Movies(isTabItem = true),
+    Movies(isTabItem = false),
 
-    Favourites(isTabItem = false),
+    ManageMedia(isTabItem = true),
     Search(isTabItem = true, tabIcon = Icons.Default.Search),
     CategoryIPTVList(listOf(CategoryIPTVListScreen.CategoryNameKey)),
     MovieDetails(

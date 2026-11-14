@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.pypisan.sanchitra.data.models.TrendingChannel
+import com.pypisan.sanchitra.data.entities.TrendingChannel
 import com.pypisan.sanchitra.presentation.common.ChannelCard
 import com.pypisan.sanchitra.presentation.common.PosterImageChannel
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding

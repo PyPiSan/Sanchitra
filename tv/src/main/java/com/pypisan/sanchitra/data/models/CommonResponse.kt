@@ -1,12 +1,14 @@
 package com.pypisan.sanchitra.data.models
 
+import com.google.gson.annotations.SerializedName
+
 data class CommonResponse(
-    val success: Boolean,
-    val message: String,
+    @SerializedName("success")val success: Boolean,
+    @SerializedName("message")val message: String,
 )
 
 
 data class LanguageResponse(
-    val success: Boolean,
-    val data: List<String>,
+    @SerializedName("success")val success: Boolean,
+    @SerializedName("data")val data: List<String>,
 )

@@ -5,6 +5,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.compose' version '2.3.21'
 
     id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 
     // This MUST match the Kotlin version (2.3.21)
     id 'org.jetbrains.kotlin.plugin.serialization' version '2.3.21'
@@ -12,19 +13,37 @@ plugins {
     id 'com.google.dagger.hilt.android' // Version is handled by top-level
     id 'com.google.devtools.ksp'
     id 'kotlin-parcelize'
+
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 def versionMajor = 4
-def versionMinor = 2
-def versionPatch = 5
+def versionMinor = 4
+def versionPatch = 4
 def buildType="alpha"
 
 def computedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
 def computedVersionCode = (versionMajor * 10000) + (versionMinor * 100) + versionPatch
 
+// load local properties file
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { stream ->
+        localProperties.load(stream)
+    }
+}
+
+def tvURL = localProperties.getProperty("TVURL")
+def videoURL = localProperties.getProperty("VIDEOURL")
+def uiURL = localProperties.getProperty("UIURL")
+def qrImage = localProperties.getProperty("QR_IMAGE")
+def rottenTomatoesImageUrl = localProperties.getProperty("RottenTomatoesImageUrl")
+def imdbImageUrl = localProperties.getProperty("IMDBImageUrl")
+
 android {
     namespace 'com.pypisan.sanchitra'
-    compileSdk 36
+    compileSdk 37
 
     defaultConfig {
         applicationId "com.pypisan.sanchitra"
@@ -40,6 +59,13 @@ android {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
 
+        buildConfigField "String", "TVURL", "\"${tvURL}\""
+        buildConfigField "String", "VIDEOURL", "\"${videoURL}\""
+        buildConfigField "String", "UIURL", "\"${uiURL}\""
+        buildConfigField "String", "QR_IMAGE", "\"${qrImage}\""
+        buildConfigField "String", "RottenTomatoesImageUrl", "\"${rottenTomatoesImageUrl}\""
+        buildConfigField "String", "IMDBImageUrl", "\"${imdbImageUrl}\""
+
     }
     lint {
         disable "NullSafeMutableLiveData"
@@ -49,10 +75,16 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue "string", "app_version", "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
             signingConfig signingConfigs.debug
+        }
+        debug {
+            // Keep disabled in debug so builds remain fast
+            minifyEnabled false
+            shrinkResources false
         }
     }
     compileOptions {
@@ -129,7 +161,7 @@ dependencies {
     implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
     implementation "androidx.media3:media3-ui:$media3_version"
-    implementation "androidx.media3:media3-ui-compose:$media3_version" // This contains the state classes
+    implementation "androidx.media3:media3-ui-compose:$media3_version"
     implementation "androidx.media3:media3-common:$media3_version"
 
     // --- 7. Image Loading & UI Utilities ---
@@ -139,10 +171,11 @@ dependencies {
     implementation "androidx.palette:palette-ktx:1.0.0"
 
     // --- 8. Firebase, Ads & Google Services ---
-    implementation platform('com.google.firebase:firebase-bom:34.11.0')
+    implementation platform('com.google.firebase:firebase-bom:34.18.0')
     implementation 'com.google.firebase:firebase-analytics'
-    implementation "com.google.android.gms:play-services-ads:23.6.0"
-    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation "com.google.android.gms:play-services-ads:25.4.0"
+    implementation 'com.google.android.material:material:1.14.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
 
@@ -154,4 +187,15 @@ dependencies {
 
     //  DataStore
     implementation("androidx.datastore:datastore-preferences:1.2.1")
+
+    def room_version = "2.8.5"
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+
+    // Use ksp if your project uses KSP, or kapt if your project uses kapt for Hilt
+    ksp "androidx.room:room-compiler:$room_version"
+    // kapt "androidx.room:room-compiler:$room_version"
+
+   // Engage TV
+    implementation("com.google.android.engage:engage-tv:1.1.0")
 }

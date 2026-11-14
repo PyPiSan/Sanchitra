@@ -8,7 +8,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlin.collections.emptyList
-import com.pypisan.sanchitra.data.models.EPGResponse
+import com.pypisan.sanchitra.data.entities.EPGResponse
 import com.pypisan.sanchitra.data.models.toDomain
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay

@@ -32,7 +32,7 @@ class TokenAuthenticator(
         }
 
         return if (newTokens != null) {
-            val newAccessToken = newTokens.data.access_token
+            val newAccessToken = newTokens.data.accessToken
 
             response.request.newBuilder()
                 .header("Authorization", "Bearer $newAccessToken")

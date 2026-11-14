@@ -78,6 +78,9 @@ fun App(
                         openTVPlayer = { channelId ->
                             activePlayer = PlayerState.TV(channelId.toString())
                         },
+                        openIPTVPlayer = { iptvChannelId ->
+                            activePlayer = PlayerState.IPTV(iptvChannelId.toString())
+                        },
                         onBackPressed = onBackPressed,
                         isComingBackFromDifferentScreen = isComingBackFromDifferentScreen,
                         resetIsComingBackFromDifferentScreen = {

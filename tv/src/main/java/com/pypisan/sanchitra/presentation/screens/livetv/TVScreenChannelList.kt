@@ -42,6 +42,7 @@ import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import com.pypisan.sanchitra.presentation.common.ChannelNameArtwork
 
 @Composable
 fun TVScreenChannelList(
@@ -131,6 +132,14 @@ private fun ChannelListItem(
                 )
 
                 Box(modifier = Modifier.fillMaxSize()) {
+                    if (channel.bannerUrl.isNullOrBlank()) {
+                        // No logo URL -> render designed channel name card directly
+                        ChannelNameArtwork(
+                            name = channel.name,
+                            category = "",
+                            modifier = modifier
+                        )
+                    } else {
                     AsyncImage(
                         model = channel.bannerUrl,
                         contentDescription = StringConstants
@@ -142,6 +151,7 @@ private fun ChannelListItem(
                             .fillMaxSize()
                             .graphicsLayer { alpha = contentAlpha }
                     )
+                    }
 
                     // Glass Light Sweep Overlay
                     if (isFocused) {

@@ -1,4 +1,4 @@
-package com.pypisan.sanchitra.data.models
+package com.pypisan.sanchitra.data.entities
 
 data class EPGResponse(
     val epg: List<EPGItem> = emptyList()

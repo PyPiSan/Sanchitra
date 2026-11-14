@@ -1,4 +1,5 @@
 package com.pypisan.sanchitra.presentation.screens.profile
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
@@ -20,6 +21,5 @@ enum class ProfileScreens(
     HelpAndSupport(title = "Help and Support", icon = Icons.Default.Support);
 
     operator fun invoke() = name
-
     val tabTitle = title ?: name
 }

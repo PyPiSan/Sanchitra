@@ -11,22 +11,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.tv.material3.ExperimentalTvMaterial3Api
+import com.pypisan.sanchitra.data.util.StringConstants
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.screens.auth.ProfileSelectionScreen
 import com.pypisan.sanchitra.presentation.screens.auth.QRLoginScreen
 import com.pypisan.sanchitra.presentation.screens.auth.SplashScreen
+import com.pypisan.sanchitra.utils.AnalyticsTracker
 import com.pypisan.sanchitra.utils.AuthState
 
-@OptIn(ExperimentalTvMaterial3Api::class)
+
 @Composable
-fun OnboardingScreen() {
+fun OnboardingScreen(
+    isSwitchProfile: Boolean = (LocalContext.current as? Activity)
+        ?.intent
+        ?.getBooleanExtra("IS_SWITCH_PROFILE", false) ?: false
+) {
     val context = LocalContext.current
     val viewModel: OnboardingViewModel = hiltViewModel()
     val state = viewModel.authState
 
-    LaunchedEffect(Unit) {
-        viewModel.start(context)
+    // 1. Single startup effect
+    LaunchedEffect(isSwitchProfile) {
+        viewModel.start(context, isSwitchProfile = isSwitchProfile)
+    }
+
+    // 2. Efficient state-driven analytics tracking
+    LaunchedEffect(state) {
+        val screenName = when (state) {
+            is AuthState.Loading -> "SplashScreen"
+            is AuthState.ProfileSelection -> "ProfileSelectionScreen"
+            is AuthState.QRLogin -> "QRLoginScreen"
+            is AuthState.Error -> "LoginErrorScreen"
+            is AuthState.ProfileSelected -> null
+        }
+        screenName?.let { AnalyticsTracker.logScreenView(it) }
     }
 
     Box(
@@ -60,12 +78,15 @@ fun OnboardingScreen() {
                 QRLoginScreen(
                     state.loginURL,
                     state.deviceCode,
-                    state.backgroundUrl
+                    state.backgroundUrl,
+                    onContinueWithoutLogin = {
+                        viewModel.continueWithoutLogin()
+                    }
                 )
             }
 
             is AuthState.Error -> {
-                Error(messageId = R.string.login_error)
+                Error(messageId = StringConstants.Composable.Placeholders.LoginError)
             }
 
         }
