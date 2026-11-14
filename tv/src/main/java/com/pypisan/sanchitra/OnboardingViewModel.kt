@@ -24,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
+import kotlin.collections.plus
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
@@ -78,27 +79,19 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
 
             val result = withTimeoutOrNull(5 * 60 * 1000) {
-
                 while (true) {
-
                     delay(3000)
-
                     val status = repo.checkLoginStatus(deviceCode)
-
                     if (status?.success == true) {
-
                         saveToken(
                             context, status.data.accessToken
                         )
-
                         saveRefreshToken(
                             context, status.data.refreshToken
                         )
-
                         loadProfiles(context)
                         loadLanguages()
                         loadUserExtended()
-
                         return@withTimeoutOrNull true
                     }
                 }
@@ -213,5 +206,33 @@ class OnboardingViewModel @Inject constructor(
 
     fun handlePollingTimeout() {
         authState = AuthState.Error
+    }
+
+    fun continueWithoutLogin(){
+//      load default profiles
+        StringConstants.Profile.isLoggedIN = false
+
+        val extraProfiles = listOf(
+
+            UserProfileMap(
+                id = "primary",
+                name = "Primary",
+                imageUrl = null,
+                icon = Icons.Default.AccountCircle
+            ),
+
+            UserProfileMap(
+                id = "guest",
+                name = "Guest",
+                imageUrl = null,
+                icon = Icons.Default.NoAccounts
+            ),
+
+            UserProfileMap(
+                id = "add", name = "Add Profile", imageUrl = null, icon = Icons.Default.Add
+            )
+        )
+        profiles = extraProfiles
+        authState = AuthState.ProfileSelection
     }
 }

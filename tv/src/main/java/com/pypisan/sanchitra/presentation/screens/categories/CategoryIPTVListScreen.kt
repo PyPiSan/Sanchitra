@@ -5,7 +5,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,7 +34,6 @@ import com.pypisan.sanchitra.data.entities.IPTVChannel
 import com.pypisan.sanchitra.presentation.common.ChannelCard
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.common.Loading
-import com.pypisan.sanchitra.presentation.common.MovieCard
 import com.pypisan.sanchitra.presentation.common.PosterImageChannel
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 

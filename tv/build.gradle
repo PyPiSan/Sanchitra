@@ -25,9 +25,25 @@ def buildType="alpha"
 def computedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
 def computedVersionCode = (versionMajor * 10000) + (versionMinor * 100) + versionPatch
 
+// load local properties file
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { stream ->
+        localProperties.load(stream)
+    }
+}
+
+def tvURL = localProperties.getProperty("TVURL")
+def videoURL = localProperties.getProperty("VIDEOURL")
+def uiURL = localProperties.getProperty("UIURL")
+def qrImage = localProperties.getProperty("QR_IMAGE")
+def rottenTomatoesImageUrl = localProperties.getProperty("RottenTomatoesImageUrl")
+def imdbImageUrl = localProperties.getProperty("IMDBImageUrl")
+
 android {
     namespace 'com.pypisan.sanchitra'
-    compileSdk 36
+    compileSdk 37
 
     defaultConfig {
         applicationId "com.pypisan.sanchitra"
@@ -42,6 +58,13 @@ android {
             // Only package ARM native libraries for TV hardware
             abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
+
+        buildConfigField "String", "TVURL", "\"${tvURL}\""
+        buildConfigField "String", "VIDEOURL", "\"${videoURL}\""
+        buildConfigField "String", "UIURL", "\"${uiURL}\""
+        buildConfigField "String", "QR_IMAGE", "\"${qrImage}\""
+        buildConfigField "String", "RottenTomatoesImageUrl", "\"${rottenTomatoesImageUrl}\""
+        buildConfigField "String", "IMDBImageUrl", "\"${imdbImageUrl}\""
 
     }
     lint {
@@ -164,6 +187,14 @@ dependencies {
 
     //  DataStore
     implementation("androidx.datastore:datastore-preferences:1.2.1")
+
+    def room_version = "2.8.5"
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+
+    // Use ksp if your project uses KSP, or kapt if your project uses kapt for Hilt
+    ksp "androidx.room:room-compiler:$room_version"
+    // kapt "androidx.room:room-compiler:$room_version"
 
    // Engage TV
     implementation("com.google.android.engage:engage-tv:1.1.0")

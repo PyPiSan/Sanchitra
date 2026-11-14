@@ -1,11 +1,16 @@
 package com.pypisan.sanchitra.data.util
 
+
+import com.pypisan.sanchitra.BuildConfig
+
+
 object StringConstants {
 
     object API {
-        const val TVURL = "https://media.pypisan.com/api/v1/"
-        const val VIDEOURL = "https://tv.pypisan.com/api/v1/"
-        const val UIURL = "https://sanchitra.pypisan.com/"
+        const val TVURL = BuildConfig.TVURL
+        const val VIDEOURL = BuildConfig.VIDEOURL
+        const val UIURL = BuildConfig.UIURL
+        const val QR_IMAGE = BuildConfig.QR_IMAGE
     }
 
     object Profile {
@@ -15,6 +20,7 @@ object StringConstants {
         var userProfilePicture: String? = null
         var userSelectedLanguage: List<String> = emptyList()
         var isSubtitleOn: Boolean = true
+        var isLoggedIN: Boolean = false
     }
 
     object ProfileExtended {
@@ -40,11 +46,9 @@ object StringConstants {
             const val RottenTomatoes = "Rotten Tomatoes"
             const val RottenTomatoesScore = "89%"
             const val RottenTomatoesReviewCount = "125"
-            const val RottenTomatoesImageUrl =
-                "https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/movies/rt.png"
+            const val RottenTomatoesImageUrl = BuildConfig.RottenTomatoesImageUrl
             const val IMDBReviewerName = "IMDB"
-            const val IMDBImageUrl =
-                "https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/movies/imdb.png"
+            const val IMDBImageUrl = BuildConfig.IMDBImageUrl
             const val IMDBDefaultCount = "1.8M"
             const val IMDBDefaultRating = "9.2"
         }

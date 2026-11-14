@@ -78,7 +78,10 @@ fun OnboardingScreen(
                 QRLoginScreen(
                     state.loginURL,
                     state.deviceCode,
-                    state.backgroundUrl
+                    state.backgroundUrl,
+                    onContinueWithoutLogin = {
+                        viewModel.continueWithoutLogin()
+                    }
                 )
             }
 

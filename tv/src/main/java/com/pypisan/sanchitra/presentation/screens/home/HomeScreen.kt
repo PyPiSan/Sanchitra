@@ -2,6 +2,7 @@ package com.pypisan.sanchitra.presentation.screens.home
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.layout.Box
 import com.pypisan.sanchitra.presentation.common.Error
 import com.pypisan.sanchitra.presentation.common.Loading
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -20,15 +22,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pypisan.sanchitra.data.entities.Videos
@@ -112,8 +119,7 @@ private fun Catalog(
 
     val shouldShowTopBar by remember {
         derivedStateOf {
-            lazyListState.firstVisibleItemIndex == 0 &&
-                    lazyListState.firstVisibleItemScrollOffset < 300
+            lazyListState.firstVisibleItemIndex == 0 && lazyListState.firstVisibleItemScrollOffset < 300
         }
     }
 
@@ -129,88 +135,134 @@ private fun Catalog(
         AnalyticsTracker.logScreenView("HomeScreen")
     }
 
-    LazyColumn(
-        state = lazyListState,
-        contentPadding = PaddingValues(bottom = 108.dp),
-        modifier = modifier
-            .focusGroup()
-            .focusRestorer(),
-    ) {
+    val nonEmptyChannelGroups = remember(groupedTrendingChannels) {
+        groupedTrendingChannels.entries.filter { it.value.isNotEmpty() }
+    }
 
-        item(key = "FeaturedGlassHomeCarousel", contentType = "FeaturedGlassHomeCarousel") {
-            FeaturedGlassHomeCarousel(
-                channels = featuredHome,
-                padding = childPadding,
-                goToTVPlayer = goToTVPlayer,
-                isActive = focusedSection == "carousel" || focusedSection.isEmpty(),
-                nextFocusDown = firstMovieFocusRequester, // Pass down route to Item 1
-                onCarouselFocused = {
-                    focusedSection = "carousel"
-                    focusedRowIndex = 0
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(carouselHeight)
+    val isAllEmpty =
+        featuredHome.isEmpty() && trendingMovies.isEmpty() && top10Movies.isEmpty() && nonEmptyChannelGroups.isEmpty()
+
+    val hasContentBelowCarousel =
+        trendingMovies.isNotEmpty() || top10Movies.isNotEmpty() || nonEmptyChannelGroups.isNotEmpty()
+
+    if (isAllEmpty) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = 48.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Add media from Media Manage to view the channels here",
+                color = Color.White.copy(alpha = 0.75f),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
             )
         }
+    } else {
+        LazyColumn(
+            state = lazyListState,
+            contentPadding = PaddingValues(bottom = 108.dp),
+            modifier = modifier
+                .focusGroup()
+                .focusRestorer(),
+        ) {
 
-        item(key = "MoviesRow", contentType = "MoviesRow") {
-            MoviesRow(
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .focusRequester(firstMovieFocusRequester),
-                videoList = trendingMovies,
-                title = StringConstants.Composable.HomeScreenTrendingTitle,
-                onMovieFocused = { video ->
-                    focusedSection = "movies"
-                    focusedRowIndex = 1
-                    lastFocusedMovieId = video.id
-                },
-                onMovieSelected = { video ->
-                    sharedVideoVM.setVideo(video)
-                    onMovieClick(video)
+            if (featuredHome.isNotEmpty()) {
+                item(key = "FeaturedGlassHomeCarousel", contentType = "FeaturedGlassHomeCarousel") {
+                    FeaturedGlassHomeCarousel(
+                        channels = featuredHome,
+                        padding = childPadding,
+                        goToTVPlayer = goToTVPlayer,
+                        isActive = focusedSection == "carousel" || focusedSection.isEmpty(),
+                        nextFocusDown = if (hasContentBelowCarousel) firstMovieFocusRequester else FocusRequester.Default,
+                        onCarouselFocused = {
+                            focusedSection = "carousel"
+                            focusedRowIndex = 0
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(carouselHeight)
+                    )
                 }
-            )
-        }
+            }
 
-        item(key = "Top10Movies", contentType = "Top10MoviesList") {
-            Top10MoviesList(
-                movieList = top10Movies,
-                isActive = focusedSection == "top10",
-                lastFocusedMovieId = lastFocusedTop10MovieId,
-                onSectionFocused = {
-                    focusedSection = "top10"
-                    focusedRowIndex = 2
-                },
-                onMovieFocused = { video ->
-                    lastFocusedTop10MovieId = video.id
-                },
-                onMovieClick = { video ->
-                    sharedVideoVM.setVideo(video)
-                    onMovieClick(video)
-                },
-                modifier = Modifier.onFocusChanged {
-                    immersiveListHasFocus = it.hasFocus
-                },
-            )
-        }
+            if (trendingMovies.isNotEmpty()) {
+                item(key = "MoviesRow", contentType = "MoviesRow") {
+                    MoviesRow(
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .focusRequester(firstMovieFocusRequester),
+                        videoList = trendingMovies,
+                        title = StringConstants.Composable.HomeScreenTrendingTitle,
+                        onMovieFocused = { video ->
+                            focusedSection = "movies"
+                            focusedRowIndex = 1
+                            lastFocusedMovieId = video.id
+                        },
+                        onMovieSelected = { video ->
+                            sharedVideoVM.setVideo(video)
+                            onMovieClick(video)
+                        })
+                }
+            }
 
-        groupedTrendingChannels.entries.toList().forEachIndexed { index, entry ->
-            val category = entry.key
-            val channels = entry.value
+            if (top10Movies.isNotEmpty()) {
+                item(key = "Top10Movies", contentType = "Top10MoviesList") {
+                    Top10MoviesList(
+                        movieList = top10Movies,
+                        isActive = focusedSection == "top10",
+                        lastFocusedMovieId = lastFocusedTop10MovieId,
+                        onSectionFocused = {
+                            focusedSection = "top10"
+                            focusedRowIndex = 2
+                        },
+                        onMovieFocused = { video ->
+                            lastFocusedTop10MovieId = video.id
+                        },
+                        onMovieClick = { video ->
+                            sharedVideoVM.setVideo(video)
+                            onMovieClick(video)
+                        },
+                        modifier = Modifier
+                            .let {
+                                if (trendingMovies.isEmpty()) it.focusRequester(
+                                    firstMovieFocusRequester
+                                )
+                                else it
+                            }
+                            .onFocusChanged {
+                                immersiveListHasFocus = it.hasFocus
+                            },
+                    )
+                }
+            }
 
-            item(key = "Trending_$category", contentType = "TrendingChannelRow") {
-                TrendingChannelRow(
-                    modifier = Modifier.padding(top = 16.dp),
-                    channels = channels,
-                    title = category,
-                    onChannelFocused = {
-                        focusedSection = "channel_$index"
-                        focusedRowIndex = index + 3
-                        lastFocusedChannelId = it
-                    },
-                    goToTVPlayer = goToTVPlayer,
-                )
+            nonEmptyChannelGroups.forEachIndexed { index, entry ->
+                val category = entry.key
+                val channels = entry.value
+                val isFirstRowBelowCarousel =
+                    trendingMovies.isEmpty() && top10Movies.isEmpty() && index == 0
+
+                item(key = "Trending_$category", contentType = "TrendingChannelRow") {
+                    TrendingChannelRow(
+                        modifier = Modifier.padding(top = 16.dp).let {
+                            if (isFirstRowBelowCarousel) it.focusRequester(
+                                firstMovieFocusRequester
+                            )
+                            else it
+                        },
+                        channels = channels,
+                        title = category,
+                        onChannelFocused = {
+                            focusedSection = "channel_$index"
+                            focusedRowIndex = index + 3
+                            lastFocusedChannelId = it
+                        },
+                        goToTVPlayer = goToTVPlayer,
+                    )
+                }
             }
         }
     }

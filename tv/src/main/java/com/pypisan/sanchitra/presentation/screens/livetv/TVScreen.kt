@@ -39,15 +39,15 @@ fun TVScreen(
     val uiState by tvScreenViewModel.uiState.collectAsStateWithLifecycle()
 
     when (val s = uiState) {
-        is TVScreenViewModel.TVScreenUiState.Loading -> {
+        is TVScreenUiState.Loading -> {
             Loading(modifier = Modifier.fillMaxSize())
         }
 
-        is TVScreenViewModel.TVScreenUiState.Error -> {
+        is TVScreenUiState.Error -> {
             CommonErrorScreen(message = s.message)
         }
 
-        is TVScreenViewModel.TVScreenUiState.Ready -> {
+        is TVScreenUiState.Ready -> {
             TVCatalog(
                 channelCategories = s.categories,
                 carouselList = s.carousel,

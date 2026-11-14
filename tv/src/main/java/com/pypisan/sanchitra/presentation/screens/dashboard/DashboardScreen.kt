@@ -52,6 +52,7 @@ import com.pypisan.sanchitra.presentation.screens.movies.MoviesScreen
 import com.pypisan.sanchitra.presentation.screens.profile.ProfileScreen
 import com.pypisan.sanchitra.presentation.screens.home.HomeScreen
 import com.pypisan.sanchitra.presentation.screens.livetv.TVScreen
+import com.pypisan.sanchitra.presentation.screens.mediamanager.ManageMedia
 import com.pypisan.sanchitra.presentation.screens.search.SearchScreen
 import com.pypisan.sanchitra.utils.Padding
 
@@ -236,26 +237,6 @@ fun DashboardScreen(
     }
 }
 
-//@Composable
-//private fun BackPressHandledArea(
-//    onBackPressed: () -> Unit,
-//    modifier: Modifier = Modifier,
-//    content: @Composable BoxScope.() -> Unit,
-//) =
-//    Box(
-//        modifier = Modifier
-//            .onPreviewKeyEvent {
-//                if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
-//                    onBackPressed()
-//                    true
-//                } else {
-//                    false
-//                }
-//            }
-//            .then(modifier),
-//        content = content
-//    )
-
 
 @Composable
 private fun BackPressHandledArea(
@@ -291,72 +272,6 @@ private fun NavGraphBuilder.tabComposable(
         content(entry)
     }
 }
-
-//@Composable
-//private fun Body(
-//    openCategoryIPTVList: (categoryName: String) -> Unit,
-//    openMovieDetailsScreen: (movieId: String) -> Unit,
-//    openTVPlayer: (channelId: Int) -> Unit,
-//    openIPTVPlayer: (channelId: Int) -> Unit,
-//    updateTopBarVisibility: (Boolean) -> Unit,
-//    modifier: Modifier = Modifier,
-//    navController: NavHostController = rememberNavController(),
-//    isTopBarVisible: Boolean = true,
-//) =
-//    NavHost(
-//        modifier = modifier,
-//        navController = navController,
-//        startDestination = Screens.Home(),
-//    ) {
-//        composable(Screens.Profile()) {
-//            ProfileScreen()
-//        }
-//        composable(Screens.Home()) {
-//            HomeScreen(
-//                onMovieClick = { movie -> openMovieDetailsScreen(movie.id.toString())
-//                },
-//                goToTVPlayer = { channel -> openTVPlayer(channel) },
-//                onScroll = updateTopBarVisibility,
-//                isTopBarVisible = isTopBarVisible
-//            )
-//        }
-//        composable(Screens.Categories()) {
-//            CategoriesScreen(
-//                onCategoryClick = openCategoryIPTVList,
-//                onScroll = updateTopBarVisibility
-//            )
-//        }
-//        composable(Screens.Movies()) {
-//            MoviesScreen(
-//                onMovieClick = { movie -> openMovieDetailsScreen(movie.id.toString()) },
-//                onScroll = updateTopBarVisibility,
-//                isTopBarVisible = isTopBarVisible
-//            )
-//        }
-//        composable(Screens.TV()) {
-//            TVScreen(
-//                goToTVPlayer = { channel -> openTVPlayer(channel) },
-//                onScroll = updateTopBarVisibility,
-//                isTopBarVisible = isTopBarVisible
-//            )
-//        }
-////        composable(Screens.Shows()) {
-////            ShowsScreen(
-////                onMovieClick = openMovieDetailsScreen,
-////                onScroll = updateTopBarVisibility,
-////                isTopBarVisible = isTopBarVisible
-////            )
-////        }
-//        composable(Screens.Search()) {
-//            SearchScreen(
-//                onMovieClick = { movie -> openMovieDetailsScreen(movie.id.toString())
-//                },
-//                goToIPTVPlayer = { channel -> openIPTVPlayer(channel) },
-//                onScroll = updateTopBarVisibility,
-//                isTopBarVisible = isTopBarVisible
-//            )
-//        }
-//    }
 
 
 @Composable
@@ -405,6 +320,11 @@ private fun Body(
                 goToTVPlayer = { channel -> openTVPlayer(channel) },
                 onScroll = updateTopBarVisibility,
                 isTopBarVisible = isTopBarVisible
+            )
+        }
+        tabComposable(Screens.ManageMedia(), onBack = onBackFromAnyTab) {
+            ManageMedia(
+                onScroll = updateTopBarVisibility,
             )
         }
         tabComposable(Screens.Search(), onBack = onBackFromAnyTab) {
