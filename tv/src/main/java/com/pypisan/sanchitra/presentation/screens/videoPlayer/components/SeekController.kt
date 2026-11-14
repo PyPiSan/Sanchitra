@@ -63,32 +63,3 @@ class SeekController(
         accumulatedSeconds = 0
     }
 }
-
-//class DoubleClickHandler(
-//    private val timeoutMs: Long = 400
-//) {
-//    private var lastRightClick = 0L
-//    private var lastLeftClick = 0L
-//
-//    fun onRightDoubleClick(action: () -> Unit) {
-//        val now = System.currentTimeMillis()
-//
-//        if (now - lastRightClick < timeoutMs) {
-//            action()
-//            lastRightClick = 0L
-//        } else {
-//            lastRightClick = now
-//        }
-//    }
-//
-//    fun onLeftDoubleClick(action: () -> Unit) {
-//        val now = System.currentTimeMillis()
-//
-//        if (now - lastLeftClick < timeoutMs) {
-//            action()
-//            lastLeftClick = 0L
-//        } else {
-//            lastLeftClick = now
-//        }
-//    }
-//}

@@ -107,7 +107,8 @@ object StringConstants {
             const val AccountsSelectionAddNewProfileSuccess = "New profile Added Successfully, change profile to use new profile."
 
             const val AccountsSelectionAddNewProfileFailed = "Failed to add new profile. Please try again."
-            const val AccountsSelectionViewSubscriptionsTitle = "View subscriptions"
+
+            const val AccountsSelectionRemoveProfile = "Remove profile"
             const val AccountsSelectionDeleteAccountTitle = "Delete account"
 
             const val AccountsSelectionDeleteAccountDescription =

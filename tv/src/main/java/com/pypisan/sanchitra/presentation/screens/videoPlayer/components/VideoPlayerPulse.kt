@@ -1,5 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.videoPlayer.components
 
+//View for Fast forward and back button pulse animation
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -18,14 +20,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardDoubleArrowLeft
 import androidx.compose.material.icons.rounded.KeyboardDoubleArrowRight
@@ -40,9 +40,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -98,21 +98,32 @@ fun rememberVideoPlayerPulseState(): VideoPlayerPulseState {
 fun VideoPlayerPulse(
     state: VideoPlayerPulseState = rememberVideoPlayerPulseState()
 ) {
+    var lastActiveType by remember { mutableStateOf(VideoPlayerPulse.Type.FORWARD) }
+    if (state.type != VideoPlayerPulse.Type.NONE) {
+        lastActiveType = state.type
+    }
+
+    // Keep the last non-zero seconds so it doesn't flash "0s" while fading out
+    var lastSeconds by remember { mutableIntStateOf(0) }
+    if (state.seconds > 0) {
+        lastSeconds = state.seconds
+    }
+
     val isVisible = state.type != VideoPlayerPulse.Type.NONE
 
-    val icon = when (state.type) {
+    val icon = when (lastActiveType) {
         VideoPlayerPulse.Type.FORWARD -> Icons.Rounded.KeyboardDoubleArrowRight
         VideoPlayerPulse.Type.BACK -> Icons.Rounded.KeyboardDoubleArrowLeft
         VideoPlayerPulse.Type.NONE -> null
     }
 
-    val xOffset = when (state.type) {
+    val xOffset = when (lastActiveType) {
         VideoPlayerPulse.Type.FORWARD -> 160.dp
         VideoPlayerPulse.Type.BACK -> (-160).dp
         VideoPlayerPulse.Type.NONE -> 0.dp
     }
 
-    // bounce every time seconds increment
+    // Bounce every time seconds increment
     val bumpAnim = remember { Animatable(1f) }
     LaunchedEffect(state.seconds) {
         if (state.seconds > 0) {
@@ -130,8 +141,6 @@ fun VideoPlayerPulse(
         }
     }
 
-    val cardShape = RoundedCornerShape(28.dp)
-
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -145,13 +154,14 @@ fun VideoPlayerPulse(
             modifier = Modifier.offset(x = xOffset)
         ) {
             Box(
+                contentAlignment = Alignment.Center, // Centers everything inside the circle
                 modifier = Modifier
-                    .shadow(
-                        elevation = 16.dp,
-                        shape = cardShape,
-                        spotColor = Color.Black.copy(alpha = 0.6f)
-                    )
-                    // Semi-transparent frosted dark glass look
+                    .size(96.dp)
+                    .graphicsLayer {
+                        scaleX = bumpAnim.value
+                        scaleY = bumpAnim.value
+                    }
+                    // Semi-transparent frosted dark glass look (no .shadow() bleed-through)
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
@@ -159,9 +169,9 @@ fun VideoPlayerPulse(
                                 Color(0xF0101116)
                             )
                         ),
-                        shape = cardShape
+                        shape = CircleShape
                     )
-                    // High-end subtle gradient border ring
+                    // Subtle gradient border ring
                     .border(
                         width = 1.dp,
                         brush = Brush.verticalGradient(
@@ -170,29 +180,27 @@ fun VideoPlayerPulse(
                                 Color.White.copy(alpha = 0.05f)
                             )
                         ),
-                        shape = cardShape
+                        shape = CircleShape
                     )
-                    .clip(cardShape)
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
+                    .clip(CircleShape)
+                    .padding(8.dp) // Light inner padding instead of 20.dp
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.height(IntrinsicSize.Min)
+                    horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally)
                 ) {
-                    // Sleek Chevron Arrows
                     if (icon != null) {
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(30.dp)
+                            modifier = Modifier.size(28.dp)
                         )
                     }
 
-                    // Dynamic number with AnimatedContent so counts flip smoothly
                     AnimatedContent(
-                        targetState = state.seconds,
+                        targetState = lastSeconds,
+                        contentAlignment = Alignment.Center,
                         transitionSpec = {
                             if (targetState > initialState) {
                                 (slideInVertically { height -> height / 2 } + fadeIn())
@@ -204,15 +212,14 @@ fun VideoPlayerPulse(
                         label = "SeekSecondsAnimation"
                     ) { sec ->
                         Row(
-                            verticalAlignment = Alignment.Bottom,
-                            modifier = Modifier.padding(bottom = 1.dp)
+                            verticalAlignment = Alignment.Bottom
                         ) {
                             Text(
                                 text = "$sec",
                                 color = Color.White,
-                                fontSize = 24.sp,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontFamily = FontFamily.Monospace, // Prevents text width wobble
+                                fontFamily = FontFamily.Monospace,
                                 style = TextStyle(
                                     platformStyle = PlatformTextStyle(
                                         includeFontPadding = false
@@ -222,9 +229,9 @@ fun VideoPlayerPulse(
                             Text(
                                 text = "s",
                                 color = Color.White.copy(alpha = 0.75f),
-                                fontSize = 16.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(start = 2.dp, bottom = 2.dp),
+                                modifier = Modifier.padding(start = 1.dp, bottom = 1.dp),
                                 style = TextStyle(
                                     platformStyle = PlatformTextStyle(
                                         includeFontPadding = false

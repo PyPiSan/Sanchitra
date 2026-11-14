@@ -3,6 +3,7 @@ package com.pypisan.sanchitra.presentation.screens.profile
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,7 +38,9 @@ import kotlinx.coroutines.withContext
 
 @Immutable
 data class AccountsSectionData(
-    val title: String, val value: String? = null, val onClick: () -> Unit = {}
+    val title: String,
+    val value: String? = null,
+    val onClick: () -> Unit = {}
 )
 
 @Composable
@@ -81,7 +84,7 @@ fun AccountsSection(
                 onClick = { showChangePasswordDialog = true }), AccountsSectionData(
                 title = StringConstants.Composable.Placeholders.AccountsSelectionAddNewProfile,
                 onClick = { showAddProfileDialog = true }), AccountsSectionData(
-                title = StringConstants.Composable.Placeholders.AccountsSelectionViewSubscriptionsTitle
+                title = StringConstants.Composable.Placeholders.AccountsSelectionRemoveProfile
             ), AccountsSectionData(
                 title = StringConstants.Composable.Placeholders.AccountsSelectionDeleteAccountTitle,
                 onClick = { showDeleteDialog = true })
@@ -115,7 +118,7 @@ fun AccountsSection(
         }
     }
 
-    // --- Dialogs ---
+    // --- Delete Account Dialogs ---
     AccountSectionActionDialog(
         showDialog = showDeleteDialog,
         title = StringConstants.Composable.Placeholders.AccountsSelectionDeleteAccountTitle,
@@ -154,6 +157,7 @@ fun AccountsSection(
             }
         })
 
+//    Log Out dialog
     AccountSectionActionDialog(
         showDialog = showLogoutDialog,
         title = StringConstants.Composable.Placeholders.AccountsSelectionLogOut,
@@ -192,6 +196,7 @@ fun AccountsSection(
             }
         })
 
+//    Change Password Dialog
     ChangePasswordDialog(
         showDialog = showChangePasswordDialog,
         message = changePasswordMessage,
@@ -225,24 +230,26 @@ fun AccountsSection(
             }
         })
 
+//    New Profile dialog
     NewProfileDialog(
         showDialog = showAddProfileDialog,
         message = addProfileMessage,
-        modifier = Modifier.width(600.dp),
+        modifier = Modifier,
+        avatarUrls = listOf("https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/avatars/1.png",
+            "https://bm3urmmijtko.objectstorage.ap-mumbai-1.oci.customer-oci.com/n/bm3urmmijtko/b/pypisan/o/avatars/2.png"),
         onDismissRequest = {
             showAddProfileDialog = false
         },
-        onConfirmAddProfile = { newProfileName ->
+        onConfirmAddProfile = { newProfileName, profilePicture ->
             showAddProfileDialog = false
             addProfileMessage = null
             onLoadingChange(true)
 
             scope.launch {
                 val success = withContext(Dispatchers.IO) {
-                    accountSectionViewModel.userAddNewProfile(newProfileName, null)
+                    accountSectionViewModel.userAddNewProfile(newProfileName, profilePicture)
                 }
                 onLoadingChange(false)
-
                 if (success) {
                     addProfileMessage =
                         StringConstants.Composable.Placeholders.AccountsSelectionAddNewProfileSuccess
@@ -255,6 +262,7 @@ fun AccountsSection(
             }
         })
 
+//    Change Profile Dialog
     AccountSectionActionDialog(
         showDialog = showSwitchProfileDialog,
         title = StringConstants.Composable.Placeholders.AccountsSelectionSwitchAccountsTitle,

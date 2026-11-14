@@ -19,7 +19,7 @@ plugins {
 
 def versionMajor = 4
 def versionMinor = 4
-def versionPatch = 2
+def versionPatch = 4
 def buildType="alpha"
 
 def computedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}-${buildType}"
@@ -164,4 +164,7 @@ dependencies {
 
     //  DataStore
     implementation("androidx.datastore:datastore-preferences:1.2.1")
+
+   // Engage TV
+    implementation("com.google.android.engage:engage-tv:1.1.0")
 }
