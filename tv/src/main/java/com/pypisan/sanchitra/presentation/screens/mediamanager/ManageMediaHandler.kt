@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 enum class MediaActionType {
     IMPORT_URL,
     TEST_STREAM,
-    TEST_DRM,
+    MODIFY_MEDIA,
     IMPORT_LOCAL
 }
 

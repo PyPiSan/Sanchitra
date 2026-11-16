@@ -38,7 +38,9 @@ class CategoriesScreenViewModel @Inject constructor(
             // Not logged in -> read categories from Room DB (returns empty list if nothing saved)
             channelRepository.observeCategories()
                 .map<List<String>, CategoriesScreenUiState> { categoryNames ->
-                    val mapped = categoryNames.mapIndexed { index, categoryName ->
+                    val mapped = categoryNames
+                        .take(12)
+                        .mapIndexed { index, categoryName ->
                         IPTVCategoryDto(
                             id = index + 1,
                             name = categoryName

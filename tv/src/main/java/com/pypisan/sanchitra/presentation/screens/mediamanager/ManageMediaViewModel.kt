@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ManageMediaViewModel @Inject constructor(
-    private val repository: ChannelRepository
+    val repository: ChannelRepository
 ) : ViewModel() {
 
     private val _isImporting = MutableStateFlow(false)
