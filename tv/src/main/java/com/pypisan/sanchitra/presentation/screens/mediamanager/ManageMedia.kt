@@ -1,5 +1,7 @@
 package com.pypisan.sanchitra.presentation.screens.mediamanager
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -39,6 +41,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.pypisan.sanchitra.presentation.screens.dashboard.rememberChildPadding
 import kotlinx.coroutines.yield
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ManageMedia(
@@ -85,10 +88,10 @@ fun ManageMedia(
                 accentColor = Color(0xFFFF5722)
             ),
             MediaActionCardData(
-                type = MediaActionType.TEST_DRM,
-                title = "Test DRM Link",
-                subtitle = "Verify Widevine, ClearKey, or PlayReady license streams",
-                buttonText = "Test DRM",
+                type = MediaActionType.MODIFY_MEDIA,
+                title = "Edit/Modify Imported Streaming Links",
+                subtitle = "Edit or Delete Saved Media Links",
+                buttonText = "Edit/Modify",
                 icon = Icons.Default.Lock,
                 accentColor = Color(0xFFEF5350)
             )
@@ -218,17 +221,27 @@ fun ManageMedia(
         )
 
         MediaActionType.TEST_STREAM -> TestStreamDialog(
-            onDismiss = { activeDialog = null },
-            onConfirm = { streamUrl ->
-//                onTestStream(streamUrl)
+            showDialog = true, // or true if this `when` already controls visibility
+            config = TestStreamDialogConfig(
+                accentColor = Color(0xFF00BCD4),
+                defaultHlsHeaders = listOf("User-Agent", "Referer", "Cookie"),
+                defaultDrmHeaders = listOf("Authorization", "X-Custom-Token"),
+                allowExtraCustomHeaders = true
+            ),
+            onDismiss = {
+                viewModel.clearError()
+                activeDialog = null
+            },
+            onConfirm = { streamData ->
                 activeDialog = null
             }
         )
 
-        MediaActionType.TEST_DRM -> TestDrmDialog(
-            onDismiss = { activeDialog = null },
-            onConfirm = { streamUrl, licenseUrl, scheme ->
-//                onTestDrm(streamUrl, licenseUrl, scheme)
+        MediaActionType.MODIFY_MEDIA -> ModifyMediaDialog(
+            repository = viewModel.repository,
+            showDialog = true,
+            onDismiss = {
+                viewModel.clearError()
                 activeDialog = null
             }
         )
@@ -252,7 +265,7 @@ private fun ManageMediaHeader() {
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = "Import channel playlists from web or USB/local storage, or test stream & DRM links before saving.",
+            text = "Import channel playlists from web or USB/local storage, or test stream & DRM links before saving. For more information visit https://sanchitra.pypisan.com/help",
             color = Color.White.copy(alpha = 0.7f),
             fontSize = 14.sp
         )
