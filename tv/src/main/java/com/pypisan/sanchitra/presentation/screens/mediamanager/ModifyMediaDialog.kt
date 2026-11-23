@@ -74,6 +74,12 @@ private enum class ChannelSortTab(val label: String) {
     RECENT("Recent"),
     CATEGORY("Category")
 }
+private data class BulkDeleteRequest(
+    val channels: List<ChannelEntity>,
+    val scopeDescription: String,
+    val clearCategory: Boolean,
+    val clearSource: Boolean
+)
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -95,6 +101,7 @@ fun ModifyMediaDialog(
 
     var editingChannel by remember { mutableStateOf<ChannelEntity?>(null) }
     var deletingChannel by remember { mutableStateOf<ChannelEntity?>(null) }
+    var bulkDeleteRequest by remember { mutableStateOf<BulkDeleteRequest?>(null) }
     var isBusy by remember { mutableStateOf(false) }
 
     // Build Source -> Categories hierarchy from existing ChannelEntity fields
@@ -139,6 +146,7 @@ fun ModifyMediaDialog(
         onDismissRequest = {
             if (!isBusy) {
                 when {
+                    bulkDeleteRequest != null -> bulkDeleteRequest = null
                     deletingChannel != null -> deletingChannel = null
                     editingChannel != null -> editingChannel = null
                     else -> onDismiss()
@@ -224,6 +232,34 @@ fun ModifyMediaDialog(
                                 try {
                                     repository.deleteChannel(target.id)
                                     deletingChannel = null
+                                } finally {
+                                    isBusy = false
+                                }
+                            }
+                        }
+                    )
+                }
+
+                // 3. Delete All Confirmation View
+                bulkDeleteRequest != null -> {
+                    val request = bulkDeleteRequest!!
+                    DeleteAllChannelsConfirmPanel(
+                        scopeDescription = request.scopeDescription,
+                        isDeleting = isBusy,
+                        focusBorderColor = focusBorderColor,
+                        onCancel = { if (!isBusy) bulkDeleteRequest = null },
+                        onConfirmDelete = {
+                            isBusy = true
+                            scope.launch {
+                                try {
+                                    // If your ChannelRepository has a batch delete method (e.g. deleteChannels(ids)
+                                    // or deleteAllChannels()), you can call it here instead of looping.
+                                    request.channels.forEach { ch ->
+                                        repository.deleteChannel(ch.id)
+                                    }
+                                    if (request.clearCategory) selectedCategory = null
+                                    if (request.clearSource) selectedSource = null
+                                    bulkDeleteRequest = null
                                 } finally {
                                     isBusy = false
                                 }
@@ -433,13 +469,53 @@ fun ModifyMediaDialog(
                         // Bottom Bar
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            if (visibleChannels.isNotEmpty()) {
+                                val deleteAllLabel = when {
+                                    selectedCategory != null -> "Delete Category (${visibleChannels.size})"
+                                    selectedSource != null -> "Delete Source (${visibleChannels.size})"
+                                    else -> "Delete All (${allChannels.size})"
+                                }
+                                ModifyGlassButton(
+                                    text = deleteAllLabel,
+                                    accentColor = Color(0xFFEF5350),
+                                    focusBorderColor = focusBorderColor,
+                                    isPrimary = true,
+                                    enabled = !isBusy,
+                                    onClick = {
+                                        val snapshot = visibleChannels.toList()
+                                        val deletedIds = snapshot.mapTo(HashSet()) { it.id }
+                                        val remainingInSource = selectedSource != null && allChannels.any {
+                                            it.resolvedSource() == selectedSource && it.id !in deletedIds
+                                        }
+                                        val desc = when {
+                                            selectedSource != null && selectedCategory != null ->
+                                                "all ${snapshot.size} channels in \"$selectedSource • $selectedCategory\""
+                                            selectedSource != null ->
+                                                "all ${snapshot.size} channels in \"$selectedSource\""
+                                            else ->
+                                                "all ${snapshot.size} channels"
+                                        }
+                                        bulkDeleteRequest = BulkDeleteRequest(
+                                            channels = snapshot,
+                                            scopeDescription = desc,
+                                            clearCategory = selectedCategory != null,
+                                            clearSource = selectedSource != null && (selectedCategory == null || !remainingInSource)
+                                        )
+                                    }
+                                )
+                            } else {
+                                Spacer(modifier = Modifier.width(1.dp))
+                            }
+
                             ModifyGlassButton(
                                 text = "Close",
                                 accentColor = Color.White,
                                 focusBorderColor = focusBorderColor,
                                 isPrimary = false,
+                                enabled = !isBusy,
                                 onClick = onDismiss
                             )
                         }
@@ -453,7 +529,7 @@ fun ModifyMediaDialog(
 
 
 private fun ChannelEntity.resolvedSource(): String {
-    if (!network.isNullOrBlank()) return network!!
+    if (!network.isNullOrBlank()) return network
     val url = streamUrl.lowercase()
     return when {
         url.startsWith("file://") || url.startsWith("content://") || url.startsWith("/") -> "Local Disk"
@@ -953,6 +1029,62 @@ private fun ModifyGlassButton(
                 color = Color.White,
                 fontSize = if (compact) 12.sp else 14.sp,
                 fontWeight = if (isFocused || isPrimary) FontWeight.Bold else FontWeight.Medium
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun DeleteAllChannelsConfirmPanel(
+    scopeDescription: String,
+    isDeleting: Boolean,
+    focusBorderColor: Color,
+    onCancel: () -> Unit,
+    onConfirmDelete: () -> Unit
+) {
+    val cancelFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { cancelFocus.requestFocus() }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Text(
+            text = "Delete All Channels?",
+            color = Color.White,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = "Are you sure you want to delete $scopeDescription? This action cannot be undone.",
+            color = Color.White.copy(alpha = 0.78f),
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            ModifyGlassButton(
+                text = "Cancel",
+                accentColor = Color.White,
+                focusBorderColor = focusBorderColor,
+                isPrimary = false,
+                enabled = !isDeleting,
+                modifier = Modifier.focusRequester(cancelFocus),
+                onClick = onCancel
+            )
+            ModifyGlassButton(
+                text = if (isDeleting) "Deleting..." else "Delete All",
+                accentColor = Color(0xFFEF5350),
+                focusBorderColor = focusBorderColor,
+                isPrimary = true,
+                enabled = !isDeleting,
+                onClick = onConfirmDelete
             )
         }
     }
